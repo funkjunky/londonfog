@@ -1,0 +1,42 @@
+TODO
+———
+
+ - create new project for londonfog
+	- new folder in projects
+	- git init
+	- README (simple, but rich text)
+	- commit and push
+ - setup basic dependencies
+	- setup package.json for server dependencies:
+		- express, grunt
+	- setup bower file with dependencies:
+		- rectify, react router, super agent, react time ago, react document title, material-ui
+	- setup bower files to go in same libs folder as npm files
+	- get all dependencies [npm install, bower update]
+ - setup generic rest server to server me data
+ - setup server to host first two pages using react router
+	- first show index page and set everything up
+		- try using everything as a test.
+	- second do a blank project page
+
+ - create full visual design for app…
+
+ … add more TODOs for building each page, including interaction for both getting data intialy and sending data to server [no live updating yet]
+ - setup web sockets for listening for updates
+
+< … add more stuff relevant to first prototype … >
+
+ - restyle things with material design
+ - add reactmq to work with tablets and phones
+ - [look for the web domain londonfog-pm]
+
+DONE:
+———
+ - Testing Reacts with forms:
+	- test out with autocomplete just rendering…
+ 	- add hiding of list
+ 	- add showing list when input is focused
+ 	- filter list depending on what is in the input
+ 	- add listener for form onSubmit, cancel the submission and console.log the form.
+	- add clicking items to retreive option.
+	- add mapping (function, JSX makes it easy)

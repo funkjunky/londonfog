@@ -1,34 +1,69 @@
 TODO
 ———
+ - branch to dev
 
- - create new project for londonfog
-	- new folder in projects
-	- git init
-	- README (simple, but rich text)
-	- commit and push
- - setup basic dependencies
-	- setup package.json for server dependencies:
-		- express, grunt
-	- setup bower file with dependencies:
-		- rectify, react router, super agent, react time ago, react document title, material-ui
-	- setup bower files to go in same libs folder as npm files
-	- get all dependencies [npm install, bower update]
- - setup generic rest server to server me data
- - setup server to host first two pages using react router
-	- first show index page and set everything up
-		- try using everything as a test.
-	- second do a blank project page
+ - Create routes
+	- todo, task, project [for real version]
+	- remove projects
 
- - create full visual design for app…
+ - Create first components
+	- todo
+		- render part
+		- todo-short
+			- render part
+		- todo-detail
+			- render part
+			- content-editable form
+		- save-able [local storage (only for TODOs)]
+		- ensure everything gets updated when i save, including the todo-short
+ ~commit
 
- … add more TODOs for building each page, including interaction for both getting data intialy and sending data to server [no live updating yet]
- - setup web sockets for listening for updates
+ - Add user component and authorization
+	- Make a standard jaavscript class for the user
+		- add register
+			- look up and add a salting thing, for some basic security. Or whatever is the defacto right now for basic password security.
+			- just email, username and password for now
+		- add login
+			- check for email or username, then query api
+		- add delete
+		- add change password
+	- add user component
+		- add html for user-tile, and expanding control
+		- add component user-tile
+		- add component user-control
+		- add route and component for user-detail
+~commit
 
-< … add more stuff relevant to first prototype … >
+ - add the framework for saving things and getting updates from the server through web sockets
+	- try using feather to make a generic rest server:
+		http://feathersjs.com/#toc6
+	- add a layer to whatever rest framework I use, so I can accept sockets
+	- make a socket framework for listening to sockets and storing their data?? and sending updates, etc. Maybe a mixin, but the socket would need to be static, as well as it’s cached data… tricky… subscriptions and stuff??
+ - get client side routing working
 
- - restyle things with material design
+ - Create other components
+	- task
+	- project
+
+ - make workspace routes and component
+	- see paper for 2 column layout.
+
+ - add in organizations to the mix somehow…
+	~ organizations can own multiple projects and multiple users
+
+ - add basic role security for projects and tasks and TODOs [special nosey role, that allows someone to see all TODOs for a organization/project]
+
+ - allow organizations to be nestable. One organization owning a set of organizations
+
+ - add homepage with a little marketing pizzaz, perhaps stellar or something neat. Big sign up form and such too. Tkae notes from other reallyt good home pages.
+
+ - double check there isn’t anything imperative I’m missing, before considering release… something very important and necessary for PM software…
+
+ - add react debug mixin, It might help some of my trickier issues.
  - add reactmq to work with tablets and phones
- - [look for the web domain londonfog-pm]
+ - [look to buy the web domain londonfog-pm]
+ - add —-flags to generic rest server, then push to github
+ - setup more secure rest server…??? hmmm or extend generic rest server with security measures??
 
 DONE:
 ———
@@ -40,3 +75,30 @@ DONE:
  	- add listener for form onSubmit, cancel the submission and console.log the form.
 	- add clicking items to retreive option.
 	- add mapping (function, JSX makes it easy)
+
+ - create new project for londonfog
+	- new folder in projects
+	- git init
+	- README (simple, but rich text)
+	- commit and push
+
+ - setup basic dependencies
+	- setup package.json for server dependencies:
+		- express, grunt, react router, super agent, react time ago
+		- rectify, react document title, material-ui
+	- get all dependencies [npm install]
+
+ - setup generic rest server to server me data
+
+ - setup server to host first two pages using react router [just server side for now, using interpreter for now, don’t bother compiling]
+	- split code into different files
+	- setup grunt and react compiling, remember to do it for es6
+ - stop compiling the server, don’t use jsx… just use the already compiled js and build on that.
+ - use commonjs stuff to include the correct files for the server
+ - for the error, look up how res.render works… maybe I should be using res.send? also what is ‘main’?
+
+ - I need to get nodemon to watch all js files in src… it doesn’t seem like it does…
+ - test all routes.
+
+ - create full visual design for app… (fyi I’ll be using material design by google)
+

@@ -1,10 +1,5 @@
 TODO
 ———
- - branch to dev
-
- - Create routes
-	- todo, task, project [for real version]
-	- remove projects
 
  - Create first components
 	- todo
@@ -16,6 +11,7 @@ TODO
 			- content-editable form
 		- save-able [local storage (only for TODOs)]
 		- ensure everything gets updated when i save, including the todo-short
+		- smooth the styling and make it look awesome
  ~commit
 
  - Add user component and authorization
@@ -32,6 +28,7 @@ TODO
 		- add component user-tile
 		- add component user-control
 		- add route and component for user-detail
+		- smooth the styling and make it look awesome
 ~commit
 
  - add the framework for saving things and getting updates from the server through web sockets
@@ -42,8 +39,12 @@ TODO
  - get client side routing working
 
  - Create other components
+	- fill out the bullets for task and project …
 	- task
+		- smooth the styling and make it look awesome
 	- project
+		- smooth the styling and make it look awesome
+
 
  - make workspace routes and component
 	- see paper for 2 column layout.
@@ -59,9 +60,15 @@ TODO
 
  - double check there isn’t anything imperative I’m missing, before considering release… something very important and necessary for PM software…
 
+ - [look to buy the web domain londonfog-pm]
+
+ - deploy my new awesome software!
+
  - add react debug mixin, It might help some of my trickier issues.
  - add reactmq to work with tablets and phones
- - [look to buy the web domain londonfog-pm]
+
+FUTURE:
+ - add github hooks
  - add —-flags to generic rest server, then push to github
  - setup more secure rest server…??? hmmm or extend generic rest server with security measures??
 
@@ -101,4 +108,7 @@ DONE:
  - test all routes.
 
  - create full visual design for app… (fyi I’ll be using material design by google)
+ - branch to dev
+ - Create routes
+	- todo, task, project [for real version]
 

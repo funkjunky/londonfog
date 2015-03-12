@@ -12,8 +12,9 @@ var Project = require('./project');
 var routes = (
     <Route name="index" path="/" handler={App}>
         <Route name="home" path="/home" handler={Home} />
-        <Route name="projects" path="/projects" handler={Projects} />
-        <Route name="project" path="project/:projectID" handler={Project} />
+        <Route name="todo" path="/todo/:id" handler={todo} />
+        <Route name="task" path="/task/:id" handler={Task} />
+        <Route name="project" path="/project/:id" handler={Project} />
         <DefaultRoute handler={Home}/>
     </Route>
 );

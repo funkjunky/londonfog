@@ -2,10 +2,17 @@ var React = require('react');
 var Router = require('react-router');
 
 var Project = React.createClass({
-    mixins: [Router.State],
+    getInitialState: function() {
+        return {expanded: false};
+    },
     render: function() {
         return (
-            <h2>Project {this.getParams().projectID}</h2>
+            <div>
+                <h2 onClick={ function() { this.setState({expanded: true}); } }>Project {this.props.data.title}</h2>
+                { this.state.expanded ? this.props.data.tasks.map(function(item) {
+                    return <Task data={item} />;
+                }) : null}
+            </div>
         );
     },
 });

@@ -1,28 +1,36 @@
 TODO
 ———
 
+
  - Create first components
 	- todo
-		- render part
-		- todo-short
-			- render part
-		- todo-detail
-			- render part
-			- content-editable form
+		- get js end working…
 		- save-able [local storage (only for TODOs)]
 		- ensure everything gets updated when i save, including the todo-short
 		- smooth the styling and make it look awesome
+
+ - rename iteminstance.js to item-instance.js and fix all references
+
  ~commit
 
+ - improve tooling
+	- fix my damn vim! The colours are awful, and i want the html tag matching with %
+ 		- colour
+		- tag bracket matching
+		- Tom’s alignment plugin
+		- auto indenting that isn’t retarded
+	- grunt file is still a bit outta whack. I need to have the “compile” task to happen before attempting to start the server.
+	- setup commonjs with react and ensure everything compiles
+	- setup everything to use commonjs properly, ie. including files needed in each file
+
+ ~ commit
+
+ - improve generic rest server
+	- first ensure it works
+	- add generic user creation and authentication/authorization using authorization header. PS I may need to add an allow header thing for ‘authorization’?
+
  - Add user component and authorization
-	- Make a standard jaavscript class for the user
-		- add register
-			- look up and add a salting thing, for some basic security. Or whatever is the defacto right now for basic password security.
-			- just email, username and password for now
-		- add login
-			- check for email or username, then query api
-		- add delete
-		- add change password
+	- add organizations and various updates regarding those things?? to User.
 	- add user component
 		- add html for user-tile, and expanding control
 		- add component user-tile
@@ -43,6 +51,7 @@ TODO
 	- task
 		- smooth the styling and make it look awesome
 	- project
+		- contains a ColumnList of tasks, that can be collapsed
 		- smooth the styling and make it look awesome
 
 
@@ -111,4 +120,8 @@ DONE:
  - branch to dev
  - Create routes
 	- todo, task, project [for real version]
-
+		- todo-short
+			- render part
+			- content-editable
+			- showing and hiding buttons based on states
+		- add whole shell of components

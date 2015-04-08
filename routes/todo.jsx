@@ -25,10 +25,12 @@ var Todo = React.createClass({
             <div>
                 <span>
                     { this.state.state == 'new'    ? <button type="button" onClick={ this.changeStatus.bind(this, 'active') }>Start</button> : null }
-                    { this.state.state == 'active' ? <button type="button">Pause</button> : null }
-                    { this.state.state == 'active' ? <button type="button">Finish</button> : null }
-                    { this.state.state == 'paused' ? <button type="button">Continue</button> : null }
-                    { this.state.state == 'paused' ? <button type="button">Freeze</button> : null }
+                    { this.state.state == 'active' ? <button type="button" onClick={ this.changeStatus.bind(this, 'paused') }>Pause</button> : null }
+                    { this.state.state == 'active' ? <button type="button" onClick={ this.changeStatus.bind(this, 'finished') }>Finish</button> : null }
+                    { this.state.state == 'paused' ? <button type="button" onClick={ this.changeStatus.bind(this, 'active') }>Continue</button> : null }
+                    { this.state.state == 'paused' ? <button type="button" onClick={ this.changeStatus.bind(this, 'frozen') }>Freeze</button> : null }
+                    { this.state.state == 'frozen' ? <button type="button" onClick={ this.changeStatus.bind(this, 'paused') }>Unfreeze</button> : null }
+                    { this.state.state == 'finished' ? <button type="button" onClick={ this.changeStatus.bind(this, 'paused') }>Undo Finished</button> : null }
                 </span>
                 <p><ContentEditable html={this.state.title} onChange={this.handleChange}></ContentEditable></p>
                 <span>

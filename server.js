@@ -1,21 +1,19 @@
-var React = require('react');
-var Router = require('react-router');
 var Express = require('express');
-var fs = require('fs');
+var url = require('url');
+require('node-jsx').install({extension: '.jsx'});
+var ReactAsync = require('react-async');
 
-var routes = require('./src/routes');
+var Routes = require('./routes/routes.jsx');
 
 var app = Express();
 
 app.use('/dist', Express.static(__dirname + '/dist'));
 
 // if using express it might look like this
-app.use(function (req, res) {
-    // pass in `req.url` and the router will immediately match
-    Router.run(routes, req.url, function (Handler) {
-        var content = React.renderToString(React.createElement(Handler, null));
-        var index = fs.readFileSync('index.html', {encoding: 'utf8'});
-        res.send(index.replace('%%%content%%%', content));
+app.get('*', function (req, res) {
+    var path = url.parse(req.url).pathname;
+    ReactAsync.renderComponentToStringWithAsyncState(Routes({path: path}), function(err, markup) {
+        res.send('<!DOCTYPE html>'+markup);
     });
 });
 

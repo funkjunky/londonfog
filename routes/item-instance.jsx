@@ -1,11 +1,9 @@
 var React = require('react');
-var Router = require('react-router');
-var Project = require('./project');
-var Task = require('./task');
-var Todo = require('./todo');
+var Project = require('./project.jsx');
+var Task = require('./task.jsx');
+var Todo = require('./todo.jsx');
 
 var ItemInstance = React.createClass({
-    mixins: [Router.State],
     render: function() {
         switch(this.props.tag) {
             case 'project': 

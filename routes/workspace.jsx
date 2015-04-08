@@ -1,8 +1,8 @@
 var React = require('react');
 var Router = require('react-router');
 
-var WorkspaceHeader = require('./workspace-header');
-var ColumnList = require('./column-list');
+var WorkspaceHeader = require('./workspace-header.jsx');
+var ColumnList = require('./column-list.jsx');
 
 var Workspace = React.createClass({
     render: function() {

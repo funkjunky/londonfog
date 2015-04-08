@@ -4,7 +4,11 @@ TODO
 
  - Create first components
 	- todo
-		- get js end working…
+		- get client side js working
+		- add events for all states
+		- try and fix all the jsx crap back to js… modernize the code i copied from.
+			- first browserify and precompiling all jsx into js, I think is a good idea
+			- next see about doing other things more nicely?? look back at server and routes
 		- save-able [local storage (only for TODOs)]
 		- ensure everything gets updated when i save, including the todo-short
 		- smooth the styling and make it look awesome

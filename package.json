@@ -8,13 +8,16 @@
     "url": "https://github.com/funkjunky/londonfog"
   },
   "dependencies": {
-    "express": "4.2.x",
+    "express": "4.9.x",
     "react": "0.12.x",
+    "react-async": "2.1.x",
+    "node-jsx": "0.12.x",
     "reactify": "1.x",
     "react-timeago": "2.0.x",
-    "react-router": "0.12.x",
+    "react-router-component": "0.24.x",
     "superagent": "latest",
     "react-document-title": "1.0.x",
+    "fibers": "^1.0.2",
     "material-ui": "0.7.x"
   },
   "devDependencies": {

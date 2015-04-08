@@ -1,24 +1,35 @@
 var React = require('react');
-var Router = require('react-router');
-var Route = Router.Route;
-var DefaultRoute = Router.DefaultRoute;
+var Router = require('react-router-component');
+var Locations = Router.Locations;
+var Location = Router.Location;
 
 //TODO: dynamically load each route somehow...
-var App = require('./app');
-var Home = require('./home');
-var ItemInstance = require('./item-instance');
-var Todo = require('./todo');
-var Task = require('./task');
-var Project = require('./project');
-var Workspace = require('./workspace');
+var Home = require('./home.jsx');
+var ItemInstance = require('./item-instance.jsx');
+var Todo = require('./todo.jsx');
+var Task = require('./task.jsx');
+var Project = require('./project.jsx');
+var Workspace = require('./workspace.jsx');
 
-var routes = (
-    <Route name="index" path="/" handler={App}>
-        <Route name="home" path="/home" handler={Home} />
-        <Route name="workspace" path="/workspace" handler={Workspace} />
-        <Route name="instanceitem" path="/:tag/:id" handler={ItemInstance} />
-        <DefaultRoute handler={Home}/>
-    </Route>
-);
+var Routes = React.createClass({
+    render: function() {
+        return (
+            <html>
+                <head>
+                    <title>React London Fog thingy</title>
+                </head>
+                <body>
+                    <Locations path={this.props.path}>
+                        <Location path="/" handler={Home} />
+                        <Location path="/home" handler={Home} />
+                        <Location path="/workspace" handler={Workspace} />
+                        <Location path="/:tag/:id" handler={ItemInstance} />
+                    </Locations>
+                    <script src="dist/bundle.js"></script>
+                </body>
+            </html>
+        );
+    },
+});
 
-module.exports = routes;
+module.exports = Routes;

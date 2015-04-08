@@ -1,7 +1,7 @@
 var React = require('react');
-var TaskBadge = require('./task-badge');
-var ProjectBadge = require('./project-badge');
-var ContentEditable = require('./content-editable');
+var TaskBadge = require('./task-badge.jsx');
+var ProjectBadge = require('./project-badge.jsx');
+var ContentEditable = require('./content-editable.jsx');
 
 var Todo = React.createClass({
     getInitialState: function() {
@@ -16,11 +16,15 @@ var Todo = React.createClass({
     handleChange: function(event) {
         this.setState({title: event.target.value});
     },
+    changeStatus: function(status) {
+        this.setState({state: status});
+    },
     render: function() {
+        var self = this;
         return (
             <div>
                 <span>
-                    { this.state.state == 'new'    ? <button type="button" onClick={ function() { this.setState({status: 'new'}); } }>Start</button> : null }
+                    { this.state.state == 'new'    ? <button type="button" onClick={ this.changeStatus.bind(this, 'active') }>Start</button> : null }
                     { this.state.state == 'active' ? <button type="button">Pause</button> : null }
                     { this.state.state == 'active' ? <button type="button">Finish</button> : null }
                     { this.state.state == 'paused' ? <button type="button">Continue</button> : null }

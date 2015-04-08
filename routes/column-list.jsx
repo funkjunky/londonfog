@@ -1,6 +1,6 @@
 var React = require('react');
 
-var ItemInstance = require('./item-instance');
+var ItemInstance = require('./item-instance.jsx');
 
 var ColumnList = React.createClass({
     render: function() {

@@ -7,6 +7,8 @@ var routes = require('./src/routes');
 
 var app = Express();
 
+app.use('/dist', Express.static(__dirname + '/dist'));
+
 // if using express it might look like this
 app.use(function (req, res) {
     // pass in `req.url` and the router will immediately match

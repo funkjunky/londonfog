@@ -11,6 +11,9 @@ module.exports = function(grunt) {
                 }],
             },
         },
+        browserify: {
+            'dist/app.js': ['src/app.js'],
+        },
         nodemon: {
             dev: {
                 script: 'server.js',
@@ -37,6 +40,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-concurrent');
 
-    grunt.registerTask('compile', ['react']);
+    grunt.registerTask('compile', ['react', 'browserify']);
     grunt.registerTask('default', ['compile', 'concurrent:watches']);
 };

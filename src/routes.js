@@ -4,7 +4,6 @@ var Locations = Router.Locations;
 var Location = Router.Location;
 
 //TODO: dynamically load each route somehow...
-var App = require('./app');
 var Home = require('./home');
 var ItemInstance = require('./item-instance');
 var Todo = require('./todo');
@@ -17,16 +16,17 @@ var Routes = React.createClass({displayName: "Routes",
         return (
             React.createElement("html", null, 
                 React.createElement("head", null, 
-                    React.createElement("title", null, "React London Fog thingy")
+                    React.createElement("title", null, "React London Fog thingy"), 
+                    React.createElement("script", {src: "https://cdn.socket.io/socket.io-1.3.5.js"})
                 ), 
                 React.createElement("body", null, 
                     React.createElement(Locations, {path: this.props.path}, 
-                        React.createElement(Location, {path: "/", handler: Home}), 
-                        React.createElement(Location, {path: "/home", handler: Home}), 
-                        React.createElement(Location, {path: "/workspace", handler: Workspace}), 
-                        React.createElement(Location, {path: "/:tag/:id", handler: ItemInstance})
+                        React.createElement(Location, {path: "/", handler: React.createElement(Home, null)}), 
+                        React.createElement(Location, {path: "/home", handler: React.createElement(Home, null)}), 
+                        React.createElement(Location, {path: "/workspace", handler: React.createElement(Workspace, null)}), 
+                        React.createElement(Location, {path: "/:tag/:id", handler: React.createElement(ItemInstance, null)})
                     ), 
-                    React.createElement("script", {src: "dist/bundle.js"})
+                    React.createElement("script", {src: "dist/bootstrap.js"})
                 )
             )
         );

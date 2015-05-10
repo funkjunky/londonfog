@@ -1,17 +1,51 @@
 TODO
 ———
 
+Sunday - 11:30-1:30
+
+ - actual TODO:
+	*- update restmodelmixin.saveModel to use this.modelData() if it exists, if not, then use this.state.data
+	*- try having modelData in the mixin, and see if it gets overwritten. If not, then give up
+	*- update the socket with this new methodology. use saveModel in todo
+	
+	*- get socket working with todo
+	
+	*- Rewrite the saveModel and delete to take arguments to specify what to save or delete, then use that to choose what to do when the lengths are different in the collection for componentDidUpdate
+	*- ensure editing works with the sockets
+	*- make sure that if i update from one browser, itll show up in another.
+		*- use socketHandler…
+	- add the ability to create new todos
+		- add the html
+		- add the js to do everything, including add the todo to the collection
+		- ensure the mixin automatically emits a ‘create’
+	- add button for deleting todos
+		- simply remove the items from the collection
+		- ensure the delete is called by the mixin.
+
+	- get socket working with project
+	- go back to looking at todo
 
  - Create first components
 	- todo
-		- get client side js working
-		- add events for all states
-		- try and fix all the jsx crap back to js… modernize the code i copied from.
-			- first browserify and precompiling all jsx into js, I think is a good idea
-			- next see about doing other things more nicely?? look back at server and routes
-		- save-able [local storage (only for TODOs)]
-		- ensure everything gets updated when i save, including the todo-short
+		- save-able (preferably local-storage + sockets, with seamless mixins)
+			*- stop the object from trying to save right off the bat.
+			- look into how to not have the client grab the same information a second time…
+
+			*- try components with restmodelmixin
+				*- ensure getting data works (remove data)
+				*- ensure saving new data works  POST
+				*- ensure saving old data works  PUT
+			- try components with SocketModelMixin
+				- ensure everything…
+		- ensure everything gets updated when i save, including the todos in different locations
+		- address TODOs:
+			- setState is called twice
+			- we are only grabbing data on client side.
 		- smooth the styling and make it look awesome
+	- update generic rest git
+		- update readme so it’s smarter and to mention technologies etc.
+		- merge —no-ff generic rest server to dev, then merge to master and push, then tag with a version.
+		- post on facebook and G+ about the update to generic rest server
 
  - rename iteminstance.js to item-instance.js and fix all references
 
@@ -26,8 +60,12 @@ TODO
 	- grunt file is still a bit outta whack. I need to have the “compile” task to happen before attempting to start the server.
 	- setup commonjs with react and ensure everything compiles
 	- setup everything to use commonjs properly, ie. including files needed in each file
+	- client side errors are hard to trace because of one file, see about making a mapping file for it.
+	- I wonder if I could edit using jsx…. then compile later for live?
 
  ~ commit
+
+ - turn all callback stuff into promise based stuff.
 
  - improve generic rest server
 	- first ensure it works
@@ -129,3 +167,36 @@ DONE:
 			- content-editable
 			- showing and hiding buttons based on states
 		- add whole shell of components
+		- get client side js working
+		- add events for all states
+- first browserify and precompiling all jsx into js, I think is a good idea
+			- next see about doing other things more nicely?? look back at server and routes
+				- remove any more mentions of react-router
+				- clean up warnings
+				- remove unnecessary libraries from package.json
+				- remove unnecessary rules from grunt
+					- don’t need bundle.js
+				- try and update all versions of things in package.json
+- create ModelMixin:
+				- expects id in props
+					- looks for data in props next to merge with
+					- if data contains an id, then use it, otherwise
+				- if no id has been set in mixin, then it’s assumed new
+				- expects this.ModelMixin.url to be set with :id as placeholder
+				- uses componentDidUpdate to listen to state changes
+					- have componentDidUpdate with ModelMixin.save, do a delayed save, waiting like 100ms, and reseting the delay each time the data is updated.
+			- create ModelRestMixin:
+				- save function sends post, put, delete calls
+			- create ModelSocketMixin:
+				- cache’s url, so anyone using the same url, well use the same socket.
+				- save function sends data over socket
+				- make a mixin that extend ModelSocketMixin, called LFSocketMixin, which has the url already set.
+- implement client side sockets using feathers
+				- implement featherjs on client
+					- emit: create, update, delete, get
+					- on id
+			- get generic rest server working again
+				- first get rest server working [manually add data, then use get, good enough]
+- generic rest server, feathers
+			- implement it, where the user passes in a comma separated list of collections they plan to use. “todo,project,task” and i’ll parse thatb and create services for them that are all generic.
+

@@ -1,13 +1,18 @@
 module.exports = function(grunt) {
     grunt.initConfig({
+        react: {
+            dynamic_mappings: {
+                files: [{
+                    expand: true,
+                    cwd: 'jsx',
+                    src: ['**/*.jsx'],
+                    dest: 'src',
+                    ext: '.js',
+                }],
+            },
+        },
         browserify: {
-            options: {
-                transform: [ require('grunt-react').browserify ]
-            },
-            client: {
-                src: ['routes/*.jsx'],
-                dest: 'dist/bundle.js',
-            },
+            'dist/bootstrap.js': ['src/bootstrap.js'],
         },
         nodemon: {
             dev: {
@@ -15,9 +20,9 @@ module.exports = function(grunt) {
             },
         },
         watch: {
-            react: {
-                files: ['routes/*.jsx'],
-                tasks: ['browserify'],
+            all: {
+                files: ['**/*.jsx'],
+                tasks: ['compile'],
             },
         },
         concurrent: {
@@ -35,6 +40,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-concurrent');
 
-    grunt.registerTask('compile', ['browserify']);
+    grunt.registerTask('compile', ['react', 'browserify']);
     grunt.registerTask('default', ['compile', 'concurrent:watches']);
 };

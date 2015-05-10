@@ -1,7 +1,7 @@
 var React = require('react');
-var Project = require('./project.jsx');
-var Task = require('./task.jsx');
-var Todo = require('./todo.jsx');
+var Project = require('./project');
+var Task = require('./task');
+var Todo = require('./todo');
 
 var ItemInstance = React.createClass({
     render: function() {

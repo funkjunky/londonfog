@@ -1,11 +1,12 @@
 var React = require('react');
 
 var ItemInstance = require('./item-instance');
-var ModelMixin = require('./mixins/socketmodelmixin');
+var SocketMixin = require('./mixins/socketmixin');
+var CollectionMixin = require('./mixins/socketcollectionmixin');
 
 var ColumnList = React.createClass({
     url: 'http://localhost:1212/',
-    mixins: [ModelMixin],
+    mixins: [SocketMixin, CollectionMixin],
     render: function() {
         return (
             <div>

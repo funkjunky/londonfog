@@ -1,10 +1,11 @@
 var React = require('react');
 
+var SocketMixin = require('./mixins/socketmixin');
 var ModelMixin = require('./mixins/socketmodelmixin');
 
 var Project = React.createClass({displayName: "Project",
     url: 'http://localhost:1212/',
-    mixins: [ModelMixin],
+    mixins: [SocketMixin, ModelMixin],
     getDefaultProps: function() {
         return {collection: 'project'};
     },

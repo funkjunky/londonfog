@@ -1,12 +1,14 @@
 var React = require('react/addons');
+
 var TaskBadge = require('./task-badge');
 var ProjectBadge = require('./project-badge');
 var ContentEditable = require('./content-editable');
-var ModelMixin = require('./mixins/socketmodelmixin');
+var SocketModelMixin = require('./mixins/socketmodelmixin');
+var SocketMixin = require('./mixins/socketmixin');
 
 var Todo = React.createClass({
     url: 'http://localhost:1212/',
-    mixins: [ModelMixin],
+    mixins: [SocketMixin, SocketModelMixin],
     getDefaultProps: function() {
         return {collection: 'todo'};
     },
@@ -19,14 +21,13 @@ var Todo = React.createClass({
             task: this.props.data.task,
         };
     },
-    getModel: function() {
+    getData: function() {
         return React.addons.update(this.props.data, {
             title: {$set: this.state.title},
             state: {$set: this.state.state}
         });
     },
-    setModel: function(model) {
-    console.log('set model called: ', model);
+    setData: function(model) {
         this.setState({ title: model.title, state: model.state });
     },
     handleChange: function(event) {

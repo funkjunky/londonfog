@@ -13,7 +13,9 @@ Sunday - 11:30-1:30
 	*- Rewrite the saveModel and delete to take arguments to specify what to save or delete, then use that to choose what to do when the lengths are different in the collection for componentDidUpdate
 	*- ensure editing works with the sockets
 	*- make sure that if i update from one browser, itll show up in another.
-		*- use socketHandler…
+		*- fill in events for model and collection mixins
+		*- make sure page loads and editing persists
+		- commit
 	- add the ability to create new todos
 		- add the html
 		- add the js to do everything, including add the todo to the collection
@@ -21,6 +23,9 @@ Sunday - 11:30-1:30
 	- add button for deleting todos
 		- simply remove the items from the collection
 		- ensure the delete is called by the mixin.
+	- remove the need for collectionData in socketCollectionMixin, used by column-list
+	- look up a way to reduce .bind(this) commands
+	- use promises or something with io.connect, so we don’t have a race condition for getting a connection
 
 	- get socket working with project
 	- go back to looking at todo

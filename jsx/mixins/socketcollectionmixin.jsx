@@ -32,10 +32,6 @@ var  SocketCollectionMixin = {
             }.bind(this));
         }.bind(this));
     },
-
-    componentDidUpdate: function(prevProps, prevState) {
-        console.log('collection DIDUPDATE');
-    },
 };
 
 //TODO: move to a better location... maybe a shims file.

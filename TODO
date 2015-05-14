@@ -33,7 +33,7 @@ Sunday - 11:30-1:30
 		*- todos aren’t staying synced between windows...
 
 	*- the getNewItem function needs to be in one place, probably TODO or Project
-	- Address really bad //TODOs in code
+	*- Address really bad //TODOs in code
 	- clean up meaningless console logs.
 	
 	- Code for TODOs should be simple and straight forward and only handle UI. (except the create button and delete button. Only exceptions.)

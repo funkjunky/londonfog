@@ -24822,7 +24822,6 @@ var ColumnList = React.createClass({displayName: "ColumnList",
     removeItem: function(index, _id) {
         this.deleteModel(_id);
         this.state.data.splice(index, 1); //first remove the item, then clone the array...
-console.log('length: ', this.state.data.length);
         this.setState({ data: this.state.data });
     },
     render: function() {
@@ -24968,10 +24967,6 @@ var  SocketCollectionMixin = {
             }.bind(this));
         }.bind(this));
     },
-
-    componentDidUpdate: function(prevProps, prevState) {
-        console.log('collection DIDUPDATE');
-    },
 };
 
 //TODO: move to a better location... maybe a shims file.
@@ -25017,8 +25012,6 @@ function SocketHandler() {
        
         //create socket.
         this.sockets[url] = socket.connect(url);
-        this.sockets[url].on('connect', function() { console.log('truly cnonected?'); });
-        console.log('socket connected in setupsocket.');
         this.callbacks[url] = { patch: {}, create: {}, 'delete': {} };
     };
 
@@ -25028,7 +25021,6 @@ function SocketHandler() {
             //If this is the first patch on this collection, then add the event.
             this.callbacks[url].patch[collection] = {};
             this.getSocket(url).on(collection + ' patched', function(item) {
-                console.log('update socket occured!!!', item);
                 //if a model was updated, and that model has a callback on it's id, then call all callbacks for it.
                 if(this.callbacks[url].patch[collection][item._id])
                     this.callbacks[url].patch[collection][item._id].forEach(function(itemCallback) { itemCallback(item) });
@@ -25046,8 +25038,6 @@ function SocketHandler() {
         if(!this.callbacks[url].create[collection]) {
             this.callbacks[url].create[collection] = [];
             this.getSocket(url).on(collection + ' created', function(item) {
-                console.log('create model on socket occured!!!', item);
-
                 //call all callbacks for this collection under create.
                 this.callbacks[url].create[collection].forEach(function(itemCallback) { itemCallback(item) });
             }.bind(this));
@@ -25059,8 +25049,6 @@ function SocketHandler() {
         if(!this.callbacks[url]['delete'][collection]) {
             this.callbacks[url]['delete'][collection] = [];
             this.getSocket(url).on(collection + ' removed', function(item) {
-                console.log('removed model on socket occured!!!', item);
-
                 //if a model was updated, and that model has a callback on it's id, then call all callbacks for it.
                 if(this.callbacks[url]['delete'][collection])
                     this.callbacks[url]['delete'][collection].forEach(function(itemCallback) { itemCallback(item) });
@@ -25168,7 +25156,6 @@ var  SocketModelMixin = {
     },
 
     componentDidMount: function() {
-        console.log('model did mount');
         if(!this.autosync)
             return;
 
@@ -25179,17 +25166,13 @@ var  SocketModelMixin = {
     },
 
     shouldComponentUpdate: function(nextProps, nextState) {
-        //console.log('state: prev, current: ', prevState, this.state);
-        //console.log('props: prev, current: ', prevProps, this.props);
         return JSON.stringify(nextState) != JSON.stringify(this.state);
     },
 
     componentDidUpdate: function(prevProps, prevState) {
-        console.log('model DIDUPDATE');
         if(!this.autosync || !prevState || !something(prevState))   //TODO: remove hacky stuff, once I figure out a way to fix reactjs
             return;
 
-        console.log('model update: ', prevState, this.state);
         this.saveModel(this._getData(), function(error, result) {
             this._setData(result);
         }.bind(this));
@@ -25367,11 +25350,9 @@ var Todo = React.createClass({displayName: "Todo",
         return {title: '', status: 'new',};
     },
     saveModelAndClear: function() {
-        console.log('save and clear called');
         this.saveModel(this._getData(), function() {
             this._setData(this.getNewItem());
         }.bind(this));
-        return false;
     },
     handleChange: function(event) {
         this.setState({title: event.target.value});
@@ -25381,7 +25362,6 @@ var Todo = React.createClass({displayName: "Todo",
     },
     render: function() {
         var self = this;
-        console.log('this.state.title: ', this.state.title);
         return (
             React.createElement("div", null, 
                 !this.props.disabled ? React.createElement("span", null, 

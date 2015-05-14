@@ -24,7 +24,6 @@ var  SocketModelMixin = {
     },
 
     componentDidMount: function() {
-        console.log('model did mount');
         if(!this.autosync)
             return;
 
@@ -35,17 +34,13 @@ var  SocketModelMixin = {
     },
 
     shouldComponentUpdate: function(nextProps, nextState) {
-        //console.log('state: prev, current: ', prevState, this.state);
-        //console.log('props: prev, current: ', prevProps, this.props);
         return JSON.stringify(nextState) != JSON.stringify(this.state);
     },
 
     componentDidUpdate: function(prevProps, prevState) {
-        console.log('model DIDUPDATE');
         if(!this.autosync || !prevState || !something(prevState))   //TODO: remove hacky stuff, once I figure out a way to fix reactjs
             return;
 
-        console.log('model update: ', prevState, this.state);
         this.saveModel(this._getData(), function(error, result) {
             this._setData(result);
         }.bind(this));

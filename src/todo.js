@@ -37,11 +37,9 @@ var Todo = React.createClass({displayName: "Todo",
         return {title: '', status: 'new',};
     },
     saveModelAndClear: function() {
-        console.log('save and clear called');
         this.saveModel(this._getData(), function() {
             this._setData(this.getNewItem());
         }.bind(this));
-        return false;
     },
     handleChange: function(event) {
         this.setState({title: event.target.value});
@@ -51,7 +49,6 @@ var Todo = React.createClass({displayName: "Todo",
     },
     render: function() {
         var self = this;
-        console.log('this.state.title: ', this.state.title);
         return (
             React.createElement("div", null, 
                 !this.props.disabled ? React.createElement("span", null, 

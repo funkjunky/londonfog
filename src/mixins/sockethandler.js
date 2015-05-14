@@ -14,8 +14,6 @@ function SocketHandler() {
        
         //create socket.
         this.sockets[url] = socket.connect(url);
-        this.sockets[url].on('connect', function() { console.log('truly cnonected?'); });
-        console.log('socket connected in setupsocket.');
         this.callbacks[url] = { patch: {}, create: {}, 'delete': {} };
     };
 
@@ -25,7 +23,6 @@ function SocketHandler() {
             //If this is the first patch on this collection, then add the event.
             this.callbacks[url].patch[collection] = {};
             this.getSocket(url).on(collection + ' patched', function(item) {
-                console.log('update socket occured!!!', item);
                 //if a model was updated, and that model has a callback on it's id, then call all callbacks for it.
                 if(this.callbacks[url].patch[collection][item._id])
                     this.callbacks[url].patch[collection][item._id].forEach(function(itemCallback) { itemCallback(item) });
@@ -43,8 +40,6 @@ function SocketHandler() {
         if(!this.callbacks[url].create[collection]) {
             this.callbacks[url].create[collection] = [];
             this.getSocket(url).on(collection + ' created', function(item) {
-                console.log('create model on socket occured!!!', item);
-
                 //call all callbacks for this collection under create.
                 this.callbacks[url].create[collection].forEach(function(itemCallback) { itemCallback(item) });
             }.bind(this));
@@ -56,8 +51,6 @@ function SocketHandler() {
         if(!this.callbacks[url]['delete'][collection]) {
             this.callbacks[url]['delete'][collection] = [];
             this.getSocket(url).on(collection + ' removed', function(item) {
-                console.log('removed model on socket occured!!!', item);
-
                 //if a model was updated, and that model has a callback on it's id, then call all callbacks for it.
                 if(this.callbacks[url]['delete'][collection])
                     this.callbacks[url]['delete'][collection].forEach(function(itemCallback) { itemCallback(item) });

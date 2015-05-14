@@ -16,7 +16,6 @@ var ColumnList = React.createClass({
     removeItem: function(index, _id) {
         this.deleteModel(_id);
         this.state.data.splice(index, 1); //first remove the item, then clone the array...
-console.log('length: ', this.state.data.length);
         this.setState({ data: this.state.data });
     },
     render: function() {

@@ -15,21 +15,37 @@ Sunday - 11:30-1:30
 	*- make sure that if i update from one browser, itll show up in another.
 		*- fill in events for model and collection mixins
 		*- make sure page loads and editing persists
-		- commit
+		*- commit
 	- add the ability to create new todos
-		- add the html
-		- add the js to do everything, including add the todo to the collection
-		- ensure the mixin automatically emits a ‘create’
-	- add button for deleting todos
-		- simply remove the items from the collection
-		- ensure the delete is called by the mixin.
-	- remove the need for collectionData in socketCollectionMixin, used by column-list
+		*- add the html with button
+		*- don’t call save in the collection… the model well do it once the user changes the state at all. (so perfect…)
+		*- in ::create for collection, check each item in _getData and check every property, if they all match, then the item is equal, THEN we add a new blank item to the collection.
+			*- else we simply add the item to the collection.
+		*- on the return of saveModel for socketmodelmixin, update using _setData
+	*- add the code for handling delete events in collectionmixin
+	*- add button for deleting todos
+		*- in the destruction call for the TODO, delete it? Perhaps? I don’t want collection to handle it.
+	*- rename  disable to autosync and simply set to true or false, no functions.
+	*- Add the add button and all functionality to todo, then rename it to create.
+	*- ensure the add code works
+		*- test more in one go, both adding and deleteing
+	*- I should have a fully working UI for TODOs
+		*- todos aren’t staying synced between windows...
+
+	- the getNewItem function needs to be in one place, probably TODO or Project
 	- look up a way to reduce .bind(this) commands
 	- use promises or something with io.connect, so we don’t have a race condition for getting a connection
+		- use promises EVERYWHERE… NEED MORE PROMISES!!
+	- Address ALL //TODOs in code
+	- clean up meaningless console logs.
+	
+	- Code for TODOs should be simple and straight forward and only handle UI. (except the create button and delete button. Only exceptions.)
+
+	-revise my TODO list for the next tasks, like assigning tasks and projects to TODOs etc…
+		-add in a bit at the end about ensuring things don’t break horribly if connection is lost. Just wait, and attempt to reconnect later perhaps.
+
 
 	- get socket working with project
-	- go back to looking at todo
-
  - Create first components
 	- todo
 		- save-able (preferably local-storage + sockets, with seamless mixins)
@@ -111,6 +127,8 @@ Sunday - 11:30-1:30
  - add basic role security for projects and tasks and TODOs [special nosey role, that allows someone to see all TODOs for a organization/project]
 
  - allow organizations to be nestable. One organization owning a set of organizations
+
+ - add mobile controls. [like Google inbox? swiping, right to complete, left to downgrade (high priority->normal priority. normal -> icebox, icebox -> delete ?? keep there for a second before fading away, so a user can swipe three times on the spot to delete?)]
 
  - add homepage with a little marketing pizzaz, perhaps stellar or something neat. Big sign up form and such too. Tkae notes from other reallyt good home pages.
 

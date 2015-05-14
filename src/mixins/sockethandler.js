@@ -14,6 +14,8 @@ function SocketHandler() {
        
         //create socket.
         this.sockets[url] = socket.connect(url);
+        this.sockets[url].on('connect', function() { console.log('truly cnonected?'); });
+        console.log('socket connected in setupsocket.');
         this.callbacks[url] = { patch: {}, create: {}, 'delete': {} };
     };
 

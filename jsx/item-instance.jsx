@@ -8,15 +8,15 @@ var ItemInstance = React.createClass({
         switch(this.props.tag) {
             case 'project': 
                 return (
-                    <Project data={this.props.data} />
+                    <Project {...this.props} />
                 );
             case 'task': 
                 return (
-                    <Task data={this.props.data} />
+                    <Task {...this.props} />
                 );
             case 'todo': 
                 return (
-                    <Todo data={this.props.data} />
+                    <Todo {...this.props} />
                 );
         }
         return (<h1 style={{color: 'red'}}>No Item Instance</h1>);

@@ -24813,18 +24813,53 @@ var CollectionMixin = require('./mixins/socketcollectionmixin');
 var ColumnList = React.createClass({displayName: "ColumnList",
     url: 'http://localhost:1212/',
     mixins: [SocketMixin, CollectionMixin],
+    getInitialState: function() {
+        return {
+            newItem: this.getNewItem(),
+            beingSaved: [],
+            data: [],
+        };
+    },
+    getNewItem: function() { //This is for collection mixin. TODO: make it more obvious this is for a mixin.
+        if(this.props.collection == 'todo')
+            return {title: '', status: 'new',};
+        else if(this.props.collection == 'project')
+            return {title: '',};
+    },
+    addItem: function() {
+        console.log('newitem: ', this.state.newItem);
+        //this.saveModel(this.state.newItem);
+        this.setState({beingSaved: this.state.beingSaved.concat([this.state.newItem])});
+        console.log('newitem after beingsaved: ', this.state.newItem);
+        this.setState({newItem: this.getNewItem()});
+    },
+    removeItem: function(index, _id) {
+        this.deleteModel(_id);
+        this.state.data.splice(index, 1); //first remove the item, then clone the array...
+console.log('length: ', this.state.data.length);
+        this.setState({ data: this.state.data });
+    },
     render: function() {
         return (
-            React.createElement("div", null, 
-                React.createElement("div", null, "Filters and such..."), 
+            React.createElement("div", {style: {border: 'solid 1px black'}}, 
                 React.createElement("ul", null, 
-                    this.collectionData().map(function(item) {
+                    React.createElement("li", {key: "newItem"}, 
+                        React.createElement(ItemInstance, {tag: this.props.collection, data: this.state.newItem})
+                    ), 
+                    this.state.beingSaved.map(function(item, index) {
                         return (
-                            React.createElement("li", {key: item.id}, 
-                                React.createElement(ItemInstance, {data: item, tag: this.props.collection})
+                            React.createElement("li", {key: item.title}, 
+                                React.createElement(ItemInstance, {data: item, tag: this.props.collection, disabled: "true"})
                             )
                         );
-                    }.bind(this))
+                    }, this), 
+                    this.state.data.map(function(item, index) {
+                        return (
+                            React.createElement("li", {key: item._id}, 
+                                React.createElement(ItemInstance, {data: item, tag: this.props.collection}), React.createElement("button", {type: "button", onClick:  this.removeItem.bind(this, index, item._id) }, "X")
+                            )
+                        );
+                    }, this)
                 )
             )
         );
@@ -24838,23 +24873,25 @@ var React = require('react');
 
 var ContentEditable = React.createClass({displayName: "ContentEditable",
     render: function(){
+        //TODO: find where html=undefined and fix it! So I can remove this? Maybe I should keep this safety.
+        var html = this.props.html || '';
+        console.log('content editable render, html: ', this.props.html);
         return React.createElement("div", {id: "contenteditable", 
-            onInput: this.emitChange, 
+            onKeyUp: this.emitChange, 
             onBlur: this.emitChange, 
             contentEditable: true, 
-            dangerouslySetInnerHTML: {__html: this.props.html}});
+            dangerouslySetInnerHTML: {__html: html}});
     },
     shouldComponentUpdate: function(nextProps){
         return nextProps.html !== this.getDOMNode().innerHTML;
     },
     
-    componentDidUpdate: function() {
-        if ( this.props.html !== this.getDOMNode().innerHTML ) {
-           this.getDOMNode().innerHTML = this.props.html;
+    emitChange: function(event){
+        if(event.keyCode == 13) {
+            this.props.onSubmit();
+            return;
         }
-    },
-        
-    emitChange: function(){
+
         var html = this.getDOMNode().innerHTML;
         if (this.props.onChange && html !== this.lastHtml) {
             this.props.onChange({
@@ -24893,15 +24930,15 @@ var ItemInstance = React.createClass({displayName: "ItemInstance",
         switch(this.props.tag) {
             case 'project': 
                 return (
-                    React.createElement(Project, {data: this.props.data})
+                    React.createElement(Project, React.__spread({},  this.props))
                 );
             case 'task': 
                 return (
-                    React.createElement(Task, {data: this.props.data})
+                    React.createElement(Task, React.__spread({},  this.props))
                 );
             case 'todo': 
                 return (
-                    React.createElement(Todo, {data: this.props.data})
+                    React.createElement(Todo, React.__spread({},  this.props))
                 );
         }
         return (React.createElement("h1", {style: {color: 'red'}}, "No Item Instance"));
@@ -24915,50 +24952,52 @@ module.exports = ItemInstance;
 var socketHandler = require('./sockethandler');
 
 var  SocketCollectionMixin = {
-    //TODO: make it so this isn't needed!!
-    collectionData: function() {
-        var data = [];
-        //TODO: clean up this garbage if statement. It shouldn't be necessary... but ie. column-list needs data... so i dunno...
-        if(this.state && this.state.data)
-            data = this.state.data;
-
-        return data;
-    },
-
     refreshData: function() {
         this.socket().emit(this.props.collection + '::find', {}, function(error, data) {
-            console.log('SOCKET ON UPDATED - collection: ', data);
+            console.log('REFRESH - SOCKET ON UPDATED - collection: ', data);
             this._setData(data);
         }.bind(this));
     },
 
     componentDidMount: function() {
         this.socket().on('connect', function() {
-            socketHandler.addCollectionEvents(this.url, this.props.collection, function(collection) {
-                console.log('SOCKET ON UPDATED - collection: ', collection);
-                this._setData(collection);
+            socketHandler.addCollectionEvents(this.url, this.props.collection, function itemCreated(newItem) {
+                console.log('CREATE - SOCKET ON UPDATED - collection: ', this.props.collection);
+                
+                /*
+                //TODO: clean up messy too lengthy code. This is a simple operation, and the code should be just as simple.
+                if(!this._getData().some(function(item) {
+                    //TODO: if the server changes any of the original values, then this won't work.
+                    for(key in item)
+                        if(item[key] != newItem[key])
+                            return false;
+
+                    return true;
+                }))
+                */
+                this.setState({data: this._getData().concat([newItem])});
+
+            }.bind(this), function itemDeleted(deletedItem) {
+                var data = this._getData().slice(0);
+                //TODO: clean up messy too lengthy code. This is a simple operation, and the code should be just as simple.
+                var foundIndex = data.findIndex(function(item) {
+                    for(key in item)
+                        if(item[key] != deletedItem[key])
+                            return false;
+
+                    return true;
+                });
+                if(foundIndex != -1)
+                    data.splice(foundIndex, 1);
+
+                this.setState({data: data});
             }.bind(this));
         }.bind(this));
     },
 
     //TODO: this requires the component to store it's data in the state.data variable. Should i inforce such a large state?
     componentDidUpdate: function(prevProps, prevState) {
-        if(!prevState || !something(prevState))   //TODO: remove hacky stuff
-            return;
-
-        console.log('collection update: ', this.state.data);
-
-        //if there is a new model in the collection
-        if(prevState.data.length < this.state.data.length)
-            this.saveModel(this.state.data[this.state.data.length - 1]);
-        //if a model was removed from the collection
-        else if(prevState.data.length > this.state.data.length)
-            prevState.data.forEach(function(model, index) {
-                if(!this.state.data.some(function(item) {
-                        return item._id == model._id;
-                    }))
-                    this.deleteModel(model._id);
-            }.bind(this));
+        console.log('collection DIDUPDATE');
     },
 };
 
@@ -24971,6 +25010,29 @@ function hasItem(obj) {
     for(var k in obj)
         return true;
     return false;
+}
+
+if (!Array.prototype.findIndex) {
+  Array.prototype.findIndex = function(predicate) {
+    if (this == null) {
+      throw new TypeError('Array.prototype.findIndex called on null or undefined');
+    }
+    if (typeof predicate !== 'function') {
+      throw new TypeError('predicate must be a function');
+    }
+    var list = Object(this);
+    var length = list.length >>> 0;
+    var thisArg = arguments[1];
+    var value;
+
+    for (var i = 0; i < length; i++) {
+      value = list[i];
+      if (predicate.call(thisArg, value, i, list)) {
+        return i;
+      }
+    }
+    return -1;
+  };
 }
 
 module.exports = SocketCollectionMixin;
@@ -24992,6 +25054,8 @@ function SocketHandler() {
        
         //create socket.
         this.sockets[url] = socket.connect(url);
+        this.sockets[url].on('connect', function() { console.log('truly cnonected?'); });
+        console.log('socket connected in setupsocket.');
         this.callbacks[url] = { patch: {}, create: {}, 'delete': {} };
     };
 
@@ -25061,9 +25125,16 @@ var socketHandler = require('./sockethandler');
     var url = 'localhost:2020';
 
     var SocketMixin = {
-        saveModel: _.debounce(function(model) {
+        autosync: true,
+
+        saveModel: _.debounce(function(model, cb) {
             function saveCB(method, err, res) {
                 console.log('SOCKET ' + method + ' - err, res: ', err, res);
+
+                //TODO: put this code into the modelMixin. If a collection somehow calls saveModel, then I'm gonna break everything...
+                this._setData(res);
+                if(cb)
+                    cb();
             }
 
             var data = _.clone(model);
@@ -25074,10 +25145,10 @@ var socketHandler = require('./sockethandler');
                 this.socket().emit(this.props.collection + '::create', data, {}, saveCB.bind(this, 'create'));
             else
                 this.socket().emit(this.props.collection + '::patch', _id, data, {}, saveCB.bind(this, 'patch'));
-        }, 100),
+        }, 500),
         deleteModel: function(id) {
             this.socket().emit(this.props.collection + '::remove', id, {}, function(error, data) {
-                console.log('SOCKET DELETE - err, res: ', err, res);
+                console.log('SOCKET DELETE - err, res: ', error, data);
             });
         },
         socket: function() {
@@ -25092,9 +25163,9 @@ var socketHandler = require('./sockethandler');
                 return this.setState({data: data}); //if the user was too lazy to provide a setData function, then just shove things in the data param of state.
         },
 
-        _getData: function(data) {
+        _getData: function() {
             if(this.getData)
-                return this.getData(data);
+                return this.getData();
             else
                 return this.state.data;
         },
@@ -25102,12 +25173,14 @@ var socketHandler = require('./sockethandler');
         componentDidMount: function() {
             if(!this.url)
                 throw 'SocketMixin requires url to be set in component class';
+            if(!this.autosync)
+                return;
 
             this.socket().on('connect', function() {
-                console.log('connected to the socket [' + this.url + ']! collection, id: ', this.props.collection, this.props.id);
+                console.log('connected to the socket [' + this.url + ']! collection, id: ', this.props.collection);
 
                 if(this.props.data)
-                    this._setData({data: this.props.data});  //TODO: Is this necessary? What if people wanted to avoid putting all data in the state
+                    this._setData({data: this.props.data});
                 else
                     this.refreshData();
             }.bind(this));
@@ -25123,32 +25196,49 @@ var socketHandler = require('./sockethandler');
 
 var  SocketModelMixin = {
     refreshData: function() {
-        this.socket().emit(this.props.collection + '::get', this.props.id, {}, function(error, data) {
+        if(!this.getId())
+            throw 'ERROR: MODEL DOESNT HAVE _id SET!';
+        this.socket().emit(this.props.collection + '::get', this.getId(), {}, function(error, data) {
             console.log('SOCKET GET - err, res: ', err, res);
-            this.setState({data: data});
+            this._setData(data);
         }.bind(this));
     },
 
     getId: function() {
-        return this.props.id || this.props.data._id;
+        if(!(this.props.data && this.props.data._id) && !this.props._id)
+            return false;
+        else
+            return this.props._id || this.props.data._id;
+    },
+
+    componentWillMount: function() {
+        if(!this.getId())
+            this.autosync = false;
     },
 
     componentDidMount: function() {
-        if(!this.props.data && !this.props.id)
-            throw 'SocketModelMixin requires either an id prop or a data prop. Otherwise where do we get data?';
+        console.log('model did mount');
+        if(!this.autosync)
+            return;
 
-        this.socket().on('connect', function() {
-            socketHandler.addModelEvents(this.url, this.props.collection, this.props.getId(), function(item) {
-                console.log('SOCKET ON UPDATED - item: ', item);
-                this._setData(item);
-            }.bind(this));
+        socketHandler.addModelEvents(this.url, this.props.collection, this.getId(), function(item) {
+            console.log('SOCKET ON UPDATED - item: ', item);
+            this._setData(item);
         }.bind(this));
     },
 
+    shouldComponentUpdate: function(nextProps, nextState) {
+        //console.log('state: prev, current: ', prevState, this.state);
+        //console.log('props: prev, current: ', prevProps, this.props);
+        return JSON.stringify(nextState) != JSON.stringify(this.state);
+    },
+
     componentDidUpdate: function(prevProps, prevState) {
-        if(!prevState || !something(prevState))   //TODO: remove hacky stuff
+        console.log('model DIDUPDATE');
+        if(!this.autosync || !prevState || !something(prevState))   //TODO: remove hacky stuff
             return;
 
+        console.log('model update: ', prevState, this.state);
         this.saveModel(this._getData());
     },
 };
@@ -25196,10 +25286,10 @@ var Project = React.createClass({displayName: "Project",
         return {collection: 'project'};
     },
     getInitialState: function() {
-        return {expanded: false};
+        return {expanded: false, data: this.props.data};
     },
     //TODO: this is bad practice... you're not supposed to set props. So figure out a way to build a new project to replace this one?
-    setModel: function(model) {
+    setData: function(model) {
         this.setProps({ data: model });
     },
     render: function() {
@@ -25301,9 +25391,10 @@ var Todo = React.createClass({displayName: "Todo",
     },
     getInitialState: function() {
         //TODO: there must be a better way... I can't just return props.data, because then they reference the same object.
+        console.log('props data: ', this.props.data);
         return {
             title: this.props.data.title,
-            state: this.props.data.status,
+            status: this.props.data.status,
             project: this.props.data.project,
             task: this.props.data.task,
         };
@@ -25311,11 +25402,26 @@ var Todo = React.createClass({displayName: "Todo",
     getData: function() {
         return React.addons.update(this.props.data, {
             title: {$set: this.state.title},
-            state: {$set: this.state.state}
+            status: {$set: this.state.status}
         });
     },
     setData: function(model) {
-        this.setState({ title: model.title, state: model.state });
+        //TODO: maybe put this in the model mixin? It's annoying, but it seems if you setData and nothing has changed, it still triggers componentDidUpda
+        if(model.title == this.state.title && model.status == this.state.status)
+            return;
+
+        this.setState({ title: model.title, status: model.status });
+    },
+    //TODO: this is duplicated in column-list
+    getNewItem: function() { //This is for collection mixin. TODO: make it more obvious this is for a mixin.
+        return {title: '', status: 'new',};
+    },
+    saveModelAndClear: function() {
+        console.log('save and clear called');
+        this.saveModel(this._getData(), function() {
+            this._setData(this.getNewItem());
+        }.bind(this));
+        return false;
     },
     handleChange: function(event) {
         console.log('new todo title: ', event.target.value);
@@ -25323,27 +25429,29 @@ var Todo = React.createClass({displayName: "Todo",
         this.setState({title: event.target.value});
     },
     changeStatus: function(status) {
-        this.setState({state: status});
+        this.setState({status: status});
     },
     render: function() {
         var self = this;
+        console.log('this.state.title: ', this.state.title);
         return (
             React.createElement("div", null, 
-                React.createElement("span", null, 
-                     this.state.state == 'new'    ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'active') }, "Start") : null, 
-                     this.state.state == 'active' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'paused') }, "Pause") : null, 
-                     this.state.state == 'active' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'finished') }, "Finish") : null, 
-                     this.state.state == 'paused' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'active') }, "Continue") : null, 
-                     this.state.state == 'paused' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'frozen') }, "Freeze") : null, 
-                     this.state.state == 'frozen' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'paused') }, "Unfreeze") : null, 
-                     this.state.state == 'finished' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'paused') }, "Undo Finished") : null
-                ), 
-                React.createElement("p", null, React.createElement(ContentEditable, {html: this.state.title, onChange: this.handleChange})), 
+                !this.props.disabled ? React.createElement("span", null, 
+                     this.state.status == 'new'    ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'active') }, "Start") : null, 
+                     this.state.status == 'active' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'paused') }, "Pause") : null, 
+                     this.state.status == 'active' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'finished') }, "Finish") : null, 
+                     this.state.status == 'paused' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'active') }, "Continue") : null, 
+                     this.state.status == 'paused' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'frozen') }, "Freeze") : null, 
+                     this.state.status == 'frozen' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'paused') }, "Unfreeze") : null, 
+                     this.state.status == 'finished' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'paused') }, "Undo Finished") : null
+                ) : null, 
+                React.createElement("p", null, React.createElement(ContentEditable, {html: this.state.title, onChange: this.handleChange, onSubmit: this.saveModelAndClear})), 
                 React.createElement("span", null, 
                      this.state.task ? React.createElement(TaskBadge, {task: this.state.task}) : null, 
                      this.state.project ? React.createElement(ProjectBadge, {project: this.state.project}) : null, 
                      (!this.state.task && !this.state.project) ? React.createElement("button", {type: "button"}, "Assign") : null
-                )
+                ), 
+                (!this.props._id && !this.props.data._id) ? React.createElement("button", {type: "button", onClick: this.saveModelAndClear}, "Create") : null
             )
         );
    },

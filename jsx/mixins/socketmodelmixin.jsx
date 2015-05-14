@@ -3,32 +3,49 @@ var socketHandler = require('./sockethandler');
 
 var  SocketModelMixin = {
     refreshData: function() {
-        this.socket().emit(this.props.collection + '::get', this.props.id, {}, function(error, data) {
+        if(!this.getId())
+            throw 'ERROR: MODEL DOESNT HAVE _id SET!';
+        this.socket().emit(this.props.collection + '::get', this.getId(), {}, function(error, data) {
             console.log('SOCKET GET - err, res: ', err, res);
-            this.setState({data: data});
+            this._setData(data);
         }.bind(this));
     },
 
     getId: function() {
-        return this.props.id || this.props.data._id;
+        if(!(this.props.data && this.props.data._id) && !this.props._id)
+            return false;
+        else
+            return this.props._id || this.props.data._id;
+    },
+
+    componentWillMount: function() {
+        if(!this.getId())
+            this.autosync = false;
     },
 
     componentDidMount: function() {
-        if(!this.props.data && !this.props.id)
-            throw 'SocketModelMixin requires either an id prop or a data prop. Otherwise where do we get data?';
+        console.log('model did mount');
+        if(!this.autosync)
+            return;
 
-        this.socket().on('connect', function() {
-            socketHandler.addModelEvents(this.url, this.props.collection, this.props.getId(), function(item) {
-                console.log('SOCKET ON UPDATED - item: ', item);
-                this._setData(item);
-            }.bind(this));
+        socketHandler.addModelEvents(this.url, this.props.collection, this.getId(), function(item) {
+            console.log('SOCKET ON UPDATED - item: ', item);
+            this._setData(item);
         }.bind(this));
     },
 
+    shouldComponentUpdate: function(nextProps, nextState) {
+        //console.log('state: prev, current: ', prevState, this.state);
+        //console.log('props: prev, current: ', prevProps, this.props);
+        return JSON.stringify(nextState) != JSON.stringify(this.state);
+    },
+
     componentDidUpdate: function(prevProps, prevState) {
-        if(!prevState || !something(prevState))   //TODO: remove hacky stuff
+        console.log('model DIDUPDATE');
+        if(!this.autosync || !prevState || !something(prevState))   //TODO: remove hacky stuff
             return;
 
+        console.log('model update: ', prevState, this.state);
         this.saveModel(this._getData());
     },
 };

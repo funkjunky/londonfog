@@ -8,15 +8,15 @@ var ItemInstance = React.createClass({displayName: "ItemInstance",
         switch(this.props.tag) {
             case 'project': 
                 return (
-                    React.createElement(Project, {data: this.props.data})
+                    React.createElement(Project, React.__spread({},  this.props))
                 );
             case 'task': 
                 return (
-                    React.createElement(Task, {data: this.props.data})
+                    React.createElement(Task, React.__spread({},  this.props))
                 );
             case 'todo': 
                 return (
-                    React.createElement(Todo, {data: this.props.data})
+                    React.createElement(Todo, React.__spread({},  this.props))
                 );
         }
         return (React.createElement("h1", {style: {color: 'red'}}, "No Item Instance"));

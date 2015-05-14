@@ -10,10 +10,10 @@ var Project = React.createClass({displayName: "Project",
         return {collection: 'project'};
     },
     getInitialState: function() {
-        return {expanded: false};
+        return {expanded: false, data: this.props.data};
     },
     //TODO: this is bad practice... you're not supposed to set props. So figure out a way to build a new project to replace this one?
-    setModel: function(model) {
+    setData: function(model) {
         this.setProps({ data: model });
     },
     render: function() {

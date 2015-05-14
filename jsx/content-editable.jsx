@@ -2,23 +2,25 @@ var React = require('react');
 
 var ContentEditable = React.createClass({
     render: function(){
+        //TODO: find where html=undefined and fix it! So I can remove this? Maybe I should keep this safety.
+        var html = this.props.html || '';
+        console.log('content editable render, html: ', this.props.html);
         return <div id="contenteditable"
-            onInput={this.emitChange} 
+            onKeyUp={this.emitChange} 
             onBlur={this.emitChange}
             contentEditable
-            dangerouslySetInnerHTML={{__html: this.props.html}}></div>;
+            dangerouslySetInnerHTML={{__html: html}}></div>;
     },
     shouldComponentUpdate: function(nextProps){
         return nextProps.html !== this.getDOMNode().innerHTML;
     },
     
-    componentDidUpdate: function() {
-        if ( this.props.html !== this.getDOMNode().innerHTML ) {
-           this.getDOMNode().innerHTML = this.props.html;
+    emitChange: function(event){
+        if(event.keyCode == 13) {
+            this.props.onSubmit();
+            return;
         }
-    },
-        
-    emitChange: function(){
+
         var html = this.getDOMNode().innerHTML;
         if (this.props.onChange && html !== this.lastHtml) {
             this.props.onChange({

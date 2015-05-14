@@ -9,9 +9,16 @@ var socketHandler = require('./sockethandler');
     var url = 'localhost:2020';
 
     var SocketMixin = {
-        saveModel: _.debounce(function(model) {
+        autosync: true,
+
+        saveModel: _.debounce(function(model, cb) {
             function saveCB(method, err, res) {
                 console.log('SOCKET ' + method + ' - err, res: ', err, res);
+
+                //TODO: put this code into the modelMixin. If a collection somehow calls saveModel, then I'm gonna break everything...
+                this._setData(res);
+                if(cb)
+                    cb();
             }
 
             var data = _.clone(model);
@@ -22,10 +29,10 @@ var socketHandler = require('./sockethandler');
                 this.socket().emit(this.props.collection + '::create', data, {}, saveCB.bind(this, 'create'));
             else
                 this.socket().emit(this.props.collection + '::patch', _id, data, {}, saveCB.bind(this, 'patch'));
-        }, 100),
+        }, 500),
         deleteModel: function(id) {
             this.socket().emit(this.props.collection + '::remove', id, {}, function(error, data) {
-                console.log('SOCKET DELETE - err, res: ', err, res);
+                console.log('SOCKET DELETE - err, res: ', error, data);
             });
         },
         socket: function() {
@@ -40,9 +47,9 @@ var socketHandler = require('./sockethandler');
                 return this.setState({data: data}); //if the user was too lazy to provide a setData function, then just shove things in the data param of state.
         },
 
-        _getData: function(data) {
+        _getData: function() {
             if(this.getData)
-                return this.getData(data);
+                return this.getData();
             else
                 return this.state.data;
         },
@@ -50,12 +57,14 @@ var socketHandler = require('./sockethandler');
         componentDidMount: function() {
             if(!this.url)
                 throw 'SocketMixin requires url to be set in component class';
+            if(!this.autosync)
+                return;
 
             this.socket().on('connect', function() {
-                console.log('connected to the socket [' + this.url + ']! collection, id: ', this.props.collection, this.props.id);
+                console.log('connected to the socket [' + this.url + ']! collection, id: ', this.props.collection);
 
                 if(this.props.data)
-                    this._setData({data: this.props.data});  //TODO: Is this necessary? What if people wanted to avoid putting all data in the state
+                    this._setData({data: this.props.data});
                 else
                     this.refreshData();
             }.bind(this));

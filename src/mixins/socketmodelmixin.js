@@ -42,11 +42,13 @@ var  SocketModelMixin = {
 
     componentDidUpdate: function(prevProps, prevState) {
         console.log('model DIDUPDATE');
-        if(!this.autosync || !prevState || !something(prevState))   //TODO: remove hacky stuff
+        if(!this.autosync || !prevState || !something(prevState))   //TODO: remove hacky stuff, once I figure out a way to fix reactjs
             return;
 
         console.log('model update: ', prevState, this.state);
-        this.saveModel(this._getData());
+        this.saveModel(this._getData(), function(error, result) {
+            this._setData(result);
+        }.bind(this));
     },
 };
 
@@ -54,7 +56,6 @@ var  SocketModelMixin = {
 function something(obj) {
     return (typeof obj !== 'undefined') && (obj.length || hasItem(obj));
 }
-
 function hasItem(obj) {
     for(var k in obj)
         return true;

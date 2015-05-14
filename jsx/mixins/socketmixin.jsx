@@ -5,30 +5,18 @@ var _ = require('underscore');
 var socketHandler = require('./sockethandler');
 
 (function() {
-    //TODO: don't hard code the url... I'd like to be able to sahre this mixin at some point.
-    var url = 'localhost:2020';
-
     var SocketMixin = {
         autosync: true,
 
-        saveModel: _.debounce(function(model, cb) {
-            function saveCB(method, err, res) {
-                console.log('SOCKET ' + method + ' - err, res: ', err, res);
-
-                //TODO: put this code into the modelMixin. If a collection somehow calls saveModel, then I'm gonna break everything...
-                this._setData(res);
-                if(cb)
-                    cb();
-            }
-
+        saveModel: _.debounce(function(model, callback) {
             var data = _.clone(model);
             var _id = data._id;
             delete data._id;
             console.log('attempting to saveModel (collection, props.id, state.data): ', this.props.collection, _id, data);
             if(typeof _id === 'undefined')
-                this.socket().emit(this.props.collection + '::create', data, {}, saveCB.bind(this, 'create'));
+                this.socket().emit(this.props.collection + '::create', data, {}, callback);
             else
-                this.socket().emit(this.props.collection + '::patch', _id, data, {}, saveCB.bind(this, 'patch'));
+                this.socket().emit(this.props.collection + '::patch', _id, data, {}, callback);
         }, 500),
         deleteModel: function(id) {
             this.socket().emit(this.props.collection + '::remove', id, {}, function(error, data) {

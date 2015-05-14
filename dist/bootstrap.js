@@ -24815,23 +24815,9 @@ var ColumnList = React.createClass({displayName: "ColumnList",
     mixins: [SocketMixin, CollectionMixin],
     getInitialState: function() {
         return {
-            newItem: this.getNewItem(),
             beingSaved: [],
             data: [],
         };
-    },
-    getNewItem: function() { //This is for collection mixin. TODO: make it more obvious this is for a mixin.
-        if(this.props.collection == 'todo')
-            return {title: '', status: 'new',};
-        else if(this.props.collection == 'project')
-            return {title: '',};
-    },
-    addItem: function() {
-        console.log('newitem: ', this.state.newItem);
-        //this.saveModel(this.state.newItem);
-        this.setState({beingSaved: this.state.beingSaved.concat([this.state.newItem])});
-        console.log('newitem after beingsaved: ', this.state.newItem);
-        this.setState({newItem: this.getNewItem()});
     },
     removeItem: function(index, _id) {
         this.deleteModel(_id);
@@ -24844,7 +24830,7 @@ console.log('length: ', this.state.data.length);
             React.createElement("div", {style: {border: 'solid 1px black'}}, 
                 React.createElement("ul", null, 
                     React.createElement("li", {key: "newItem"}, 
-                        React.createElement(ItemInstance, {tag: this.props.collection, data: this.state.newItem})
+                        React.createElement(ItemInstance, {tag: this.props.collection})
                     ), 
                     this.state.beingSaved.map(function(item, index) {
                         return (
@@ -24964,19 +24950,7 @@ var  SocketCollectionMixin = {
             socketHandler.addCollectionEvents(this.url, this.props.collection, function itemCreated(newItem) {
                 console.log('CREATE - SOCKET ON UPDATED - collection: ', this.props.collection);
                 
-                /*
-                //TODO: clean up messy too lengthy code. This is a simple operation, and the code should be just as simple.
-                if(!this._getData().some(function(item) {
-                    //TODO: if the server changes any of the original values, then this won't work.
-                    for(key in item)
-                        if(item[key] != newItem[key])
-                            return false;
-
-                    return true;
-                }))
-                */
                 this.setState({data: this._getData().concat([newItem])});
-
             }.bind(this), function itemDeleted(deletedItem) {
                 var data = this._getData().slice(0);
                 //TODO: clean up messy too lengthy code. This is a simple operation, and the code should be just as simple.
@@ -24995,23 +24969,12 @@ var  SocketCollectionMixin = {
         }.bind(this));
     },
 
-    //TODO: this requires the component to store it's data in the state.data variable. Should i inforce such a large state?
     componentDidUpdate: function(prevProps, prevState) {
         console.log('collection DIDUPDATE');
     },
 };
 
-//TODO: putsomewhere better. This is duplicated in rest and maybe elsewhere?
-function something(obj) {
-    return (typeof obj !== 'undefined') && (obj.length || hasItem(obj));
-}
-
-function hasItem(obj) {
-    for(var k in obj)
-        return true;
-    return false;
-}
-
+//TODO: move to a better location... maybe a shims file.
 if (!Array.prototype.findIndex) {
   Array.prototype.findIndex = function(predicate) {
     if (this == null) {
@@ -25121,30 +25084,18 @@ var _ = require('underscore');
 var socketHandler = require('./sockethandler');
 
 (function() {
-    //TODO: don't hard code the url... I'd like to be able to sahre this mixin at some point.
-    var url = 'localhost:2020';
-
     var SocketMixin = {
         autosync: true,
 
-        saveModel: _.debounce(function(model, cb) {
-            function saveCB(method, err, res) {
-                console.log('SOCKET ' + method + ' - err, res: ', err, res);
-
-                //TODO: put this code into the modelMixin. If a collection somehow calls saveModel, then I'm gonna break everything...
-                this._setData(res);
-                if(cb)
-                    cb();
-            }
-
+        saveModel: _.debounce(function(model, callback) {
             var data = _.clone(model);
             var _id = data._id;
             delete data._id;
             console.log('attempting to saveModel (collection, props.id, state.data): ', this.props.collection, _id, data);
             if(typeof _id === 'undefined')
-                this.socket().emit(this.props.collection + '::create', data, {}, saveCB.bind(this, 'create'));
+                this.socket().emit(this.props.collection + '::create', data, {}, callback);
             else
-                this.socket().emit(this.props.collection + '::patch', _id, data, {}, saveCB.bind(this, 'patch'));
+                this.socket().emit(this.props.collection + '::patch', _id, data, {}, callback);
         }, 500),
         deleteModel: function(id) {
             this.socket().emit(this.props.collection + '::remove', id, {}, function(error, data) {
@@ -25235,11 +25186,13 @@ var  SocketModelMixin = {
 
     componentDidUpdate: function(prevProps, prevState) {
         console.log('model DIDUPDATE');
-        if(!this.autosync || !prevState || !something(prevState))   //TODO: remove hacky stuff
+        if(!this.autosync || !prevState || !something(prevState))   //TODO: remove hacky stuff, once I figure out a way to fix reactjs
             return;
 
         console.log('model update: ', prevState, this.state);
-        this.saveModel(this._getData());
+        this.saveModel(this._getData(), function(error, result) {
+            this._setData(result);
+        }.bind(this));
     },
 };
 
@@ -25247,7 +25200,6 @@ var  SocketModelMixin = {
 function something(obj) {
     return (typeof obj !== 'undefined') && (obj.length || hasItem(obj));
 }
-
 function hasItem(obj) {
     for(var k in obj)
         return true;
@@ -25283,7 +25235,8 @@ var Project = React.createClass({displayName: "Project",
     url: 'http://localhost:1212/',
     mixins: [SocketMixin, ModelMixin],
     getDefaultProps: function() {
-        return {collection: 'project'};
+        //TODO: should use getNewItem() function for data, but apparently 'this' isn't instantiated yet.
+        return {collection: 'project', data: {title: ''}};
     },
     getInitialState: function() {
         return {expanded: false, data: this.props.data};
@@ -25387,11 +25340,13 @@ var Todo = React.createClass({displayName: "Todo",
     url: 'http://localhost:1212/',
     mixins: [SocketMixin, SocketModelMixin],
     getDefaultProps: function() {
-        return {collection: 'todo'};
+        //TODO: apparently the object doesn't exist yet? so we can't use members.
+        //var newItem = this.getNewItem();
+        var newItem = {title: '', status: 'new',};
+        return {collection: 'todo', data: newItem};
     },
     getInitialState: function() {
         //TODO: there must be a better way... I can't just return props.data, because then they reference the same object.
-        console.log('props data: ', this.props.data);
         return {
             title: this.props.data.title,
             status: this.props.data.status,
@@ -25406,14 +25361,9 @@ var Todo = React.createClass({displayName: "Todo",
         });
     },
     setData: function(model) {
-        //TODO: maybe put this in the model mixin? It's annoying, but it seems if you setData and nothing has changed, it still triggers componentDidUpda
-        if(model.title == this.state.title && model.status == this.state.status)
-            return;
-
         this.setState({ title: model.title, status: model.status });
     },
-    //TODO: this is duplicated in column-list
-    getNewItem: function() { //This is for collection mixin. TODO: make it more obvious this is for a mixin.
+    getNewItem: function() { //this is like the default data... perhaps a better name?
         return {title: '', status: 'new',};
     },
     saveModelAndClear: function() {
@@ -25424,8 +25374,6 @@ var Todo = React.createClass({displayName: "Todo",
         return false;
     },
     handleChange: function(event) {
-        console.log('new todo title: ', event.target.value);
-        //TODO: don't call setState twice
         this.setState({title: event.target.value});
     },
     changeStatus: function(status) {

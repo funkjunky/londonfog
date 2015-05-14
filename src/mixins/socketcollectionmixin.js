@@ -14,19 +14,7 @@ var  SocketCollectionMixin = {
             socketHandler.addCollectionEvents(this.url, this.props.collection, function itemCreated(newItem) {
                 console.log('CREATE - SOCKET ON UPDATED - collection: ', this.props.collection);
                 
-                /*
-                //TODO: clean up messy too lengthy code. This is a simple operation, and the code should be just as simple.
-                if(!this._getData().some(function(item) {
-                    //TODO: if the server changes any of the original values, then this won't work.
-                    for(key in item)
-                        if(item[key] != newItem[key])
-                            return false;
-
-                    return true;
-                }))
-                */
                 this.setState({data: this._getData().concat([newItem])});
-
             }.bind(this), function itemDeleted(deletedItem) {
                 var data = this._getData().slice(0);
                 //TODO: clean up messy too lengthy code. This is a simple operation, and the code should be just as simple.
@@ -45,23 +33,12 @@ var  SocketCollectionMixin = {
         }.bind(this));
     },
 
-    //TODO: this requires the component to store it's data in the state.data variable. Should i inforce such a large state?
     componentDidUpdate: function(prevProps, prevState) {
         console.log('collection DIDUPDATE');
     },
 };
 
-//TODO: putsomewhere better. This is duplicated in rest and maybe elsewhere?
-function something(obj) {
-    return (typeof obj !== 'undefined') && (obj.length || hasItem(obj));
-}
-
-function hasItem(obj) {
-    for(var k in obj)
-        return true;
-    return false;
-}
-
+//TODO: move to a better location... maybe a shims file.
 if (!Array.prototype.findIndex) {
   Array.prototype.findIndex = function(predicate) {
     if (this == null) {

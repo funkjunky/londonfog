@@ -10,11 +10,13 @@ var Todo = React.createClass({
     url: 'http://localhost:1212/',
     mixins: [SocketMixin, SocketModelMixin],
     getDefaultProps: function() {
-        return {collection: 'todo'};
+        //TODO: apparently the object doesn't exist yet? so we can't use members.
+        //var newItem = this.getNewItem();
+        var newItem = {title: '', status: 'new',};
+        return {collection: 'todo', data: newItem};
     },
     getInitialState: function() {
         //TODO: there must be a better way... I can't just return props.data, because then they reference the same object.
-        console.log('props data: ', this.props.data);
         return {
             title: this.props.data.title,
             status: this.props.data.status,
@@ -29,14 +31,9 @@ var Todo = React.createClass({
         });
     },
     setData: function(model) {
-        //TODO: maybe put this in the model mixin? It's annoying, but it seems if you setData and nothing has changed, it still triggers componentDidUpda
-        if(model.title == this.state.title && model.status == this.state.status)
-            return;
-
         this.setState({ title: model.title, status: model.status });
     },
-    //TODO: this is duplicated in column-list
-    getNewItem: function() { //This is for collection mixin. TODO: make it more obvious this is for a mixin.
+    getNewItem: function() { //this is like the default data... perhaps a better name?
         return {title: '', status: 'new',};
     },
     saveModelAndClear: function() {
@@ -47,8 +44,6 @@ var Todo = React.createClass({
         return false;
     },
     handleChange: function(event) {
-        console.log('new todo title: ', event.target.value);
-        //TODO: don't call setState twice
         this.setState({title: event.target.value});
     },
     changeStatus: function(status) {

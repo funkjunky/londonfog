@@ -7,7 +7,8 @@ var Project = React.createClass({
     url: 'http://localhost:1212/',
     mixins: [SocketMixin, ModelMixin],
     getDefaultProps: function() {
-        return {collection: 'project'};
+        //TODO: should use getNewItem() function for data, but apparently 'this' isn't instantiated yet.
+        return {collection: 'project', data: {title: ''}};
     },
     getInitialState: function() {
         return {expanded: false, data: this.props.data};

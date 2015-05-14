@@ -32,17 +32,18 @@ Sunday - 11:30-1:30
 	*- I should have a fully working UI for TODOs
 		*- todos aren’t staying synced between windows...
 
-	- the getNewItem function needs to be in one place, probably TODO or Project
-	- look up a way to reduce .bind(this) commands
-	- use promises or something with io.connect, so we don’t have a race condition for getting a connection
-		- use promises EVERYWHERE… NEED MORE PROMISES!!
-	- Address ALL //TODOs in code
+	*- the getNewItem function needs to be in one place, probably TODO or Project
+	- Address really bad //TODOs in code
 	- clean up meaningless console logs.
 	
 	- Code for TODOs should be simple and straight forward and only handle UI. (except the create button and delete button. Only exceptions.)
 
 	-revise my TODO list for the next tasks, like assigning tasks and projects to TODOs etc…
 		-add in a bit at the end about ensuring things don’t break horribly if connection is lost. Just wait, and attempt to reconnect later perhaps.
+		- add promises to all callback functionality, and all socket stuff.
+		- all emits should work off of promises
+		- update restmixin to work again
+		- clean up ALL todos.
 
 
 	- get socket working with project

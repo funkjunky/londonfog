@@ -9,23 +9,9 @@ var ColumnList = React.createClass({displayName: "ColumnList",
     mixins: [SocketMixin, CollectionMixin],
     getInitialState: function() {
         return {
-            newItem: this.getNewItem(),
             beingSaved: [],
             data: [],
         };
-    },
-    getNewItem: function() { //This is for collection mixin. TODO: make it more obvious this is for a mixin.
-        if(this.props.collection == 'todo')
-            return {title: '', status: 'new',};
-        else if(this.props.collection == 'project')
-            return {title: '',};
-    },
-    addItem: function() {
-        console.log('newitem: ', this.state.newItem);
-        //this.saveModel(this.state.newItem);
-        this.setState({beingSaved: this.state.beingSaved.concat([this.state.newItem])});
-        console.log('newitem after beingsaved: ', this.state.newItem);
-        this.setState({newItem: this.getNewItem()});
     },
     removeItem: function(index, _id) {
         this.deleteModel(_id);
@@ -38,7 +24,7 @@ console.log('length: ', this.state.data.length);
             React.createElement("div", {style: {border: 'solid 1px black'}}, 
                 React.createElement("ul", null, 
                     React.createElement("li", {key: "newItem"}, 
-                        React.createElement(ItemInstance, {tag: this.props.collection, data: this.state.newItem})
+                        React.createElement(ItemInstance, {tag: this.props.collection})
                     ), 
                     this.state.beingSaved.map(function(item, index) {
                         return (

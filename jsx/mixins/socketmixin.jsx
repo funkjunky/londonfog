@@ -31,15 +31,27 @@ var socketHandler = require('./sockethandler');
         _setData: function(data) {
             if(this.setData)
                 return this.setData(data);
-            else
-                return this.setState({data: data}); //if the user was too lazy to provide a setData function, then just shove things in the data param of state.
+            else if(this.dataKey) {
+                if(this.dataKey == '#root')
+                    return this.setState(data);
+                else {
+                    var newState = {}; newState[this.dataKey] = data;
+                    return this.setState(newState);
+                }
+            } else
+                throw 'All classes using socketmixin, must define either setData member method or dataKey member variable';
         },
 
         _getData: function() {
             if(this.getData)
                 return this.getData();
-            else
-                return this.state.data;
+            else if(this.dataKey) {
+                if(this.dataKey == '#root')
+                    return this.state;
+                else
+                    return this.state[this.dataKey];
+            } else //TODO: remove throw... I should throw much earlier. Like during componentDidMount or something.
+                throw 'All classes using socketmixin, must define either setData member method or dataKey member variable';
         },
 
         componentDidMount: function() {

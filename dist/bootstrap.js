@@ -24812,6 +24812,8 @@ var CollectionMixin = require('./mixins/socketcollectionmixin');
 
 var ColumnList = React.createClass({displayName: "ColumnList",
     url: 'http://localhost:1212/',
+    dataKey: 'data',
+
     mixins: [SocketMixin, CollectionMixin],
     getInitialState: function() {
         return {
@@ -24821,8 +24823,9 @@ var ColumnList = React.createClass({displayName: "ColumnList",
     },
     removeItem: function(index, _id) {
         this.deleteModel(_id);
-        this.state.data.splice(index, 1); //first remove the item, then clone the array...
-        this.setState({ data: this.state.data });
+        //TODO: add feedback to replace the fact that I no longer immediately remove the item I deleted.
+        //this.state.data.splice(index, 1); //first remove the item, then clone the array...
+        //this.setState({ data: this.state.data });
     },
     render: function() {
         return (
@@ -25098,15 +25101,27 @@ var socketHandler = require('./sockethandler');
         _setData: function(data) {
             if(this.setData)
                 return this.setData(data);
-            else
-                return this.setState({data: data}); //if the user was too lazy to provide a setData function, then just shove things in the data param of state.
+            else if(this.dataKey) {
+                if(this.dataKey == '#root')
+                    return this.setState(data);
+                else {
+                    var newState = {}; newState[this.dataKey] = data;
+                    return this.setState(newState);
+                }
+            } else
+                throw 'All classes using socketmixin, must define either setData member method or dataKey member variable';
         },
 
         _getData: function() {
             if(this.getData)
                 return this.getData();
-            else
-                return this.state.data;
+            else if(this.dataKey) {
+                if(this.dataKey == '#root')
+                    return this.state;
+                else
+                    return this.state[this.dataKey];
+            } else //TODO: remove throw... I should throw much earlier. Like during componentDidMount or something.
+                throw 'All classes using socketmixin, must define either setData member method or dataKey member variable';
         },
 
         componentDidMount: function() {
@@ -25216,6 +25231,8 @@ var ModelMixin = require('./mixins/socketmodelmixin');
 
 var Project = React.createClass({displayName: "Project",
     url: 'http://localhost:1212/',
+    dataKey: 'data',
+
     mixins: [SocketMixin, ModelMixin],
     getDefaultProps: function() {
         //TODO: should use getNewItem() function for data, but apparently 'this' isn't instantiated yet.
@@ -25319,60 +25336,45 @@ var ContentEditable = require('./content-editable');
 var SocketModelMixin = require('./mixins/socketmodelmixin');
 var SocketMixin = require('./mixins/socketmixin');
 
+//Note: during getDefaultProps, none of the member methods exist yet. Further AFTERWARDS, getDefaultProps no longer exists... so I have to rely on an external function.
+function blankTodo() {
+    return {title: '', status: 'new',};
+}
+
 var Todo = React.createClass({displayName: "Todo",
     url: 'http://localhost:1212/',
+    dataKey: '#root', //this means we put the data directly in the state.
+    //the button states and labels displayed while in each state.
+    states: {
+        new: {active: 'Start',},
+        active: {paused: 'Pause', finished: 'Finish',},
+        paused: {active: 'Continue', frozen: 'Freeze',},
+        frozen: {paused: 'Unfreeze',},
+        finished: {active: 'Not Yet Done',},
+    },
+
     mixins: [SocketMixin, SocketModelMixin],
     getDefaultProps: function() {
-        //TODO: apparently the object doesn't exist yet? so we can't use members.
-        //var newItem = this.getNewItem();
-        var newItem = {title: '', status: 'new',};
-        return {collection: 'todo', data: newItem};
+        return {collection: 'todo', data: blankTodo()};
     },
     getInitialState: function() {
-        //TODO: there must be a better way... I can't just return props.data, because then they reference the same object.
-        return {
-            title: this.props.data.title,
-            status: this.props.data.status,
-            project: this.props.data.project,
-            task: this.props.data.task,
-        };
-    },
-    getData: function() {
-        return React.addons.update(this.props.data, {
-            title: {$set: this.state.title},
-            status: {$set: this.state.status}
-        });
-    },
-    setData: function(model) {
-        this.setState({ title: model.title, status: model.status });
-    },
-    getNewItem: function() { //this is like the default data... perhaps a better name?
-        return {title: '', status: 'new',};
+        return this.props.data;
     },
     saveModelAndClear: function() {
         this.saveModel(this._getData(), function() {
-            this._setData(this.getNewItem());
+            this._setData(blankTodo());
         }.bind(this));
     },
     handleChange: function(event) {
         this.setState({title: event.target.value});
     },
-    changeStatus: function(status) {
-        this.setState({status: status});
-    },
     render: function() {
-        var self = this;
         return (
             React.createElement("div", null, 
-                !this.props.disabled ? React.createElement("span", null, 
-                     this.state.status == 'new'    ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'active') }, "Start") : null, 
-                     this.state.status == 'active' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'paused') }, "Pause") : null, 
-                     this.state.status == 'active' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'finished') }, "Finish") : null, 
-                     this.state.status == 'paused' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'active') }, "Continue") : null, 
-                     this.state.status == 'paused' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'frozen') }, "Freeze") : null, 
-                     this.state.status == 'frozen' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'paused') }, "Unfreeze") : null, 
-                     this.state.status == 'finished' ? React.createElement("button", {type: "button", onClick:  this.changeStatus.bind(this, 'paused') }, "Undo Finished") : null
-                ) : null, 
+                objmap(this.states[this.state.status], function(item, key) {
+                    console.log('key, item: ', key, item);
+                    return ( React.createElement("button", {type: "button", onClick:  this.setState.bind(this, {status: key}, null) }, item) );
+                }, this), 
                 React.createElement("p", null, React.createElement(ContentEditable, {html: this.state.title, onChange: this.handleChange, onSubmit: this.saveModelAndClear})), 
                 React.createElement("span", null, 
                      this.state.task ? React.createElement(TaskBadge, {task: this.state.task}) : null, 
@@ -25384,6 +25386,14 @@ var Todo = React.createClass({displayName: "Todo",
         );
    },
 });
+
+function objmap(obj, fnc, context) {
+    var arr = [];
+    for(var k in obj)
+        arr.push(fnc.call(context, obj[k], k, obj));
+
+    return arr;
+}
 
 module.exports = Todo;
 

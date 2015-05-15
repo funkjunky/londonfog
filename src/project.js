@@ -5,6 +5,8 @@ var ModelMixin = require('./mixins/socketmodelmixin');
 
 var Project = React.createClass({displayName: "Project",
     url: 'http://localhost:1212/',
+    dataKey: 'data',
+
     mixins: [SocketMixin, ModelMixin],
     getDefaultProps: function() {
         //TODO: should use getNewItem() function for data, but apparently 'this' isn't instantiated yet.

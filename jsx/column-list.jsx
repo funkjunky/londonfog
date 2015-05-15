@@ -6,6 +6,8 @@ var CollectionMixin = require('./mixins/socketcollectionmixin');
 
 var ColumnList = React.createClass({
     url: 'http://localhost:1212/',
+    dataKey: 'data',
+
     mixins: [SocketMixin, CollectionMixin],
     getInitialState: function() {
         return {
@@ -15,8 +17,9 @@ var ColumnList = React.createClass({
     },
     removeItem: function(index, _id) {
         this.deleteModel(_id);
-        this.state.data.splice(index, 1); //first remove the item, then clone the array...
-        this.setState({ data: this.state.data });
+        //TODO: add feedback to replace the fact that I no longer immediately remove the item I deleted.
+        //this.state.data.splice(index, 1); //first remove the item, then clone the array...
+        //this.setState({ data: this.state.data });
     },
     render: function() {
         return (

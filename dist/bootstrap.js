@@ -24803,12 +24803,13 @@ if(typeof window !== 'undefined') {
     }
 }
 
-},{"./routes":209,"react":196}],199:[function(require,module,exports){
+},{"./routes":210,"react":196}],199:[function(require,module,exports){
 var React = require('react');
 
 var ItemInstance = require('./item-instance');
 var SocketMixin = require('./mixins/socketmixin');
 var CollectionMixin = require('./mixins/socketcollectionmixin');
+var Styles = require('./styles');
 
 var ColumnList = React.createClass({displayName: "ColumnList",
     url: 'http://localhost:1212/',
@@ -24829,26 +24830,24 @@ var ColumnList = React.createClass({displayName: "ColumnList",
     },
     render: function() {
         return (
-            React.createElement("div", {style: {border: 'solid 1px black'}}, 
-                React.createElement("ul", null, 
-                    React.createElement("li", {key: "newItem"}, 
-                        React.createElement(ItemInstance, {tag: this.props.collection})
-                    ), 
-                    this.state.beingSaved.map(function(item, index) {
-                        return (
-                            React.createElement("li", {key: item.title}, 
-                                React.createElement(ItemInstance, {data: item, tag: this.props.collection, disabled: "true"})
-                            )
-                        );
-                    }, this), 
-                    this.state.data.map(function(item, index) {
-                        return (
-                            React.createElement("li", {key: item._id}, 
-                                React.createElement(ItemInstance, {data: item, tag: this.props.collection}), React.createElement("button", {type: "button", onClick:  this.removeItem.bind(this, index, item._id) }, "X")
-                            )
-                        );
-                    }, this)
-                )
+            React.createElement("div", {style: this.props.style}, 
+                React.createElement("div", {key: "newItem", style: Styles.fullWidth}, 
+                    React.createElement(ItemInstance, {tag: this.props.collection})
+                ), 
+                this.state.beingSaved.map(function(item, index) {
+                    return (
+                        React.createElement("div", {key: item.title, style: Styles.fullWidth}, 
+                            React.createElement(ItemInstance, {data: item, tag: this.props.collection, disabled: "true"})
+                        )
+                    );
+                }, this), 
+                this.state.data.map(function(item, index) {
+                    return (
+                        React.createElement("div", {key: item._id, style: Styles.fullWidth}, 
+                            React.createElement(ItemInstance, {data: item, tag: this.props.collection}), React.createElement("button", {type: "button", onClick:  this.removeItem.bind(this, index, item._id) }, "X")
+                        )
+                    );
+                }, this)
             )
         );
     },
@@ -24856,7 +24855,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
 
 module.exports = ColumnList;
 
-},{"./item-instance":202,"./mixins/socketcollectionmixin":203,"./mixins/socketmixin":205,"react":196}],200:[function(require,module,exports){
+},{"./item-instance":202,"./mixins/socketcollectionmixin":203,"./mixins/socketmixin":205,"./styles":211,"react":196}],200:[function(require,module,exports){
 var React = require('react');
 
 var ContentEditable = React.createClass({displayName: "ContentEditable",
@@ -24864,7 +24863,8 @@ var ContentEditable = React.createClass({displayName: "ContentEditable",
         //TODO: find where html=undefined and fix it! So I can remove this? Maybe I should keep this safety.
         var html = this.props.html || '';
         console.log('content editable render, html: ', this.props.html);
-        return React.createElement("div", {id: "contenteditable", 
+        return React.createElement("span", {id: "contenteditable", 
+            style: this.props.style, 
             onKeyUp: this.emitChange, 
             onBlur: this.emitChange, 
             contentEditable: true, 
@@ -24935,7 +24935,7 @@ var ItemInstance = React.createClass({displayName: "ItemInstance",
 
 module.exports = ItemInstance;
 
-},{"./project":208,"./task":211,"./todo":212,"react":196}],203:[function(require,module,exports){
+},{"./project":209,"./task":213,"./todo":214,"react":196}],203:[function(require,module,exports){
 //REQUIRES SOCKETMIXIN
 var socketHandler = require('./sockethandler');
 
@@ -25207,6 +25207,29 @@ function hasItem(obj) {
 module.exports = SocketModelMixin;
 
 },{"./sockethandler":204}],207:[function(require,module,exports){
+module.exports = {
+    light: '#F8EDC1',
+    lighter: '#F6E7B3',
+    lightest: '#E9DB92',
+    red: '#922635',
+    brown: '#442905',
+
+    //TODO: do colour math on these instead...
+    new: '#CDECCC',
+    newlight: '#DEFEEE',
+    paused: '#EDD269',
+    pausedlight: '#FEE37A',
+    active: '#E88460',
+    activelight: '#F99571',
+    frozen: '#B1CAF0',
+    frozenlight: '#C2DBFF',
+
+    important: '#F23460',
+    notice: '#321D2E',
+    noticeFG: '#EDD269',
+};
+
+},{}],208:[function(require,module,exports){
 var React = require('react');
 
 var ProjectBadge = React.createClass({displayName: "ProjectBadge",
@@ -25223,7 +25246,7 @@ var ProjectBadge = React.createClass({displayName: "ProjectBadge",
 
 module.exports = ProjectBadge;
 
-},{"react":196}],208:[function(require,module,exports){
+},{"react":196}],209:[function(require,module,exports){
 var React = require('react');
 
 var SocketMixin = require('./mixins/socketmixin');
@@ -25259,7 +25282,7 @@ var Project = React.createClass({displayName: "Project",
 
 module.exports = Project;
 
-},{"./mixins/socketmixin":205,"./mixins/socketmodelmixin":206,"react":196}],209:[function(require,module,exports){
+},{"./mixins/socketmixin":205,"./mixins/socketmodelmixin":206,"react":196}],210:[function(require,module,exports){
 var React = require('react');
 var Router = require('react-router-component');
 var Locations = Router.Locations;
@@ -25279,7 +25302,8 @@ var Routes = React.createClass({displayName: "Routes",
             React.createElement("html", null, 
                 React.createElement("head", null, 
                     React.createElement("title", null, "React London Fog thingy"), 
-                    React.createElement("script", {src: "https://cdn.socket.io/socket.io-1.3.5.js"})
+                    React.createElement("script", {src: "https://cdn.socket.io/socket.io-1.3.5.js"}), 
+                    React.createElement("link", {rel: "stylesheet", href: "/dist/reset.css"})
                 ), 
                 React.createElement("body", null, 
                     React.createElement(Locations, {path: this.props.path}, 
@@ -25297,7 +25321,24 @@ var Routes = React.createClass({displayName: "Routes",
 
 module.exports = Routes;
 
-},{"./home":201,"./item-instance":202,"./project":208,"./task":211,"./todo":212,"./workspace":214,"react":196,"react-router-component":4}],210:[function(require,module,exports){
+},{"./home":201,"./item-instance":202,"./project":209,"./task":213,"./todo":214,"./workspace":216,"react":196,"react-router-component":4}],211:[function(require,module,exports){
+var _ = require('underscore');
+
+var Palette = require('./palette');
+
+
+var Styles = {};
+
+Styles.with = function(key, additionalStyles) {
+    return _.extend(_.clone(Styles[key]), additionalStyles);
+};
+
+Styles.fullWidth = {width: '100%'};
+Styles.columnRow = _.extend(Styles.fullWidth, {overflow: 'hidden', padding: 2, height: 30});
+
+module.exports = Styles;
+
+},{"./palette":207,"underscore":197}],212:[function(require,module,exports){
 var React = require('react');
 
 var TaskBadge = React.createClass({displayName: "TaskBadge",
@@ -25314,7 +25355,7 @@ var TaskBadge = React.createClass({displayName: "TaskBadge",
 
 module.exports = TaskBadge;
 
-},{"react":196}],211:[function(require,module,exports){
+},{"react":196}],213:[function(require,module,exports){
 var React = require('react');
 
 var Task = React.createClass({displayName: "Task",
@@ -25327,14 +25368,17 @@ var Task = React.createClass({displayName: "Task",
 
 module.exports = Task;
 
-},{"react":196}],212:[function(require,module,exports){
+},{"react":196}],214:[function(require,module,exports){
 var React = require('react/addons');
+var _ = require('underscore');
 
 var TaskBadge = require('./task-badge');
 var ProjectBadge = require('./project-badge');
 var ContentEditable = require('./content-editable');
 var SocketModelMixin = require('./mixins/socketmodelmixin');
 var SocketMixin = require('./mixins/socketmixin');
+var Palette = require('./palette');
+var Styles = require('./styles');
 
 //Note: during getDefaultProps, none of the member methods exist yet. Further AFTERWARDS, getDefaultProps no longer exists... so I have to rely on an external function.
 function blankTodo() {
@@ -25370,12 +25414,12 @@ var Todo = React.createClass({displayName: "Todo",
     },
     render: function() {
         return (
-            React.createElement("div", null, 
+            React.createElement("div", {style: Styles.with('columnRow', {backgroundColor: Palette[this.state.status]})}, 
                 objmap(this.states[this.state.status], function(item, key) {
                     console.log('key, item: ', key, item);
-                    return ( React.createElement("button", {type: "button", onClick:  this.setState.bind(this, {status: key}, null) }, item) );
+                    return ( React.createElement("button", {style: {height: 16, fontSize: 10, verticalAlign: 'center'}, type: "button", onClick:  this.setState.bind(this, {status: key}, null) }, item) );
                 }, this), 
-                React.createElement("p", null, React.createElement(ContentEditable, {html: this.state.title, onChange: this.handleChange, onSubmit: this.saveModelAndClear})), 
+                React.createElement("span", null, React.createElement(ContentEditable, {html: this.state.title, onChange: this.handleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[this.state.status + 'light'], display: 'inline-block', minWidth: 50,}})), 
                 React.createElement("span", null, 
                      this.state.task ? React.createElement(TaskBadge, {task: this.state.task}) : null, 
                      this.state.project ? React.createElement(ProjectBadge, {project: this.state.project}) : null, 
@@ -25397,13 +25441,24 @@ function objmap(obj, fnc, context) {
 
 module.exports = Todo;
 
-},{"./content-editable":200,"./mixins/socketmixin":205,"./mixins/socketmodelmixin":206,"./project-badge":207,"./task-badge":210,"react/addons":24}],213:[function(require,module,exports){
+},{"./content-editable":200,"./mixins/socketmixin":205,"./mixins/socketmodelmixin":206,"./palette":207,"./project-badge":208,"./styles":211,"./task-badge":212,"react/addons":24,"underscore":197}],215:[function(require,module,exports){
 var React = require('react');
+var _ = require('underscore');
+
+var Styles = require('./styles');
+var Palette = require('./palette');
 
 var WorkspaceHeader = React.createClass({displayName: "WorkspaceHeader",
     render: function() {
+        var border = '2px solid ' + Palette.lightest;
         return (
-            React.createElement("h1", null, "Some Guys Work Space")
+            React.createElement("div", {style: Styles.with('fullWidth', {height: 80})}, 
+                React.createElement("p", {style: {position: 'absolute', padding: 0, left: 0, top: 0, backgroundColor: Palette.brown, borderRight: border, borderBottom: border, color: Palette.lightest, fontSize: 16, padding: 5}}, "London Fog"), 
+                React.createElement("div", {style: {position: 'absolute', right: 0, top: 0, fontSize: 14, padding: 5}}, 
+                    React.createElement("span", null, "Jason "), 
+                    "| ", React.createElement("a", null, "Logoff")
+                )
+            )
         );
     },
 });
@@ -25411,7 +25466,7 @@ var WorkspaceHeader = React.createClass({displayName: "WorkspaceHeader",
 module.exports = WorkspaceHeader;
 
 
-},{"react":196}],214:[function(require,module,exports){
+},{"./palette":207,"./styles":211,"react":196,"underscore":197}],216:[function(require,module,exports){
 var React = require('react');
 
 var WorkspaceHeader = require('./workspace-header');
@@ -25419,12 +25474,14 @@ var ColumnList = require('./column-list');
 
 var Workspace = React.createClass({displayName: "Workspace",
     render: function() {
+        var leftStyle = {width: '45%', height: '100%', border: 'solid 1px black', position: 'absolute', top: 80, margin: 10, };
+        var rightStyle = {width: '45%', height: '100%', border: 'solid 1px black', position: 'absolute', top: 80, margin: 10, left: '50%', };
         return (
             React.createElement("div", null, 
                 React.createElement(WorkspaceHeader, null), 
                 React.createElement("div", {className: "body"}, 
-                    React.createElement(ColumnList, {collection: "todo"}), 
-                    React.createElement(ColumnList, {collection: "project"})
+                    React.createElement(ColumnList, {collection: "todo", style: leftStyle}), 
+                    React.createElement(ColumnList, {collection: "project", style: rightStyle})
                 )
             )
         );
@@ -25433,4 +25490,4 @@ var Workspace = React.createClass({displayName: "Workspace",
 
 module.exports = Workspace;
 
-},{"./column-list":199,"./workspace-header":213,"react":196}]},{},[198]);
+},{"./column-list":199,"./workspace-header":215,"react":196}]},{},[198]);

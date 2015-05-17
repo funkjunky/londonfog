@@ -17,7 +17,8 @@ var Routes = React.createClass({displayName: "Routes",
             React.createElement("html", null, 
                 React.createElement("head", null, 
                     React.createElement("title", null, "React London Fog thingy"), 
-                    React.createElement("script", {src: "https://cdn.socket.io/socket.io-1.3.5.js"})
+                    React.createElement("script", {src: "https://cdn.socket.io/socket.io-1.3.5.js"}), 
+                    React.createElement("link", {rel: "stylesheet", href: "/dist/reset.css"})
                 ), 
                 React.createElement("body", null, 
                     React.createElement(Locations, {path: this.props.path}, 

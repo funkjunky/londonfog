@@ -1,10 +1,13 @@
 var React = require('react/addons');
+var _ = require('underscore');
 
 var TaskBadge = require('./task-badge');
 var ProjectBadge = require('./project-badge');
 var ContentEditable = require('./content-editable');
 var SocketModelMixin = require('./mixins/socketmodelmixin');
 var SocketMixin = require('./mixins/socketmixin');
+var Palette = require('./palette');
+var Styles = require('./styles');
 
 //Note: during getDefaultProps, none of the member methods exist yet. Further AFTERWARDS, getDefaultProps no longer exists... so I have to rely on an external function.
 function blankTodo() {
@@ -40,12 +43,12 @@ var Todo = React.createClass({
     },
     render: function() {
         return (
-            <div>
+            <div style={Styles.with('columnRow', {backgroundColor: Palette[this.state.status]})}>
                 {objmap(this.states[this.state.status], function(item, key) {
                     console.log('key, item: ', key, item);
-                    return ( <button type="button" onClick={ this.setState.bind(this, {status: key}, null) }>{item}</button> );
+                    return ( <button style={{height: 16, fontSize: 10, verticalAlign: 'center'}} type="button" onClick={ this.setState.bind(this, {status: key}, null) }>{item}</button> );
                 }, this)}
-                <p><ContentEditable html={this.state.title} onChange={this.handleChange} onSubmit={this.saveModelAndClear}></ContentEditable></p>
+                <span><ContentEditable html={this.state.title} onChange={this.handleChange} onSubmit={this.saveModelAndClear} style={{backgroundColor: Palette[this.state.status + 'light'], display: 'inline-block', minWidth: 50,}}></ContentEditable></span>
                 <span>
                     { this.state.task ? <TaskBadge task={this.state.task} /> : null }
                     { this.state.project ? <ProjectBadge project={this.state.project} /> : null }

@@ -3,6 +3,7 @@ var React = require('react');
 var ItemInstance = require('./item-instance');
 var SocketMixin = require('./mixins/socketmixin');
 var CollectionMixin = require('./mixins/socketcollectionmixin');
+var Styles = require('./styles');
 
 var ColumnList = React.createClass({
     url: 'http://localhost:1212/',
@@ -23,26 +24,24 @@ var ColumnList = React.createClass({
     },
     render: function() {
         return (
-            <div style={{border: 'solid 1px black'}}>
-                <ul>
-                    <li key='newItem'>
-                        <ItemInstance tag={this.props.collection} />
-                    </li>
-                    {this.state.beingSaved.map(function(item, index) {
-                        return (
-                            <li key={item.title}>
-                                <ItemInstance data={item} tag={this.props.collection} disabled="true" />
-                            </li>
-                        );
-                    }, this)}
-                    {this.state.data.map(function(item, index) {
-                        return (
-                            <li key={item._id}>
-                                <ItemInstance data={item} tag={this.props.collection} /><button type="button" onClick={ this.removeItem.bind(this, index, item._id) }>X</button>
-                            </li>
-                        );
-                    }, this)}
-                </ul>
+            <div style={this.props.style}>
+                <div key='newItem' style={Styles.fullWidth}>
+                    <ItemInstance tag={this.props.collection} />
+                </div>
+                {this.state.beingSaved.map(function(item, index) {
+                    return (
+                        <div key={item.title} style={Styles.fullWidth}>
+                            <ItemInstance data={item} tag={this.props.collection} disabled="true" />
+                        </div>
+                    );
+                }, this)}
+                {this.state.data.map(function(item, index) {
+                    return (
+                        <div key={item._id} style={Styles.fullWidth}>
+                            <ItemInstance data={item} tag={this.props.collection} /><button type="button" onClick={ this.removeItem.bind(this, index, item._id) }>X</button>
+                        </div>
+                    );
+                }, this)}
             </div>
         );
     },

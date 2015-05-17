@@ -1,146 +1,65 @@
 TODO
 ———
+	Colour Pallete: http://www.colourlovers.com/palette/15787/spiced_chai
+		backgrounds: #F8EDC1, #F6E7B3, #E9DB92
+		foregrounds and borders: #922635, #442905
 
-Sunday - 11:30-1:30
+	- instantiating cosmetics [making the project pretty from now on]
+		*- look for a nice London Fog Tea looking colour swatch/ scheme online
+		*- choose a nice font that most browsers have
+		*- look up how to do a simple two column layout
+		*- Make the header MUCH nicer
+			*- add static user info on top right
+		- redo design of TODOs
+			- no more status, instead just a boolean: ‘done’
+				- move the status buttons to the task 
+		- improve the styling of TODOs
+		- improve the styling of Project, basically for now.
+	- get task and project working as intended in London Fog
 
- - actual TODO:
-	*- update restmodelmixin.saveModel to use this.modelData() if it exists, if not, then use this.state.data
-	*- try having modelData in the mixin, and see if it gets overwritten. If not, then give up
-	*- update the socket with this new methodology. use saveModel in todo
-	
-	*- get socket working with todo
-	
-	*- Rewrite the saveModel and delete to take arguments to specify what to save or delete, then use that to choose what to do when the lengths are different in the collection for componentDidUpdate
-	*- ensure editing works with the sockets
-	*- make sure that if i update from one browser, itll show up in another.
-		*- fill in events for model and collection mixins
-		*- make sure page loads and editing persists
-		*- commit
-	- add the ability to create new todos
-		*- add the html with button
-		*- don’t call save in the collection… the model well do it once the user changes the state at all. (so perfect…)
-		*- in ::create for collection, check each item in _getData and check every property, if they all match, then the item is equal, THEN we add a new blank item to the collection.
-			*- else we simply add the item to the collection.
-		*- on the return of saveModel for socketmodelmixin, update using _setData
-	*- add the code for handling delete events in collectionmixin
-	*- add button for deleting todos
-		*- in the destruction call for the TODO, delete it? Perhaps? I don’t want collection to handle it.
-	*- rename  disable to autosync and simply set to true or false, no functions.
-	*- Add the add button and all functionality to todo, then rename it to create.
-	*- ensure the add code works
-		*- test more in one go, both adding and deleteing
-	*- I should have a fully working UI for TODOs
-		*- todos aren’t staying synced between windows...
+	- grab data on server side, then update on client afterwards [see SO QA]
 
-	*- the getNewItem function needs to be in one place, probably TODO or Project
-	*- Address really bad //TODOs in code
-	*- clean up meaningless console logs.
-	
-	- Code for TODOs should be simple and straight forward and only handle UI. (except the create button and delete button. Only exceptions.)
+ 	- improve tooling
+		- fix my damn vim! The colours are awful, and i want the html tag matching with %
+ 			- colour
+			- tag bracket matching
+			- Tom’s alignment plugin
+			- auto indenting that isn’t retarded
+		- grunt file is still a bit outta whack. I need to have the “compile” task to happen before attempting to start the server.
+		- setup commonjs with react and ensure everything compiles
+		- setup everything to use commonjs properly, ie. including files needed in each file
+		- client side errors are hard to trace because of one file, see about making a mapping file for it.
+		- stop tracking compiled files. Deploy script should create the files or something… but I don’t like committing double the files.
 
-	-revise my TODO list for the next tasks, like assigning tasks and projects to TODOs etc…
-		-add in a bit at the end about ensuring things don’t break horribly if connection is lost. Just wait, and attempt to reconnect later perhaps.
-		- add promises to all callback functionality, and all socket stuff.
-		- all emits should work off of promises
-		- update restmixin to work again
-		- clean up ALL todos.
-
-
-	- get socket working with project
- - Create first components
-	- todo
-		- save-able (preferably local-storage + sockets, with seamless mixins)
-			*- stop the object from trying to save right off the bat.
-			- look into how to not have the client grab the same information a second time…
-
-			*- try components with restmodelmixin
-				*- ensure getting data works (remove data)
-				*- ensure saving new data works  POST
-				*- ensure saving old data works  PUT
-			- try components with SocketModelMixin
-				- ensure everything…
-		- ensure everything gets updated when i save, including the todos in different locations
-		- address TODOs:
-			- setState is called twice
-			- we are only grabbing data on client side.
-		- smooth the styling and make it look awesome
 	- update generic rest git
+		- add generic user creation and authentication/authorization using authorization header. PS I may need to add an allow header thing for ‘authorization’?
 		- update readme so it’s smarter and to mention technologies etc.
 		- merge —no-ff generic rest server to dev, then merge to master and push, then tag with a version.
 		- post on facebook and G+ about the update to generic rest server
 
- - rename iteminstance.js to item-instance.js and fix all references
-
- ~commit
-
- - improve tooling
-	- fix my damn vim! The colours are awful, and i want the html tag matching with %
- 		- colour
-		- tag bracket matching
-		- Tom’s alignment plugin
-		- auto indenting that isn’t retarded
-	- grunt file is still a bit outta whack. I need to have the “compile” task to happen before attempting to start the server.
-	- setup commonjs with react and ensure everything compiles
-	- setup everything to use commonjs properly, ie. including files needed in each file
-	- client side errors are hard to trace because of one file, see about making a mapping file for it.
-	- I wonder if I could edit using jsx…. then compile later for live?
-
- ~ commit
-
- - turn all callback stuff into promise based stuff.
-
- - improve generic rest server
-	- first ensure it works
-	- add generic user creation and authentication/authorization using authorization header. PS I may need to add an allow header thing for ‘authorization’?
-
- - Add user component and authorization
-	- add organizations and various updates regarding those things?? to User.
-	- add user component
-		- add html for user-tile, and expanding control
-		- add component user-tile
-		- add component user-control
-		- add route and component for user-detail
-		- smooth the styling and make it look awesome
-~commit
-
- - add the framework for saving things and getting updates from the server through web sockets
-	- try using feather to make a generic rest server:
-		http://feathersjs.com/#toc6
-	- add a layer to whatever rest framework I use, so I can accept sockets
-	- make a socket framework for listening to sockets and storing their data?? and sending updates, etc. Maybe a mixin, but the socket would need to be static, as well as it’s cached data… tricky… subscriptions and stuff??
- - get client side routing working
-
- - Create other components
-	- fill out the bullets for task and project …
-	- task
-		- smooth the styling and make it look awesome
-	- project
-		- contains a ColumnList of tasks, that can be collapsed
-		- smooth the styling and make it look awesome
+ 	- Add user component and authorization
+		- add organizations and various updates regarding those things?? to User.
+			- allow organizations to be nestable. One organization owning a set of organizations
+		- add user component
+			- add html for user-tile, and expanding control
+			- add component user-tile
+			- add component user-control
+			- add route and component for user-detail
+			- smooth the styling and make it look awesome
+	- add promises to all callback functionality, and all socket stuff.
+	- all emits should work off of promises
+	- update restmixin to work again
+	- clean up ALL todos.
+	- make sure the webpage doesn’t break horribly if the socket server goes down…
+		
+ 	- add mobile controls. [like Google inbox? swiping, right to complete, left to downgrade (high priority->normal priority. normal -> icebox, icebox -> delete ?? keep there for a second before fading away, so a user can swipe three times on the spot to delete?)]
+		- add reactmq to work with tablets and phones
+ 	- add homepage with a little marketing pizzaz, perhaps stellar or something neat. Big sign up form and such too. Tkae notes from other reallyt good home pages.
+ 	- double check there isn’t anything imperative I’m missing, before considering release… something very important and necessary for PM software…
+ 	- [look to buy the web domain londonfog-pm]
+ 	- deploy my new awesome software!
 
 
- - make workspace routes and component
-	- see paper for 2 column layout.
-
- - add in organizations to the mix somehow…
-	~ organizations can own multiple projects and multiple users
-
- - add basic role security for projects and tasks and TODOs [special nosey role, that allows someone to see all TODOs for a organization/project]
-
- - allow organizations to be nestable. One organization owning a set of organizations
-
- - add mobile controls. [like Google inbox? swiping, right to complete, left to downgrade (high priority->normal priority. normal -> icebox, icebox -> delete ?? keep there for a second before fading away, so a user can swipe three times on the spot to delete?)]
-
- - add homepage with a little marketing pizzaz, perhaps stellar or something neat. Big sign up form and such too. Tkae notes from other reallyt good home pages.
-
- - double check there isn’t anything imperative I’m missing, before considering release… something very important and necessary for PM software…
-
- - [look to buy the web domain londonfog-pm]
-
- - deploy my new awesome software!
-
- - add react debug mixin, It might help some of my trickier issues.
- - add reactmq to work with tablets and phones
 
 FUTURE:
  - add github hooks
@@ -223,4 +142,37 @@ DONE:
 				- first get rest server working [manually add data, then use get, good enough]
 - generic rest server, feathers
 			- implement it, where the user passes in a comma separated list of collections they plan to use. “todo,project,task” and i’ll parse thatb and create services for them that are all generic.
+	*- update restmodelmixin.saveModel to use this.modelData() if it exists, if not, then use this.state.data
+	*- try having modelData in the mixin, and see if it gets overwritten. If not, then give up
+	*- update the socket with this new methodology. use saveModel in todo
+	
+	*- get socket working with todo
+	
+	*- Rewrite the saveModel and delete to take arguments to specify what to save or delete, then use that to choose what to do when the lengths are different in the collection for componentDidUpdate
+	*- ensure editing works with the sockets
+	*- make sure that if i update from one browser, itll show up in another.
+		*- fill in events for model and collection mixins
+		*- make sure page loads and editing persists
+		*- commit
+	- add the ability to create new todos
+		*- add the html with button
+		*- don’t call save in the collection… the model well do it once the user changes the state at all. (so perfect…)
+		*- in ::create for collection, check each item in _getData and check every property, if they all match, then the item is equal, THEN we add a new blank item to the collection.
+			*- else we simply add the item to the collection.
+		*- on the return of saveModel for socketmodelmixin, update using _setData
+	*- add the code for handling delete events in collectionmixin
+	*- add button for deleting todos
+		*- in the destruction call for the TODO, delete it? Perhaps? I don’t want collection to handle it.
+	*- rename  disable to autosync and simply set to true or false, no functions.
+	*- Add the add button and all functionality to todo, then rename it to create.
+	*- ensure the add code works
+		*- test more in one go, both adding and deleteing
+	*- I should have a fully working UI for TODOs
+		*- todos aren’t staying synced between windows...
+
+	*- the getNewItem function needs to be in one place, probably TODO or Project
+	*- Address really bad //TODOs in code
+	*- clean up meaningless console logs.
+	
+	*- Code for TODOs should be simple and straight forward and only handle UI. (except the create button and delete button. Only exceptions.)
 

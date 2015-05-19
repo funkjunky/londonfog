@@ -25,8 +25,8 @@ var ColumnList = React.createClass({displayName: "ColumnList",
     render: function() {
         return (
             React.createElement("div", {style: this.props.style}, 
-                React.createElement("div", {key: "newItem", style: Styles.fullWidth}, 
-                    React.createElement(ItemInstance, {tag: this.props.collection})
+                React.createElement("div", {key: "newItem"}, 
+                    React.createElement(ItemInstance, {autofocus: true, tag: this.props.collection})
                 ), 
                 this.state.beingSaved.map(function(item, index) {
                     return (
@@ -38,7 +38,8 @@ var ColumnList = React.createClass({displayName: "ColumnList",
                 this.state.data.map(function(item, index) {
                     return (
                         React.createElement("div", {key: item._id, style: Styles.fullWidth}, 
-                            React.createElement(ItemInstance, {data: item, tag: this.props.collection}), React.createElement("button", {type: "button", onClick:  this.removeItem.bind(this, index, item._id) }, "X")
+                            React.createElement(ItemInstance, {data: item, tag: this.props.collection}), 
+                             this.state.focused || true ? React.createElement("button", {type: "button", onClick:  this.removeItem.bind(this, index, item._id), style: {position: 'absolute', right: -30, top: 0}}, "X") : null
                         )
                     );
                 }, this)

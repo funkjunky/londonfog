@@ -11,20 +11,13 @@ var Styles = require('./styles');
 
 //Note: during getDefaultProps, none of the member methods exist yet. Further AFTERWARDS, getDefaultProps no longer exists... so I have to rely on an external function.
 function blankTodo() {
-    return {title: '', status: 'new',};
+    return {title: '',};
 }
 
 var Todo = React.createClass({displayName: "Todo",
     url: 'http://localhost:1212/',
     dataKey: '#root', //this means we put the data directly in the state.
     //the button states and labels displayed while in each state.
-    states: {
-        new: {active: 'Start',},
-        active: {paused: 'Pause', finished: 'Finish',},
-        paused: {active: 'Continue', frozen: 'Freeze',},
-        frozen: {paused: 'Unfreeze',},
-        finished: {active: 'Not Yet Done',},
-    },
 
     mixins: [SocketMixin, SocketModelMixin],
     getDefaultProps: function() {
@@ -41,20 +34,32 @@ var Todo = React.createClass({displayName: "Todo",
     handleChange: function(event) {
         this.setState({title: event.target.value});
     },
+    complete: function(event) {
+        this.setState({complete: !this.state.complete});
+    },
+    getStatus: function() {
+        if(this.state.complete)
+            return 'finished';
+        else if(this.state.task)
+            return this.state.task.status;
+        else
+            return 'unassigned';
+    },
     render: function() {
+        var status = this.getStatus();
+        var isNew = !this.props._id && !this.props.data._id;
+console.log('AUTOFOCUS: ', this.props.autofocus);
         return (
-            React.createElement("div", {style: Styles.with('columnRow', {backgroundColor: Palette[this.state.status]})}, 
-                objmap(this.states[this.state.status], function(item, key) {
-                    console.log('key, item: ', key, item);
-                    return ( React.createElement("button", {style: {height: 16, fontSize: 10, verticalAlign: 'center'}, type: "button", onClick:  this.setState.bind(this, {status: key}, null) }, item) );
-                }, this), 
-                React.createElement("span", null, React.createElement(ContentEditable, {html: this.state.title, onChange: this.handleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[this.state.status + 'light'], display: 'inline-block', minWidth: 50,}})), 
-                React.createElement("span", null, 
-                     this.state.task ? React.createElement(TaskBadge, {task: this.state.task}) : null, 
-                     this.state.project ? React.createElement(ProjectBadge, {project: this.state.project}) : null, 
-                     (!this.state.task && !this.state.project) ? React.createElement("button", {type: "button"}, "Assign") : null
+            React.createElement("div", {style: Styles.with('columnRow', {backgroundColor: Palette[status]})}, 
+                React.createElement("span", {onClick: this.complete, style: Styles.with('rowButton', {backgroundColor: 'white'})}, 
+                    React.createElement("input", {type: "hidden", value: this.state.completed}), 
+                     isNew ? React.createElement("button", {type: "button", onClick: this.saveModelAndClear}, "Create")
+                        : (this.state.complete ? React.createElement("i", {className: "fa fa-check"}) : React.createElement("i", {className: "fa"})) 
                 ), 
-                (!this.props._id && !this.props.data._id) ? React.createElement("button", {type: "button", onClick: this.saveModelAndClear}, "Create") : null
+                React.createElement(ContentEditable, {autofocus: this.props.autofocus, html: this.state.title, onChange: this.handleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
+                 this.state.task ? React.createElement(TaskBadge, {task: this.state.task}) : null, 
+                 this.state.project ? React.createElement(ProjectBadge, {project: this.state.project}) : null, 
+                 (!this.state.task && !this.state.project) ? React.createElement("span", {style: Styles.with('rowBadge', {backgroundColor: 'white'})}, "Task?") : null
             )
         );
    },

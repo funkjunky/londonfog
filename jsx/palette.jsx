@@ -1,4 +1,4 @@
-module.exports = {
+var Palette = {
     light: '#F8EDC1',
     lighter: '#F6E7B3',
     lightest: '#E9DB92',
@@ -14,8 +14,15 @@ module.exports = {
     activelight: '#F99571',
     frozen: '#B1CAF0',
     frozenlight: '#C2DBFF',
+    finished: '#442905',
 
     important: '#F23460',
     notice: '#321D2E',
     noticeFG: '#EDD269',
 };
+
+Palette.unassigned = Palette.light;
+Palette.unassignedlight = Palette.lighter; //TODO: instead do colour math on light
+Palette.finishedlight = Palette.finished;
+
+module.exports = Palette;

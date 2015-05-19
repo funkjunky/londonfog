@@ -25,8 +25,8 @@ var ColumnList = React.createClass({
     render: function() {
         return (
             <div style={this.props.style}>
-                <div key='newItem' style={Styles.fullWidth}>
-                    <ItemInstance tag={this.props.collection} />
+                <div key='newItem'>
+                    <ItemInstance autofocus={true} tag={this.props.collection} />
                 </div>
                 {this.state.beingSaved.map(function(item, index) {
                     return (
@@ -38,7 +38,8 @@ var ColumnList = React.createClass({
                 {this.state.data.map(function(item, index) {
                     return (
                         <div key={item._id} style={Styles.fullWidth}>
-                            <ItemInstance data={item} tag={this.props.collection} /><button type="button" onClick={ this.removeItem.bind(this, index, item._id) }>X</button>
+                            <ItemInstance data={item} tag={this.props.collection} />
+                            { this.state.focused || true ? <button type="button" onClick={ this.removeItem.bind(this, index, item._id) } style={{position: 'absolute', right: -30, top: 0}}>X</button> : null }
                         </div>
                     );
                 }, this)}

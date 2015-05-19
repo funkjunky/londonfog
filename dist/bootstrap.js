@@ -24831,8 +24831,8 @@ var ColumnList = React.createClass({displayName: "ColumnList",
     render: function() {
         return (
             React.createElement("div", {style: this.props.style}, 
-                React.createElement("div", {key: "newItem", style: Styles.fullWidth}, 
-                    React.createElement(ItemInstance, {tag: this.props.collection})
+                React.createElement("div", {key: "newItem"}, 
+                    React.createElement(ItemInstance, {autofocus: true, tag: this.props.collection})
                 ), 
                 this.state.beingSaved.map(function(item, index) {
                     return (
@@ -24844,7 +24844,8 @@ var ColumnList = React.createClass({displayName: "ColumnList",
                 this.state.data.map(function(item, index) {
                     return (
                         React.createElement("div", {key: item._id, style: Styles.fullWidth}, 
-                            React.createElement(ItemInstance, {data: item, tag: this.props.collection}), React.createElement("button", {type: "button", onClick:  this.removeItem.bind(this, index, item._id) }, "X")
+                            React.createElement(ItemInstance, {data: item, tag: this.props.collection}), 
+                             this.state.focused || true ? React.createElement("button", {type: "button", onClick:  this.removeItem.bind(this, index, item._id), style: {position: 'absolute', right: -30, top: 0}}, "X") : null
                         )
                     );
                 }, this)
@@ -24863,11 +24864,13 @@ var ContentEditable = React.createClass({displayName: "ContentEditable",
         //TODO: find where html=undefined and fix it! So I can remove this? Maybe I should keep this safety.
         var html = this.props.html || '';
         console.log('content editable render, html: ', this.props.html);
+        console.log('content editable render, style: ', this.props.style);
         return React.createElement("span", {id: "contenteditable", 
             style: this.props.style, 
             onKeyUp: this.emitChange, 
             onBlur: this.emitChange, 
             contentEditable: true, 
+            autoFocus: this.props.autofocus, 
             dangerouslySetInnerHTML: {__html: html}});
     },
     shouldComponentUpdate: function(nextProps){
@@ -25207,7 +25210,7 @@ function hasItem(obj) {
 module.exports = SocketModelMixin;
 
 },{"./sockethandler":204}],207:[function(require,module,exports){
-module.exports = {
+var Palette = {
     light: '#F8EDC1',
     lighter: '#F6E7B3',
     lightest: '#E9DB92',
@@ -25223,11 +25226,18 @@ module.exports = {
     activelight: '#F99571',
     frozen: '#B1CAF0',
     frozenlight: '#C2DBFF',
+    finished: '#442905',
 
     important: '#F23460',
     notice: '#321D2E',
     noticeFG: '#EDD269',
 };
+
+Palette.unassigned = Palette.light;
+Palette.unassignedlight = Palette.lighter; //TODO: instead do colour math on light
+Palette.finishedlight = Palette.finished;
+
+module.exports = Palette;
 
 },{}],208:[function(require,module,exports){
 var React = require('react');
@@ -25303,7 +25313,8 @@ var Routes = React.createClass({displayName: "Routes",
                 React.createElement("head", null, 
                     React.createElement("title", null, "React London Fog thingy"), 
                     React.createElement("script", {src: "https://cdn.socket.io/socket.io-1.3.5.js"}), 
-                    React.createElement("link", {rel: "stylesheet", href: "/dist/reset.css"})
+                    React.createElement("link", {rel: "stylesheet", href: "/dist/reset.css"}), 
+                    React.createElement("link", {rel: "stylesheet", href: "//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"})
                 ), 
                 React.createElement("body", null, 
                     React.createElement(Locations, {path: this.props.path}, 
@@ -25334,7 +25345,9 @@ Styles.with = function(key, additionalStyles) {
 };
 
 Styles.fullWidth = {width: '100%'};
-Styles.columnRow = _.extend(Styles.fullWidth, {overflow: 'hidden', padding: 2, height: 30});
+Styles.columnRow = _.extend(Styles.fullWidth, {overflow: 'auto', padding: 0, height: 30, marginBottom: 2, marginTop: 2, display: 'table', position: 'relative'});
+Styles.rowButton = {borderRadius: 5, width: 24, border: '2px solid black', fontSize: 21, display: 'table-cell', height: '100%'};
+Styles.rowBadge = {width: 50, height: 19, padding: 6, fontSize: 20, display: 'table-cell', textAlign: 'center', position: 'absolute', right: 0, top: 0};
 
 module.exports = Styles;
 
@@ -25358,17 +25371,34 @@ module.exports = TaskBadge;
 },{"react":196}],213:[function(require,module,exports){
 var React = require('react');
 
+var Styles = require('./styles');
+var Palette = require('./palette');
+
 var Task = React.createClass({displayName: "Task",
+    states: {
+        new: {active: 'Start',},
+        active: {paused: 'Pause', finished: 'Finish',},
+        paused: {active: 'Continue', frozen: 'Freeze',},
+        frozen: {paused: 'Unfreeze',},
+        finished: {active: 'Not Yet Done',},
+    },
+
     render: function() {
         return (
-            React.createElement("h2", null, "Task ", this.props.id)
+            React.createElement("div", {style: Styles.with('columnRow', {backgroundColor: Palette[status]})}, 
+                objmap(this.states[this.state.status], function(item, key) {
+                    console.log('key, item: ', key, item);
+                    return ( React.createElement("button", {style: {height: 16, fontSize: 10, verticalAlign: 'center'}, type: "button", onClick:  this.setState.bind(this, {status: key}, null) }, item) );
+                }, this), 
+                React.createElement("p", null, "Task ", this.props.id)
+            )
         );
     },
 });
 
 module.exports = Task;
 
-},{"react":196}],214:[function(require,module,exports){
+},{"./palette":207,"./styles":211,"react":196}],214:[function(require,module,exports){
 var React = require('react/addons');
 var _ = require('underscore');
 
@@ -25382,20 +25412,13 @@ var Styles = require('./styles');
 
 //Note: during getDefaultProps, none of the member methods exist yet. Further AFTERWARDS, getDefaultProps no longer exists... so I have to rely on an external function.
 function blankTodo() {
-    return {title: '', status: 'new',};
+    return {title: '',};
 }
 
 var Todo = React.createClass({displayName: "Todo",
     url: 'http://localhost:1212/',
     dataKey: '#root', //this means we put the data directly in the state.
     //the button states and labels displayed while in each state.
-    states: {
-        new: {active: 'Start',},
-        active: {paused: 'Pause', finished: 'Finish',},
-        paused: {active: 'Continue', frozen: 'Freeze',},
-        frozen: {paused: 'Unfreeze',},
-        finished: {active: 'Not Yet Done',},
-    },
 
     mixins: [SocketMixin, SocketModelMixin],
     getDefaultProps: function() {
@@ -25412,20 +25435,32 @@ var Todo = React.createClass({displayName: "Todo",
     handleChange: function(event) {
         this.setState({title: event.target.value});
     },
+    complete: function(event) {
+        this.setState({complete: !this.state.complete});
+    },
+    getStatus: function() {
+        if(this.state.complete)
+            return 'finished';
+        else if(this.state.task)
+            return this.state.task.status;
+        else
+            return 'unassigned';
+    },
     render: function() {
+        var status = this.getStatus();
+        var isNew = !this.props._id && !this.props.data._id;
+console.log('AUTOFOCUS: ', this.props.autofocus);
         return (
-            React.createElement("div", {style: Styles.with('columnRow', {backgroundColor: Palette[this.state.status]})}, 
-                objmap(this.states[this.state.status], function(item, key) {
-                    console.log('key, item: ', key, item);
-                    return ( React.createElement("button", {style: {height: 16, fontSize: 10, verticalAlign: 'center'}, type: "button", onClick:  this.setState.bind(this, {status: key}, null) }, item) );
-                }, this), 
-                React.createElement("span", null, React.createElement(ContentEditable, {html: this.state.title, onChange: this.handleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[this.state.status + 'light'], display: 'inline-block', minWidth: 50,}})), 
-                React.createElement("span", null, 
-                     this.state.task ? React.createElement(TaskBadge, {task: this.state.task}) : null, 
-                     this.state.project ? React.createElement(ProjectBadge, {project: this.state.project}) : null, 
-                     (!this.state.task && !this.state.project) ? React.createElement("button", {type: "button"}, "Assign") : null
+            React.createElement("div", {style: Styles.with('columnRow', {backgroundColor: Palette[status]})}, 
+                React.createElement("span", {onClick: this.complete, style: Styles.with('rowButton', {backgroundColor: 'white'})}, 
+                    React.createElement("input", {type: "hidden", value: this.state.completed}), 
+                     isNew ? React.createElement("button", {type: "button", onClick: this.saveModelAndClear}, "Create")
+                        : (this.state.complete ? React.createElement("i", {className: "fa fa-check"}) : React.createElement("i", {className: "fa"})) 
                 ), 
-                (!this.props._id && !this.props.data._id) ? React.createElement("button", {type: "button", onClick: this.saveModelAndClear}, "Create") : null
+                React.createElement(ContentEditable, {autofocus: this.props.autofocus, html: this.state.title, onChange: this.handleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
+                 this.state.task ? React.createElement(TaskBadge, {task: this.state.task}) : null, 
+                 this.state.project ? React.createElement(ProjectBadge, {project: this.state.project}) : null, 
+                 (!this.state.task && !this.state.project) ? React.createElement("span", {style: Styles.with('rowBadge', {backgroundColor: 'white'})}, "Task?") : null
             )
         );
    },

@@ -19,6 +19,7 @@ var Routes = React.createClass({
                     <title>React London Fog thingy</title>
                     <script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
                     <link rel="stylesheet" href="/dist/reset.css" />
+                    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
                 </head>
                 <body>
                     <Locations path={this.props.path}>

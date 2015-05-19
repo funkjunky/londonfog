@@ -5,11 +5,13 @@ var ContentEditable = React.createClass({
         //TODO: find where html=undefined and fix it! So I can remove this? Maybe I should keep this safety.
         var html = this.props.html || '';
         console.log('content editable render, html: ', this.props.html);
+        console.log('content editable render, style: ', this.props.style);
         return <span id="contenteditable"
             style={this.props.style}
             onKeyUp={this.emitChange} 
             onBlur={this.emitChange}
             contentEditable
+            autoFocus={this.props.autofocus}
             dangerouslySetInnerHTML={{__html: html}}></span>;
     },
     shouldComponentUpdate: function(nextProps){

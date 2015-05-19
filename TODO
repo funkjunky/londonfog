@@ -1,8 +1,6 @@
 TODO
 ———
 	Colour Pallete: http://www.colourlovers.com/palette/15787/spiced_chai
-		backgrounds: #F8EDC1, #F6E7B3, #E9DB92
-		foregrounds and borders: #922635, #442905
 
 	- instantiating cosmetics [making the project pretty from now on]
 		*- look for a nice London Fog Tea looking colour swatch/ scheme online
@@ -10,12 +8,30 @@ TODO
 		*- look up how to do a simple two column layout
 		*- Make the header MUCH nicer
 			*- add static user info on top right
-		- redo design of TODOs
-			- no more status, instead just a boolean: ‘done’
-				- move the status buttons to the task 
+		*- redo design of TODOs
+			*- no more status, instead just a boolean: ‘done’
+				*- move the status buttons to the task 
 		- improve the styling of TODOs
-		- improve the styling of Project, basically for now.
+			*- adjust checkbox to fix more evenly in row
+				*- Task disappeared, but from my fiddle it looks like position absolute, top0 right0 is the answer.
+			*- figure out assign UI
+				*- button on right side. Like checkbox, but with ‘task?’
+			*- style create button
+			*- style delete in there somehow.
+
 	- get task and project working as intended in London Fog
+		- first tasks
+			- tasks are like TODOs, but with status buttons on the right, show these status buttons and ensure they work (no checkbox)
+			- ensure you can create and save current tasks
+			- style status buttons nicely using colour scheme, rounded borders, etc.
+			- add type drop down like pivotal icons, dropdown of icons. bug, feature, upgrade [green up arrow] (for system updates, like allowing a system to work faster, or easier to use, or less code, etc. no direct affect to API, but not a bug fix)
+				- ensure this actually sets the status correctly. [also put the words beside the icon when showing dropdown [ie <bug> bug, <star> feature, <arrow> upgrade]]
+			- add arrow on the left most space like pivotal
+			- add code to show todos under the task, when the arrow is clicked [this.state.showTodos]
+				- indent TODOs!
+		- projects
+			- show name and have arrow, then also have an expand-all button that well expand all subtasks todos as well.
+		
 
 	- grab data on server side, then update on client afterwards [see SO QA]
 
@@ -59,7 +75,11 @@ TODO
  	- [look to buy the web domain londonfog-pm]
  	- deploy my new awesome software!
 
-
+	-Start to fix pesky bugs
+		- when completing a TODO, the style doesn’t update for content-editable… it doesn’t go through?
+		- autofocus on new todo in todo list.
+		- focus on new todo when just created a new task in the project list.
+		- hide delete button for todos, unless they are focused, OR the top filters delete button is pressed.
 
 FUTURE:
  - add github hooks

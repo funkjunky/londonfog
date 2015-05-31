@@ -31,7 +31,7 @@ var Todo = React.createClass({displayName: "Todo",
             this._setData(blankTodo());
         }.bind(this));
     },
-    handleChange: function(event) {
+    handleTitleChange: function(event) {
         this.setState({title: event.target.value});
     },
     complete: function(event) {
@@ -50,13 +50,14 @@ var Todo = React.createClass({displayName: "Todo",
         var isNew = !this.props._id && !this.props.data._id;
 console.log('AUTOFOCUS: ', this.props.autofocus);
         return (
-            React.createElement("div", {style: Styles.with('columnRow', {backgroundColor: Palette[status]})}, 
-                React.createElement("span", {onClick: this.complete, style: Styles.with('rowButton', {backgroundColor: 'white'})}, 
-                    React.createElement("input", {type: "hidden", value: this.state.completed}), 
-                     isNew ? React.createElement("button", {type: "button", onClick: this.saveModelAndClear}, "Create")
-                        : (this.state.complete ? React.createElement("i", {className: "fa fa-check"}) : React.createElement("i", {className: "fa"})) 
-                ), 
-                React.createElement(ContentEditable, {autofocus: this.props.autofocus, html: this.state.title, onChange: this.handleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
+            React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette[status]})}, 
+                 isNew
+                ?   React.createElement("span", {onClick: this.saveModelAndClear, style: Styles.with('rowButton', {backgroundColor: 'white', fontSize: 20})}, "Create")
+                :   React.createElement("span", {onClick: this.complete, style: Styles.with('rowButton', {backgroundColor: 'white'})}, 
+                        React.createElement("input", {type: "hidden", value: this.state.completed}), 
+                         this.state.complete ? React.createElement("i", {className: "fa fa-check"}) : React.createElement("i", {className: "fa"})
+                    ), 
+                React.createElement(ContentEditable, {autofocus: this.props.autofocus, html: this.state.title, onChange: this.handleTitleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
                  this.state.task ? React.createElement(TaskBadge, {task: this.state.task}) : null, 
                  this.state.project ? React.createElement(ProjectBadge, {project: this.state.project}) : null, 
                  (!this.state.task && !this.state.project) ? React.createElement("span", {style: Styles.with('rowBadge', {backgroundColor: 'white'})}, "Task?") : null

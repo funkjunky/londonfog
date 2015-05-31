@@ -31,7 +31,7 @@ var Todo = React.createClass({
             this._setData(blankTodo());
         }.bind(this));
     },
-    handleChange: function(event) {
+    handleTitleChange: function(event) {
         this.setState({title: event.target.value});
     },
     complete: function(event) {
@@ -50,13 +50,14 @@ var Todo = React.createClass({
         var isNew = !this.props._id && !this.props.data._id;
 console.log('AUTOFOCUS: ', this.props.autofocus);
         return (
-            <div style={Styles.with('columnRow', {backgroundColor: Palette[status]})}>
-                <span onClick={this.complete} style={Styles.with('rowButton', {backgroundColor: 'white'})}>
-                    <input type="hidden" value={this.state.completed} />
-                    { isNew ? <button type="button" onClick={this.saveModelAndClear}>Create</button>
-                        : (this.state.complete ? <i className="fa fa-check"></i> : <i className="fa"></i>) }
-                </span>
-                <ContentEditable autofocus={this.props.autofocus} html={this.state.title} onChange={this.handleChange} onSubmit={this.saveModelAndClear} style={{backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}></ContentEditable>
+            <div style={Styles.with('columnRowTable', {backgroundColor: Palette[status]})}>
+                { isNew
+                ?   <span onClick={this.saveModelAndClear} style={Styles.with('rowButton', {backgroundColor: 'white', fontSize: 20})}>Create</span>
+                :   <span onClick={this.complete} style={Styles.with('rowButton', {backgroundColor: 'white'})}>
+                        <input type="hidden" value={this.state.completed} />
+                        { this.state.complete ? <i className="fa fa-check"></i> : <i className="fa"></i> }
+                    </span> }
+                <ContentEditable autofocus={this.props.autofocus} html={this.state.title} onChange={this.handleTitleChange} onSubmit={this.saveModelAndClear} style={{backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}></ContentEditable>
                 { this.state.task ? <TaskBadge task={this.state.task} /> : null }
                 { this.state.project ? <ProjectBadge project={this.state.project} /> : null }
                 { (!this.state.task && !this.state.project) ? <span style={Styles.with('rowBadge', {backgroundColor: 'white'})}>Task?</span> : null }

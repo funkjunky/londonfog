@@ -23244,6 +23244,1322 @@ module.exports = warning;
 module.exports = require('./lib/React');
 
 },{"./lib/React":54}],197:[function(require,module,exports){
+/**
+ * Module dependencies.
+ */
+
+var Emitter = require('emitter');
+var reduce = require('reduce');
+
+/**
+ * Root reference for iframes.
+ */
+
+var root = 'undefined' == typeof window
+  ? (this || self)
+  : window;
+
+/**
+ * Noop.
+ */
+
+function noop(){};
+
+/**
+ * Check if `obj` is a host object,
+ * we don't want to serialize these :)
+ *
+ * TODO: future proof, move to compoent land
+ *
+ * @param {Object} obj
+ * @return {Boolean}
+ * @api private
+ */
+
+function isHost(obj) {
+  var str = {}.toString.call(obj);
+
+  switch (str) {
+    case '[object File]':
+    case '[object Blob]':
+    case '[object FormData]':
+      return true;
+    default:
+      return false;
+  }
+}
+
+/**
+ * Determine XHR.
+ */
+
+request.getXHR = function () {
+  if (root.XMLHttpRequest
+      && (!root.location || 'file:' != root.location.protocol
+          || !root.ActiveXObject)) {
+    return new XMLHttpRequest;
+  } else {
+    try { return new ActiveXObject('Microsoft.XMLHTTP'); } catch(e) {}
+    try { return new ActiveXObject('Msxml2.XMLHTTP.6.0'); } catch(e) {}
+    try { return new ActiveXObject('Msxml2.XMLHTTP.3.0'); } catch(e) {}
+    try { return new ActiveXObject('Msxml2.XMLHTTP'); } catch(e) {}
+  }
+  return false;
+};
+
+/**
+ * Removes leading and trailing whitespace, added to support IE.
+ *
+ * @param {String} s
+ * @return {String}
+ * @api private
+ */
+
+var trim = ''.trim
+  ? function(s) { return s.trim(); }
+  : function(s) { return s.replace(/(^\s*|\s*$)/g, ''); };
+
+/**
+ * Check if `obj` is an object.
+ *
+ * @param {Object} obj
+ * @return {Boolean}
+ * @api private
+ */
+
+function isObject(obj) {
+  return obj === Object(obj);
+}
+
+/**
+ * Serialize the given `obj`.
+ *
+ * @param {Object} obj
+ * @return {String}
+ * @api private
+ */
+
+function serialize(obj) {
+  if (!isObject(obj)) return obj;
+  var pairs = [];
+  for (var key in obj) {
+    if (null != obj[key]) {
+      pairs.push(encodeURIComponent(key)
+        + '=' + encodeURIComponent(obj[key]));
+    }
+  }
+  return pairs.join('&');
+}
+
+/**
+ * Expose serialization method.
+ */
+
+ request.serializeObject = serialize;
+
+ /**
+  * Parse the given x-www-form-urlencoded `str`.
+  *
+  * @param {String} str
+  * @return {Object}
+  * @api private
+  */
+
+function parseString(str) {
+  var obj = {};
+  var pairs = str.split('&');
+  var parts;
+  var pair;
+
+  for (var i = 0, len = pairs.length; i < len; ++i) {
+    pair = pairs[i];
+    parts = pair.split('=');
+    obj[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
+  }
+
+  return obj;
+}
+
+/**
+ * Expose parser.
+ */
+
+request.parseString = parseString;
+
+/**
+ * Default MIME type map.
+ *
+ *     superagent.types.xml = 'application/xml';
+ *
+ */
+
+request.types = {
+  html: 'text/html',
+  json: 'application/json',
+  xml: 'application/xml',
+  urlencoded: 'application/x-www-form-urlencoded',
+  'form': 'application/x-www-form-urlencoded',
+  'form-data': 'application/x-www-form-urlencoded'
+};
+
+/**
+ * Default serialization map.
+ *
+ *     superagent.serialize['application/xml'] = function(obj){
+ *       return 'generated xml here';
+ *     };
+ *
+ */
+
+ request.serialize = {
+   'application/x-www-form-urlencoded': serialize,
+   'application/json': JSON.stringify
+ };
+
+ /**
+  * Default parsers.
+  *
+  *     superagent.parse['application/xml'] = function(str){
+  *       return { object parsed from str };
+  *     };
+  *
+  */
+
+request.parse = {
+  'application/x-www-form-urlencoded': parseString,
+  'application/json': JSON.parse
+};
+
+/**
+ * Parse the given header `str` into
+ * an object containing the mapped fields.
+ *
+ * @param {String} str
+ * @return {Object}
+ * @api private
+ */
+
+function parseHeader(str) {
+  var lines = str.split(/\r?\n/);
+  var fields = {};
+  var index;
+  var line;
+  var field;
+  var val;
+
+  lines.pop(); // trailing CRLF
+
+  for (var i = 0, len = lines.length; i < len; ++i) {
+    line = lines[i];
+    index = line.indexOf(':');
+    field = line.slice(0, index).toLowerCase();
+    val = trim(line.slice(index + 1));
+    fields[field] = val;
+  }
+
+  return fields;
+}
+
+/**
+ * Return the mime type for the given `str`.
+ *
+ * @param {String} str
+ * @return {String}
+ * @api private
+ */
+
+function type(str){
+  return str.split(/ *; */).shift();
+};
+
+/**
+ * Return header field parameters.
+ *
+ * @param {String} str
+ * @return {Object}
+ * @api private
+ */
+
+function params(str){
+  return reduce(str.split(/ *; */), function(obj, str){
+    var parts = str.split(/ *= */)
+      , key = parts.shift()
+      , val = parts.shift();
+
+    if (key && val) obj[key] = val;
+    return obj;
+  }, {});
+};
+
+/**
+ * Initialize a new `Response` with the given `xhr`.
+ *
+ *  - set flags (.ok, .error, etc)
+ *  - parse header
+ *
+ * Examples:
+ *
+ *  Aliasing `superagent` as `request` is nice:
+ *
+ *      request = superagent;
+ *
+ *  We can use the promise-like API, or pass callbacks:
+ *
+ *      request.get('/').end(function(res){});
+ *      request.get('/', function(res){});
+ *
+ *  Sending data can be chained:
+ *
+ *      request
+ *        .post('/user')
+ *        .send({ name: 'tj' })
+ *        .end(function(res){});
+ *
+ *  Or passed to `.send()`:
+ *
+ *      request
+ *        .post('/user')
+ *        .send({ name: 'tj' }, function(res){});
+ *
+ *  Or passed to `.post()`:
+ *
+ *      request
+ *        .post('/user', { name: 'tj' })
+ *        .end(function(res){});
+ *
+ * Or further reduced to a single call for simple cases:
+ *
+ *      request
+ *        .post('/user', { name: 'tj' }, function(res){});
+ *
+ * @param {XMLHTTPRequest} xhr
+ * @param {Object} options
+ * @api private
+ */
+
+function Response(req, options) {
+  options = options || {};
+  this.req = req;
+  this.xhr = this.req.xhr;
+  // responseText is accessible only if responseType is '' or 'text' and on older browsers
+  this.text = ((this.req.method !='HEAD' && (this.xhr.responseType === '' || this.xhr.responseType === 'text')) || typeof this.xhr.responseType === 'undefined')
+     ? this.xhr.responseText
+     : null;
+  this.statusText = this.req.xhr.statusText;
+  this.setStatusProperties(this.xhr.status);
+  this.header = this.headers = parseHeader(this.xhr.getAllResponseHeaders());
+  // getAllResponseHeaders sometimes falsely returns "" for CORS requests, but
+  // getResponseHeader still works. so we get content-type even if getting
+  // other headers fails.
+  this.header['content-type'] = this.xhr.getResponseHeader('content-type');
+  this.setHeaderProperties(this.header);
+  this.body = this.req.method != 'HEAD'
+    ? this.parseBody(this.text ? this.text : this.xhr.response)
+    : null;
+}
+
+/**
+ * Get case-insensitive `field` value.
+ *
+ * @param {String} field
+ * @return {String}
+ * @api public
+ */
+
+Response.prototype.get = function(field){
+  return this.header[field.toLowerCase()];
+};
+
+/**
+ * Set header related properties:
+ *
+ *   - `.type` the content type without params
+ *
+ * A response of "Content-Type: text/plain; charset=utf-8"
+ * will provide you with a `.type` of "text/plain".
+ *
+ * @param {Object} header
+ * @api private
+ */
+
+Response.prototype.setHeaderProperties = function(header){
+  // content-type
+  var ct = this.header['content-type'] || '';
+  this.type = type(ct);
+
+  // params
+  var obj = params(ct);
+  for (var key in obj) this[key] = obj[key];
+};
+
+/**
+ * Parse the given body `str`.
+ *
+ * Used for auto-parsing of bodies. Parsers
+ * are defined on the `superagent.parse` object.
+ *
+ * @param {String} str
+ * @return {Mixed}
+ * @api private
+ */
+
+Response.prototype.parseBody = function(str){
+  var parse = request.parse[this.type];
+  return parse && str && (str.length || str instanceof Object)
+    ? parse(str)
+    : null;
+};
+
+/**
+ * Set flags such as `.ok` based on `status`.
+ *
+ * For example a 2xx response will give you a `.ok` of __true__
+ * whereas 5xx will be __false__ and `.error` will be __true__. The
+ * `.clientError` and `.serverError` are also available to be more
+ * specific, and `.statusType` is the class of error ranging from 1..5
+ * sometimes useful for mapping respond colors etc.
+ *
+ * "sugar" properties are also defined for common cases. Currently providing:
+ *
+ *   - .noContent
+ *   - .badRequest
+ *   - .unauthorized
+ *   - .notAcceptable
+ *   - .notFound
+ *
+ * @param {Number} status
+ * @api private
+ */
+
+Response.prototype.setStatusProperties = function(status){
+  // handle IE9 bug: http://stackoverflow.com/questions/10046972/msie-returns-status-code-of-1223-for-ajax-request
+  if (status === 1223) {
+    status = 204;
+  }
+
+  var type = status / 100 | 0;
+
+  // status / class
+  this.status = status;
+  this.statusType = type;
+
+  // basics
+  this.info = 1 == type;
+  this.ok = 2 == type;
+  this.clientError = 4 == type;
+  this.serverError = 5 == type;
+  this.error = (4 == type || 5 == type)
+    ? this.toError()
+    : false;
+
+  // sugar
+  this.accepted = 202 == status;
+  this.noContent = 204 == status;
+  this.badRequest = 400 == status;
+  this.unauthorized = 401 == status;
+  this.notAcceptable = 406 == status;
+  this.notFound = 404 == status;
+  this.forbidden = 403 == status;
+};
+
+/**
+ * Return an `Error` representative of this response.
+ *
+ * @return {Error}
+ * @api public
+ */
+
+Response.prototype.toError = function(){
+  var req = this.req;
+  var method = req.method;
+  var url = req.url;
+
+  var msg = 'cannot ' + method + ' ' + url + ' (' + this.status + ')';
+  var err = new Error(msg);
+  err.status = this.status;
+  err.method = method;
+  err.url = url;
+
+  return err;
+};
+
+/**
+ * Expose `Response`.
+ */
+
+request.Response = Response;
+
+/**
+ * Initialize a new `Request` with the given `method` and `url`.
+ *
+ * @param {String} method
+ * @param {String} url
+ * @api public
+ */
+
+function Request(method, url) {
+  var self = this;
+  Emitter.call(this);
+  this._query = this._query || [];
+  this.method = method;
+  this.url = url;
+  this.header = {};
+  this._header = {};
+  this.on('end', function(){
+    var err = null;
+    var res = null;
+
+    try {
+      res = new Response(self);
+    } catch(e) {
+      err = new Error('Parser is unable to parse the response');
+      err.parse = true;
+      err.original = e;
+      return self.callback(err);
+    }
+
+    self.emit('response', res);
+
+    if (err) {
+      return self.callback(err, res);
+    }
+
+    if (res.status >= 200 && res.status < 300) {
+      return self.callback(err, res);
+    }
+
+    var new_err = new Error(res.statusText || 'Unsuccessful HTTP response');
+    new_err.original = err;
+    new_err.response = res;
+    new_err.status = res.status;
+
+    self.callback(err || new_err, res);
+  });
+}
+
+/**
+ * Mixin `Emitter`.
+ */
+
+Emitter(Request.prototype);
+
+/**
+ * Allow for extension
+ */
+
+Request.prototype.use = function(fn) {
+  fn(this);
+  return this;
+}
+
+/**
+ * Set timeout to `ms`.
+ *
+ * @param {Number} ms
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.timeout = function(ms){
+  this._timeout = ms;
+  return this;
+};
+
+/**
+ * Clear previous timeout.
+ *
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.clearTimeout = function(){
+  this._timeout = 0;
+  clearTimeout(this._timer);
+  return this;
+};
+
+/**
+ * Abort the request, and clear potential timeout.
+ *
+ * @return {Request}
+ * @api public
+ */
+
+Request.prototype.abort = function(){
+  if (this.aborted) return;
+  this.aborted = true;
+  this.xhr.abort();
+  this.clearTimeout();
+  this.emit('abort');
+  return this;
+};
+
+/**
+ * Set header `field` to `val`, or multiple fields with one object.
+ *
+ * Examples:
+ *
+ *      req.get('/')
+ *        .set('Accept', 'application/json')
+ *        .set('X-API-Key', 'foobar')
+ *        .end(callback);
+ *
+ *      req.get('/')
+ *        .set({ Accept: 'application/json', 'X-API-Key': 'foobar' })
+ *        .end(callback);
+ *
+ * @param {String|Object} field
+ * @param {String} val
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.set = function(field, val){
+  if (isObject(field)) {
+    for (var key in field) {
+      this.set(key, field[key]);
+    }
+    return this;
+  }
+  this._header[field.toLowerCase()] = val;
+  this.header[field] = val;
+  return this;
+};
+
+/**
+ * Remove header `field`.
+ *
+ * Example:
+ *
+ *      req.get('/')
+ *        .unset('User-Agent')
+ *        .end(callback);
+ *
+ * @param {String} field
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.unset = function(field){
+  delete this._header[field.toLowerCase()];
+  delete this.header[field];
+  return this;
+};
+
+/**
+ * Get case-insensitive header `field` value.
+ *
+ * @param {String} field
+ * @return {String}
+ * @api private
+ */
+
+Request.prototype.getHeader = function(field){
+  return this._header[field.toLowerCase()];
+};
+
+/**
+ * Set Content-Type to `type`, mapping values from `request.types`.
+ *
+ * Examples:
+ *
+ *      superagent.types.xml = 'application/xml';
+ *
+ *      request.post('/')
+ *        .type('xml')
+ *        .send(xmlstring)
+ *        .end(callback);
+ *
+ *      request.post('/')
+ *        .type('application/xml')
+ *        .send(xmlstring)
+ *        .end(callback);
+ *
+ * @param {String} type
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.type = function(type){
+  this.set('Content-Type', request.types[type] || type);
+  return this;
+};
+
+/**
+ * Set Accept to `type`, mapping values from `request.types`.
+ *
+ * Examples:
+ *
+ *      superagent.types.json = 'application/json';
+ *
+ *      request.get('/agent')
+ *        .accept('json')
+ *        .end(callback);
+ *
+ *      request.get('/agent')
+ *        .accept('application/json')
+ *        .end(callback);
+ *
+ * @param {String} accept
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.accept = function(type){
+  this.set('Accept', request.types[type] || type);
+  return this;
+};
+
+/**
+ * Set Authorization field value with `user` and `pass`.
+ *
+ * @param {String} user
+ * @param {String} pass
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.auth = function(user, pass){
+  var str = btoa(user + ':' + pass);
+  this.set('Authorization', 'Basic ' + str);
+  return this;
+};
+
+/**
+* Add query-string `val`.
+*
+* Examples:
+*
+*   request.get('/shoes')
+*     .query('size=10')
+*     .query({ color: 'blue' })
+*
+* @param {Object|String} val
+* @return {Request} for chaining
+* @api public
+*/
+
+Request.prototype.query = function(val){
+  if ('string' != typeof val) val = serialize(val);
+  if (val) this._query.push(val);
+  return this;
+};
+
+/**
+ * Write the field `name` and `val` for "multipart/form-data"
+ * request bodies.
+ *
+ * ``` js
+ * request.post('/upload')
+ *   .field('foo', 'bar')
+ *   .end(callback);
+ * ```
+ *
+ * @param {String} name
+ * @param {String|Blob|File} val
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.field = function(name, val){
+  if (!this._formData) this._formData = new root.FormData();
+  this._formData.append(name, val);
+  return this;
+};
+
+/**
+ * Queue the given `file` as an attachment to the specified `field`,
+ * with optional `filename`.
+ *
+ * ``` js
+ * request.post('/upload')
+ *   .attach(new Blob(['<a id="a"><b id="b">hey!</b></a>'], { type: "text/html"}))
+ *   .end(callback);
+ * ```
+ *
+ * @param {String} field
+ * @param {Blob|File} file
+ * @param {String} filename
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.attach = function(field, file, filename){
+  if (!this._formData) this._formData = new root.FormData();
+  this._formData.append(field, file, filename);
+  return this;
+};
+
+/**
+ * Send `data`, defaulting the `.type()` to "json" when
+ * an object is given.
+ *
+ * Examples:
+ *
+ *       // querystring
+ *       request.get('/search')
+ *         .end(callback)
+ *
+ *       // multiple data "writes"
+ *       request.get('/search')
+ *         .send({ search: 'query' })
+ *         .send({ range: '1..5' })
+ *         .send({ order: 'desc' })
+ *         .end(callback)
+ *
+ *       // manual json
+ *       request.post('/user')
+ *         .type('json')
+ *         .send('{"name":"tj"})
+ *         .end(callback)
+ *
+ *       // auto json
+ *       request.post('/user')
+ *         .send({ name: 'tj' })
+ *         .end(callback)
+ *
+ *       // manual x-www-form-urlencoded
+ *       request.post('/user')
+ *         .type('form')
+ *         .send('name=tj')
+ *         .end(callback)
+ *
+ *       // auto x-www-form-urlencoded
+ *       request.post('/user')
+ *         .type('form')
+ *         .send({ name: 'tj' })
+ *         .end(callback)
+ *
+ *       // defaults to x-www-form-urlencoded
+  *      request.post('/user')
+  *        .send('name=tobi')
+  *        .send('species=ferret')
+  *        .end(callback)
+ *
+ * @param {String|Object} data
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.send = function(data){
+  var obj = isObject(data);
+  var type = this.getHeader('Content-Type');
+
+  // merge
+  if (obj && isObject(this._data)) {
+    for (var key in data) {
+      this._data[key] = data[key];
+    }
+  } else if ('string' == typeof data) {
+    if (!type) this.type('form');
+    type = this.getHeader('Content-Type');
+    if ('application/x-www-form-urlencoded' == type) {
+      this._data = this._data
+        ? this._data + '&' + data
+        : data;
+    } else {
+      this._data = (this._data || '') + data;
+    }
+  } else {
+    this._data = data;
+  }
+
+  if (!obj || isHost(data)) return this;
+  if (!type) this.type('json');
+  return this;
+};
+
+/**
+ * Invoke the callback with `err` and `res`
+ * and handle arity check.
+ *
+ * @param {Error} err
+ * @param {Response} res
+ * @api private
+ */
+
+Request.prototype.callback = function(err, res){
+  var fn = this._callback;
+  this.clearTimeout();
+  fn(err, res);
+};
+
+/**
+ * Invoke callback with x-domain error.
+ *
+ * @api private
+ */
+
+Request.prototype.crossDomainError = function(){
+  var err = new Error('Origin is not allowed by Access-Control-Allow-Origin');
+  err.crossDomain = true;
+  this.callback(err);
+};
+
+/**
+ * Invoke callback with timeout error.
+ *
+ * @api private
+ */
+
+Request.prototype.timeoutError = function(){
+  var timeout = this._timeout;
+  var err = new Error('timeout of ' + timeout + 'ms exceeded');
+  err.timeout = timeout;
+  this.callback(err);
+};
+
+/**
+ * Enable transmission of cookies with x-domain requests.
+ *
+ * Note that for this to work the origin must not be
+ * using "Access-Control-Allow-Origin" with a wildcard,
+ * and also must set "Access-Control-Allow-Credentials"
+ * to "true".
+ *
+ * @api public
+ */
+
+Request.prototype.withCredentials = function(){
+  this._withCredentials = true;
+  return this;
+};
+
+/**
+ * Initiate request, invoking callback `fn(res)`
+ * with an instanceof `Response`.
+ *
+ * @param {Function} fn
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.end = function(fn){
+  var self = this;
+  var xhr = this.xhr = request.getXHR();
+  var query = this._query.join('&');
+  var timeout = this._timeout;
+  var data = this._formData || this._data;
+
+  // store callback
+  this._callback = fn || noop;
+
+  // state change
+  xhr.onreadystatechange = function(){
+    if (4 != xhr.readyState) return;
+
+    // In IE9, reads to any property (e.g. status) off of an aborted XHR will
+    // result in the error "Could not complete the operation due to error c00c023f"
+    var status;
+    try { status = xhr.status } catch(e) { status = 0; }
+
+    if (0 == status) {
+      if (self.timedout) return self.timeoutError();
+      if (self.aborted) return;
+      return self.crossDomainError();
+    }
+    self.emit('end');
+  };
+
+  // progress
+  var handleProgress = function(e){
+    if (e.total > 0) {
+      e.percent = e.loaded / e.total * 100;
+    }
+    self.emit('progress', e);
+  };
+  if (this.hasListeners('progress')) {
+    xhr.onprogress = handleProgress;
+  }
+  try {
+    if (xhr.upload && this.hasListeners('progress')) {
+      xhr.upload.onprogress = handleProgress;
+    }
+  } catch(e) {
+    // Accessing xhr.upload fails in IE from a web worker, so just pretend it doesn't exist.
+    // Reported here:
+    // https://connect.microsoft.com/IE/feedback/details/837245/xmlhttprequest-upload-throws-invalid-argument-when-used-from-web-worker-context
+  }
+
+  // timeout
+  if (timeout && !this._timer) {
+    this._timer = setTimeout(function(){
+      self.timedout = true;
+      self.abort();
+    }, timeout);
+  }
+
+  // querystring
+  if (query) {
+    query = request.serializeObject(query);
+    this.url += ~this.url.indexOf('?')
+      ? '&' + query
+      : '?' + query;
+  }
+
+  // initiate request
+  xhr.open(this.method, this.url, true);
+
+  // CORS
+  if (this._withCredentials) xhr.withCredentials = true;
+
+  // body
+  if ('GET' != this.method && 'HEAD' != this.method && 'string' != typeof data && !isHost(data)) {
+    // serialize stuff
+    var serialize = request.serialize[this.getHeader('Content-Type')];
+    if (serialize) data = serialize(data);
+  }
+
+  // set header fields
+  for (var field in this.header) {
+    if (null == this.header[field]) continue;
+    xhr.setRequestHeader(field, this.header[field]);
+  }
+
+  // send stuff
+  this.emit('request', this);
+  xhr.send(data);
+  return this;
+};
+
+/**
+ * Expose `Request`.
+ */
+
+request.Request = Request;
+
+/**
+ * Issue a request:
+ *
+ * Examples:
+ *
+ *    request('GET', '/users').end(callback)
+ *    request('/users').end(callback)
+ *    request('/users', callback)
+ *
+ * @param {String} method
+ * @param {String|Function} url or callback
+ * @return {Request}
+ * @api public
+ */
+
+function request(method, url) {
+  // callback
+  if ('function' == typeof url) {
+    return new Request('GET', method).end(url);
+  }
+
+  // url first
+  if (1 == arguments.length) {
+    return new Request('GET', method);
+  }
+
+  return new Request(method, url);
+}
+
+/**
+ * GET `url` with optional callback `fn(res)`.
+ *
+ * @param {String} url
+ * @param {Mixed|Function} data or fn
+ * @param {Function} fn
+ * @return {Request}
+ * @api public
+ */
+
+request.get = function(url, data, fn){
+  var req = request('GET', url);
+  if ('function' == typeof data) fn = data, data = null;
+  if (data) req.query(data);
+  if (fn) req.end(fn);
+  return req;
+};
+
+/**
+ * HEAD `url` with optional callback `fn(res)`.
+ *
+ * @param {String} url
+ * @param {Mixed|Function} data or fn
+ * @param {Function} fn
+ * @return {Request}
+ * @api public
+ */
+
+request.head = function(url, data, fn){
+  var req = request('HEAD', url);
+  if ('function' == typeof data) fn = data, data = null;
+  if (data) req.send(data);
+  if (fn) req.end(fn);
+  return req;
+};
+
+/**
+ * DELETE `url` with optional callback `fn(res)`.
+ *
+ * @param {String} url
+ * @param {Function} fn
+ * @return {Request}
+ * @api public
+ */
+
+request.del = function(url, fn){
+  var req = request('DELETE', url);
+  if (fn) req.end(fn);
+  return req;
+};
+
+/**
+ * PATCH `url` with optional `data` and callback `fn(res)`.
+ *
+ * @param {String} url
+ * @param {Mixed} data
+ * @param {Function} fn
+ * @return {Request}
+ * @api public
+ */
+
+request.patch = function(url, data, fn){
+  var req = request('PATCH', url);
+  if ('function' == typeof data) fn = data, data = null;
+  if (data) req.send(data);
+  if (fn) req.end(fn);
+  return req;
+};
+
+/**
+ * POST `url` with optional `data` and callback `fn(res)`.
+ *
+ * @param {String} url
+ * @param {Mixed} data
+ * @param {Function} fn
+ * @return {Request}
+ * @api public
+ */
+
+request.post = function(url, data, fn){
+  var req = request('POST', url);
+  if ('function' == typeof data) fn = data, data = null;
+  if (data) req.send(data);
+  if (fn) req.end(fn);
+  return req;
+};
+
+/**
+ * PUT `url` with optional `data` and callback `fn(res)`.
+ *
+ * @param {String} url
+ * @param {Mixed|Function} data or fn
+ * @param {Function} fn
+ * @return {Request}
+ * @api public
+ */
+
+request.put = function(url, data, fn){
+  var req = request('PUT', url);
+  if ('function' == typeof data) fn = data, data = null;
+  if (data) req.send(data);
+  if (fn) req.end(fn);
+  return req;
+};
+
+/**
+ * Expose `request`.
+ */
+
+module.exports = request;
+
+},{"emitter":198,"reduce":199}],198:[function(require,module,exports){
+
+/**
+ * Expose `Emitter`.
+ */
+
+module.exports = Emitter;
+
+/**
+ * Initialize a new `Emitter`.
+ *
+ * @api public
+ */
+
+function Emitter(obj) {
+  if (obj) return mixin(obj);
+};
+
+/**
+ * Mixin the emitter properties.
+ *
+ * @param {Object} obj
+ * @return {Object}
+ * @api private
+ */
+
+function mixin(obj) {
+  for (var key in Emitter.prototype) {
+    obj[key] = Emitter.prototype[key];
+  }
+  return obj;
+}
+
+/**
+ * Listen on the given `event` with `fn`.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.on =
+Emitter.prototype.addEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+  (this._callbacks[event] = this._callbacks[event] || [])
+    .push(fn);
+  return this;
+};
+
+/**
+ * Adds an `event` listener that will be invoked a single
+ * time then automatically removed.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.once = function(event, fn){
+  var self = this;
+  this._callbacks = this._callbacks || {};
+
+  function on() {
+    self.off(event, on);
+    fn.apply(this, arguments);
+  }
+
+  on.fn = fn;
+  this.on(event, on);
+  return this;
+};
+
+/**
+ * Remove the given callback for `event` or all
+ * registered callbacks.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.off =
+Emitter.prototype.removeListener =
+Emitter.prototype.removeAllListeners =
+Emitter.prototype.removeEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+
+  // all
+  if (0 == arguments.length) {
+    this._callbacks = {};
+    return this;
+  }
+
+  // specific event
+  var callbacks = this._callbacks[event];
+  if (!callbacks) return this;
+
+  // remove all handlers
+  if (1 == arguments.length) {
+    delete this._callbacks[event];
+    return this;
+  }
+
+  // remove specific handler
+  var cb;
+  for (var i = 0; i < callbacks.length; i++) {
+    cb = callbacks[i];
+    if (cb === fn || cb.fn === fn) {
+      callbacks.splice(i, 1);
+      break;
+    }
+  }
+  return this;
+};
+
+/**
+ * Emit `event` with the given args.
+ *
+ * @param {String} event
+ * @param {Mixed} ...
+ * @return {Emitter}
+ */
+
+Emitter.prototype.emit = function(event){
+  this._callbacks = this._callbacks || {};
+  var args = [].slice.call(arguments, 1)
+    , callbacks = this._callbacks[event];
+
+  if (callbacks) {
+    callbacks = callbacks.slice(0);
+    for (var i = 0, len = callbacks.length; i < len; ++i) {
+      callbacks[i].apply(this, args);
+    }
+  }
+
+  return this;
+};
+
+/**
+ * Return array of callbacks for `event`.
+ *
+ * @param {String} event
+ * @return {Array}
+ * @api public
+ */
+
+Emitter.prototype.listeners = function(event){
+  this._callbacks = this._callbacks || {};
+  return this._callbacks[event] || [];
+};
+
+/**
+ * Check if this emitter has `event` handlers.
+ *
+ * @param {String} event
+ * @return {Boolean}
+ * @api public
+ */
+
+Emitter.prototype.hasListeners = function(event){
+  return !! this.listeners(event).length;
+};
+
+},{}],199:[function(require,module,exports){
+
+/**
+ * Reduce `arr` with `fn`.
+ *
+ * @param {Array} arr
+ * @param {Function} fn
+ * @param {Mixed} initial
+ *
+ * TODO: combatible error handling?
+ */
+
+module.exports = function(arr, fn, initial){  
+  var idx = 0;
+  var len = arr.length;
+  var curr = arguments.length == 3
+    ? initial
+    : arr[idx++];
+
+  while (idx < len) {
+    curr = fn.call(null, curr, arr[idx], ++idx, arr);
+  }
+  
+  return curr;
+};
+},{}],200:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -24793,7 +26109,43 @@ module.exports = require('./lib/React');
   }
 }.call(this));
 
-},{}],198:[function(require,module,exports){
+},{}],201:[function(require,module,exports){
+var React = require('react');
+
+var ItemInstance = require('./item-instance');
+var SocketMixin = require('./mixins/socketmixin');
+var CollectionMixin = require('./mixins/socketcollectionmixin');
+var Styles = require('./styles');
+
+//This represents a list of slower items. Things you need to add manually over time.
+var BasicList = React.createClass({displayName: "BasicList",
+    url: 'http://localhost:1212/',
+    dataKey: 'data',
+
+    mixins: [SocketMixin, CollectionMixin],
+    getInitialState: function() {
+        return {
+            data: [],
+        };
+    },
+    render: function() {
+        return (
+            React.createElement("div", {style: this.props.style}, 
+                this.state.data.map(function(item, index) {
+                    return (
+                        React.createElement("div", {key: item._id, style: Styles.fullWidth}, 
+                            React.createElement(ItemInstance, {data: item, tag: this.props.collection})
+                        )
+                    );
+                }, this)
+            )
+        );
+    },
+});
+
+module.exports = BasicList;
+
+},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":219,"react":196}],202:[function(require,module,exports){
 var React = require('react');
 var Routes = React.createFactory(require('./routes'));
 
@@ -24803,7 +26155,7 @@ if(typeof window !== 'undefined') {
     }
 }
 
-},{"./routes":210,"react":196}],199:[function(require,module,exports){
+},{"./routes":218,"react":196}],203:[function(require,module,exports){
 var React = require('react');
 
 var ItemInstance = require('./item-instance');
@@ -24811,6 +26163,8 @@ var SocketMixin = require('./mixins/socketmixin');
 var CollectionMixin = require('./mixins/socketcollectionmixin');
 var Styles = require('./styles');
 
+//A LIST OF TODOS... nothing else... I should rename this class at some point.
+//This represents a list of quick to create items. With new items ready to be created just by typing and hitting enter in a single textbox.
 var ColumnList = React.createClass({displayName: "ColumnList",
     url: 'http://localhost:1212/',
     dataKey: 'data',
@@ -24856,7 +26210,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
 
 module.exports = ColumnList;
 
-},{"./item-instance":202,"./mixins/socketcollectionmixin":203,"./mixins/socketmixin":205,"./styles":211,"react":196}],200:[function(require,module,exports){
+},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":219,"react":196}],204:[function(require,module,exports){
 var React = require('react');
 
 var ContentEditable = React.createClass({displayName: "ContentEditable",
@@ -24897,7 +26251,31 @@ var ContentEditable = React.createClass({displayName: "ContentEditable",
 
 module.exports = ContentEditable;
 
-},{"react":196}],201:[function(require,module,exports){
+},{"react":196}],205:[function(require,module,exports){
+var React = require('react');
+var _ = require('underscore');
+
+var Styles = require('./styles');
+var Palette = require('./palette');
+
+var Header = React.createClass({displayName: "Header",
+    render: function() {
+        var border = '2px solid ' + Palette.lightest;
+        return (
+            React.createElement("div", {style: Styles.with('fullWidth', {height: 25})}, 
+                React.createElement("p", {style: {position: 'absolute', padding: 0, left: 0, top: 0, backgroundColor: Palette.brown, borderRight: border, borderBottom: border, color: Palette.lightest, fontSize: 16, padding: 5}}, "London Fog"), 
+                React.createElement("div", {style: {position: 'absolute', right: 0, top: 0, fontSize: 14, padding: 5}}, 
+                    React.createElement("span", null, "Jason "), 
+                    "| ", React.createElement("a", null, "Logoff")
+                )
+            )
+        );
+    },
+});
+
+module.exports = Header;
+
+},{"./palette":214,"./styles":219,"react":196,"underscore":200}],206:[function(require,module,exports){
 var React = require('react');
 
 var Home = React.createClass({displayName: "Home",
@@ -24910,7 +26288,7 @@ var Home = React.createClass({displayName: "Home",
 
 module.exports = Home;
 
-},{"react":196}],202:[function(require,module,exports){
+},{"react":196}],207:[function(require,module,exports){
 var React = require('react');
 var Project = require('./project');
 var Task = require('./task');
@@ -24938,7 +26316,7 @@ var ItemInstance = React.createClass({displayName: "ItemInstance",
 
 module.exports = ItemInstance;
 
-},{"./project":209,"./task":213,"./todo":214,"react":196}],203:[function(require,module,exports){
+},{"./project":217,"./task":221,"./todo":222,"react":196}],208:[function(require,module,exports){
 //REQUIRES SOCKETMIXIN
 var socketHandler = require('./sockethandler');
 
@@ -25001,7 +26379,7 @@ if (!Array.prototype.findIndex) {
 
 module.exports = SocketCollectionMixin;
 
-},{"./sockethandler":204}],204:[function(require,module,exports){
+},{"./sockethandler":209}],209:[function(require,module,exports){
 function SocketHandler() {
     this.callbacks = {};
     this.sockets = {};
@@ -25070,7 +26448,7 @@ var socketHandler = SocketHandler();
 
 module.exports = socketHandler;
 
-},{}],205:[function(require,module,exports){
+},{}],210:[function(require,module,exports){
 /**
  * Note: This mixin can't be used without either SocketCollectionMixin or SocketModelMixin!
  **/
@@ -25147,7 +26525,7 @@ var socketHandler = require('./sockethandler');
     module.exports = SocketMixin;
 })();
 
-},{"./sockethandler":204,"underscore":197}],206:[function(require,module,exports){
+},{"./sockethandler":209,"underscore":200}],211:[function(require,module,exports){
 //REQUIRES SOCKETMIXIN
 var socketHandler = require('./sockethandler');
 
@@ -25183,12 +26561,14 @@ var  SocketModelMixin = {
         }.bind(this));
     },
 
+    //TODO: this shouldn't be necessary =\
     shouldComponentUpdate: function(nextProps, nextState) {
         return JSON.stringify(nextState) != JSON.stringify(this.state);
     },
 
     componentDidUpdate: function(prevProps, prevState) {
-        if(!this.autosync || !prevState || !something(prevState))   //TODO: remove hacky stuff, once I figure out a way to fix reactjs
+        //TODO: remove hacky stuff, once I figure out a way to fix reactjs
+        if(!this.autosync || !prevState || !something(prevState))
             return;
 
         this.saveModel(this._getData(), function(error, result) {
@@ -25209,7 +26589,57 @@ function hasItem(obj) {
 
 module.exports = SocketModelMixin;
 
-},{"./sockethandler":204}],207:[function(require,module,exports){
+},{"./sockethandler":209}],212:[function(require,module,exports){
+var stateShortcuts = {
+    //convinience function for setting states in react components
+    toggleState: function(state) {
+        return function() {
+            console.log('this: ', this);
+            var obj = {};
+            obj[state] = !this.state[state];
+            this.setState(obj);
+        }.bind(this);
+    },
+    //sets the state for the item,but also falses all other 'states' when turned on.
+    toggleExclusiveState: function(state, states) {
+        return function() {
+            console.log('this: ', this);
+            var obj = {};
+            obj[state] = !this.state[state];
+            if(obj[state])
+                states.forEach(function(item) {
+                    if(item != state)
+                        obj[item] = false;
+                });
+            this.setState(obj);
+        }.bind(this);
+    },
+};
+
+module.exports = stateShortcuts;
+
+},{}],213:[function(require,module,exports){
+var React = require('react');
+
+var Styles = require('./styles');
+
+var Modal = React.createClass({displayName: "Modal",
+    render: function() {
+        return (
+            React.createElement("div", null, 
+                React.createElement("div", {style: Styles.with('aboveOverlay', {position: 'relative', width: 320})}, 
+                    React.createElement("i", {className: "fa fa-times-circle-o", onClick: this.props.onClose, style: Styles.with('circleButton', {position: 'absolute', right: -8, top: -8, backgroundColor: 'white'})}), 
+                    this.props.children
+                ), 
+                React.createElement("div", {style: Styles.overlay, onClick: this.props.onClose})
+            )
+        );
+    },
+});
+
+module.exports = Modal;
+
+},{"./styles":219,"react":196}],214:[function(require,module,exports){
 var Palette = {
     light: '#F8EDC1',
     lighter: '#F6E7B3',
@@ -25239,52 +26669,151 @@ Palette.finishedlight = Palette.finished;
 
 module.exports = Palette;
 
-},{}],208:[function(require,module,exports){
+},{}],215:[function(require,module,exports){
 var React = require('react');
+
+var Styles = require('./styles');
 
 var ProjectBadge = React.createClass({displayName: "ProjectBadge",
     //TODO: add colours and borders nicely according to the task colour?
     //the border and font should be the colour, while the background is a much ligher shade
    render: function() {
+        console.log('badge props: ', this.props);
+        var acronym = this.props.project.acronym || getAcronym(this.props.project.title);
         return (
             React.createElement("span", null, 
-                React.createElement("span", null, this.project.acronym || this.project.title)
+                React.createElement("span", {style: Styles.badgeFont}, acronym.toUpperCase())
             )
         )
    },
 });
 
+function getAcronym(text) {
+    return text.split(' ').reduce(function(collector, item) {
+        return collector + item.substr(0,1);
+    }, '');
+}
+
 module.exports = ProjectBadge;
 
-},{"react":196}],209:[function(require,module,exports){
+},{"./styles":219,"react":196}],216:[function(require,module,exports){
 var React = require('react');
+var request = require('superagent');
+
+var Styles = require('./styles');
+
+var ProjectForm = React.createClass({displayName: "ProjectForm",
+    //TODO: yell at ReactJS developers for making this necessary... this is what should happen by default, without me putting the function
+    getInitialState: function() {
+        return {};
+    },
+    render: function() {
+        console.log('fullWidth: ', Styles.fullWidth);
+        return (
+            React.createElement("div", null, 
+                React.createElement("input", {type: "text", placeholder: "Project Name", onChange: this.setStateToInput('name'), style: Styles.fullWidth}), 
+                React.createElement("input", {type: "text", placeholder: "https://github.com/funkjunky/londonfog", onChange: this.setStateToInput('github'), style: Styles.fullWidth}), 
+                this.state.githubValid
+                    ? React.createElement("p", null, "TODO: show github stuff here...")
+                    : React.createElement("p", null, "Fill in github project url to use github project description and details or..."), 
+                React.createElement("button", {type: "button"}, "Custom Project Details"), React.createElement("br", null), 
+                //I'll eventually add description etc here, for the foolish people who don't want to just use githubs data...
+                
+                React.createElement("button", {type: "button", onClick: this.save}, "Create Project"), React.createElement("br", null)
+            )
+        );
+    },
+
+    setStateToInput: function(state) {
+        return function(event) {
+            var obj = {};
+            obj[state] = event.target.value;
+            this.setState(obj);
+        }.bind(this);
+    },
+
+    save: function() {
+        request('post', 'http://localhost:1212/project')
+            .send({
+                name: this.state.name,
+                github: this.state.github
+            }).end(function(err, res) {
+                console.log('done saving project: ', err, res);
+                this.props.onSave(res);
+            }.bind(this));
+    },
+});
+
+module.exports = ProjectForm;
+
+},{"./styles":219,"react":196,"superagent":197}],217:[function(require,module,exports){
+var React = require('react');
+
+var Styles = require('./styles');
+var Palette = require('./palette');
 
 var SocketMixin = require('./mixins/socketmixin');
 var ModelMixin = require('./mixins/socketmodelmixin');
+var stateShortcuts = require('./mixins/stateShortcuts');
+
+var ContentEditable = require('./content-editable');
+var Task = require('./task');
+var Todo = require('./todo');
 
 var Project = React.createClass({displayName: "Project",
     url: 'http://localhost:1212/',
     dataKey: 'data',
 
-    mixins: [SocketMixin, ModelMixin],
+    mixins: [SocketMixin, ModelMixin, stateShortcuts],
     getDefaultProps: function() {
         //TODO: should use getNewItem() function for data, but apparently 'this' isn't instantiated yet.
-        return {collection: 'project', data: {title: ''}};
+        return {collection: 'project', data: {name: '', tasks: [],}};
     },
     getInitialState: function() {
-        return {expanded: false, data: this.props.data};
+        this.props.data.tasks = this.props.data.tasks || []; //TODO: remove... shouldn't be needed. getNewProject should have this instead
+        return {expanded: false, name: this.props.data.name};
     },
     //TODO: this is bad practice... you're not supposed to set props. So figure out a way to build a new project to replace this one?
     setData: function(model) {
         this.setProps({ data: model });
     },
+    taskChanged: function(index, newTask) {
+        this.setState({ data: { tasks: { $splice: [[index, 1, newTask]] } } });
+    },
+    taskCreated: function(newTask) {
+        this.setState({ data: { tasks: { $push: newTask } } });
+    },
+    //TODO: make a wrapper fucntion that provides vaule as a parameter instead of event.
+    //TODO: better name to be similar to above Changed functions
+    handleTitleChange: function(event) {
+        this.setState({name: event.target.value});
+    },
+    componentDidMount: function() {
+        this.autosync = false;
+    },
     render: function() {
+        var modes = ['creatingTasks', 'creatingTodos'];
+        //TODO: display: none for for tasks when NOT expanded, otherwise display block. Or just set a show prop
         return (
             React.createElement("div", null, 
-                React.createElement("h2", {onClick:  function() { this.setState({expanded: true}); }}, "Project ", this.props.data.title), 
-                 this.state.expanded ? this.props.data.tasks.map(function(item) {
-                    return React.createElement(Task, {data: item});
-                }) : null
+                React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette.notice, color: Palette.noticeFG})}, 
+                    React.createElement("div", {style: Styles.columnRowRow}, 
+                        React.createElement("i", {className: "fa fa-arrow-right", onClick: this.setState.bind(this, {expanded: true}, null)}), 
+                        React.createElement(ContentEditable, {html: this.state.name, onChange: this.handleTitleChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
+                        React.createElement("span", {style:  (this.state.creatingTasks) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleExclusiveState(modes[0], modes)}, "Create Tasks..."), 
+                        React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleExclusiveState(modes[1], modes)}, "Create Todos...")
+                    )
+                ), 
+                 this.state.creatingTasks ?
+                    React.createElement(Task, {data: {project: {_id: this.props.data._id, title: this.state.name}}}) : null, 
+                 this.state.creatingTodos ?
+                    React.createElement(Todo, {data: {project: {_id: this.props.data._id, title: this.state.name}}}) : null, 
+                 this.state.expanded ?
+                    React.createElement("div", {style: Styles.columnRowRow}, 
+                         this.props.data.tasks.map(function(item, index) {
+                            return React.createElement(Task, {data: item, index: index, statechanged: this.taskChanged})
+                        })
+                    ) : null
             )
         );
     },
@@ -25292,13 +26821,14 @@ var Project = React.createClass({displayName: "Project",
 
 module.exports = Project;
 
-},{"./mixins/socketmixin":205,"./mixins/socketmodelmixin":206,"react":196}],210:[function(require,module,exports){
+},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./mixins/stateShortcuts":212,"./palette":214,"./styles":219,"./task":221,"./todo":222,"react":196}],218:[function(require,module,exports){
 var React = require('react');
 var Router = require('react-router-component');
 var Locations = Router.Locations;
 var Location = Router.Location;
 
 //TODO: dynamically load each route somehow...
+var Header = require('./header');
 var Home = require('./home');
 var ItemInstance = require('./item-instance');
 var Todo = require('./todo');
@@ -25317,6 +26847,7 @@ var Routes = React.createClass({displayName: "Routes",
                     React.createElement("link", {rel: "stylesheet", href: "//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"})
                 ), 
                 React.createElement("body", null, 
+                    React.createElement(Header, null), 
                     React.createElement(Locations, {path: this.props.path}, 
                         React.createElement(Location, {path: "/", handler: React.createElement(Home, null)}), 
                         React.createElement(Location, {path: "/home", handler: React.createElement(Home, null)}), 
@@ -25332,7 +26863,7 @@ var Routes = React.createClass({displayName: "Routes",
 
 module.exports = Routes;
 
-},{"./home":201,"./item-instance":202,"./project":209,"./task":213,"./todo":214,"./workspace":216,"react":196,"react-router-component":4}],211:[function(require,module,exports){
+},{"./header":205,"./home":206,"./item-instance":207,"./project":217,"./task":221,"./todo":222,"./workspace":224,"react":196,"react-router-component":4}],219:[function(require,module,exports){
 var _ = require('underscore');
 
 var Palette = require('./palette');
@@ -25344,14 +26875,25 @@ Styles.with = function(key, additionalStyles) {
     return _.extend(_.clone(Styles[key]), additionalStyles);
 };
 
-Styles.fullWidth = {width: '100%'};
-Styles.columnRow = _.extend(Styles.fullWidth, {overflow: 'auto', padding: 0, height: 30, marginBottom: 2, marginTop: 2, display: 'table', position: 'relative'});
-Styles.rowButton = {borderRadius: 5, width: 24, border: '2px solid black', fontSize: 21, display: 'table-cell', height: '100%'};
-Styles.rowBadge = {width: 50, height: 19, padding: 6, fontSize: 20, display: 'table-cell', textAlign: 'center', position: 'absolute', right: 0, top: 0};
+Styles.fullWidth = {width: '100%', position: 'relative', display: 'block'};
+Styles.columnRowTable = Styles.with('fullWidth', {overflow: 'auto', padding: 0, height: 30, marginBottom: 2, marginTop: 2, display: 'table', position: 'relative'});
+Styles.columnRowRow = Styles.with('fullWidth', {display: 'table-row'});
+Styles.button = {cursor: 'pointer'};
+Styles.rowButton = Styles.with('button', {borderRadius: 5, width: 24, border: '2px solid black', fontSize: 21, display: 'table-cell', height: '100%'});
+Styles.rowBadge = Styles.with('button', {width: 50, height: 19, padding: 6, fontSize: 20, display: 'table-cell', textAlign: 'center', position: 'absolute', right: 0, top: 0});
+Styles.badgeFont = {fontFamily: 'Palatino Linotype', fontSize: 24};
+Styles.circleButton = Styles.with('button', {borderRadius: 8, width: 16, height: 16, fontSize: 16, textAlign: 'center', cursor: 'pointer', zIndex: 1});
+Styles.basicButton = Styles.with('button', {borderRadius: 2, border: '2px solid black', fontSize: 16, backgroundColor: 'white', color: 'black', boxShadow: '4px 4px 2px rgba(0,0,0,0.75)', marginTop: 5, display: 'inline-block'});
+Styles.basicButtonPressed = Styles.with('basicButton', {boxShadow: 'inset 2px 2px 2px rgba(0,0,0,0.75)',});
+
+//perhaps have a maroon overlay colour? it might add a nice flare. Try some different overlay colours that are very dark.
+Styles.overlay = {position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'black', opacity: 0.6, zIndex: 2};
+Styles.aboveOverlay = {zIndex: 30, backgroundColor: 'white'};
+
 
 module.exports = Styles;
 
-},{"./palette":207,"underscore":197}],212:[function(require,module,exports){
+},{"./palette":214,"underscore":200}],220:[function(require,module,exports){
 var React = require('react');
 
 var TaskBadge = React.createClass({displayName: "TaskBadge",
@@ -25368,11 +26910,21 @@ var TaskBadge = React.createClass({displayName: "TaskBadge",
 
 module.exports = TaskBadge;
 
-},{"react":196}],213:[function(require,module,exports){
+},{"react":196}],221:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
 var Palette = require('./palette');
+
+var ContentEditable = require('./content-editable');
+var ProjectBadge = require('./project-badge');
+
+function getNewTask() {
+    return {
+        title: '',
+        status: 'new',
+    };
+}
 
 var Task = React.createClass({displayName: "Task",
     states: {
@@ -25383,14 +26935,42 @@ var Task = React.createClass({displayName: "Task",
         finished: {active: 'Not Yet Done',},
     },
 
+    getInitialState: function() {
+        //TODO: all the code in this function is too inconsistent. I need a better way to say x = z.y or default. Regardless of whether z is undefined or not.
+        var initialState = {
+            title: (this.props.data) ? this.props.data.title : '',
+            expanded: false,
+        };
+        if(this.props.data) {
+            initialState.project = this.props.data.project;
+            initialState.status = this.props.data.status || 'new';
+        }
+
+        return initialState;
+    },
+
+    saveAndClear: function() {
+        this.props.stateChanged();
+        this.setState(getNewTask());
+    },
+
+    handleTitleChange: function(event) {
+        this.setState({title: event.target.value});
+    },
+
     render: function() {
+        var isNew = !this.props._id && !this.props.data._id;
         return (
-            React.createElement("div", {style: Styles.with('columnRow', {backgroundColor: Palette[status]})}, 
-                objmap(this.states[this.state.status], function(item, key) {
-                    console.log('key, item: ', key, item);
-                    return ( React.createElement("button", {style: {height: 16, fontSize: 10, verticalAlign: 'center'}, type: "button", onClick:  this.setState.bind(this, {status: key}, null) }, item) );
-                }, this), 
-                React.createElement("p", null, "Task ", this.props.id)
+            React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette[this.state.status]})}, 
+                 isNew
+                    ? React.createElement("span", {style: Styles.with('rowButton', {backgroundColor: 'white', fontSize: 20}), onClick: this.saveModelAndClear}, "Create")
+                    : objmap(this.states[this.state.status], function(item, key) {
+                        console.log('key, item: ', key, item);
+                        return ( React.createElement("button", {style: {height: 16, fontSize: 10, verticalAlign: 'center'}, type: "button", onClick:  this.setState.bind(this, {status: key}, null) }, item) );
+                    }, this), 
+                
+                React.createElement(ContentEditable, {autofocus: this.props.autofocus, html: this.state.title, onChange: this.handleTitleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
+                React.createElement(ProjectBadge, {project: this.state.project})
             )
         );
     },
@@ -25398,7 +26978,7 @@ var Task = React.createClass({displayName: "Task",
 
 module.exports = Task;
 
-},{"./palette":207,"./styles":211,"react":196}],214:[function(require,module,exports){
+},{"./content-editable":204,"./palette":214,"./project-badge":215,"./styles":219,"react":196}],222:[function(require,module,exports){
 var React = require('react/addons');
 var _ = require('underscore');
 
@@ -25432,7 +27012,7 @@ var Todo = React.createClass({displayName: "Todo",
             this._setData(blankTodo());
         }.bind(this));
     },
-    handleChange: function(event) {
+    handleTitleChange: function(event) {
         this.setState({title: event.target.value});
     },
     complete: function(event) {
@@ -25451,13 +27031,14 @@ var Todo = React.createClass({displayName: "Todo",
         var isNew = !this.props._id && !this.props.data._id;
 console.log('AUTOFOCUS: ', this.props.autofocus);
         return (
-            React.createElement("div", {style: Styles.with('columnRow', {backgroundColor: Palette[status]})}, 
-                React.createElement("span", {onClick: this.complete, style: Styles.with('rowButton', {backgroundColor: 'white'})}, 
-                    React.createElement("input", {type: "hidden", value: this.state.completed}), 
-                     isNew ? React.createElement("button", {type: "button", onClick: this.saveModelAndClear}, "Create")
-                        : (this.state.complete ? React.createElement("i", {className: "fa fa-check"}) : React.createElement("i", {className: "fa"})) 
-                ), 
-                React.createElement(ContentEditable, {autofocus: this.props.autofocus, html: this.state.title, onChange: this.handleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
+            React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette[status]})}, 
+                 isNew
+                ?   React.createElement("span", {onClick: this.saveModelAndClear, style: Styles.with('rowButton', {backgroundColor: 'white', fontSize: 20})}, "Create")
+                :   React.createElement("span", {onClick: this.complete, style: Styles.with('rowButton', {backgroundColor: 'white'})}, 
+                        React.createElement("input", {type: "hidden", value: this.state.completed}), 
+                         this.state.complete ? React.createElement("i", {className: "fa fa-check"}) : React.createElement("i", {className: "fa"})
+                    ), 
+                React.createElement(ContentEditable, {autofocus: this.props.autofocus, html: this.state.title, onChange: this.handleTitleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
                  this.state.task ? React.createElement(TaskBadge, {task: this.state.task}) : null, 
                  this.state.project ? React.createElement(ProjectBadge, {project: this.state.project}) : null, 
                  (!this.state.task && !this.state.project) ? React.createElement("span", {style: Styles.with('rowBadge', {backgroundColor: 'white'})}, "Task?") : null
@@ -25476,23 +27057,27 @@ function objmap(obj, fnc, context) {
 
 module.exports = Todo;
 
-},{"./content-editable":200,"./mixins/socketmixin":205,"./mixins/socketmodelmixin":206,"./palette":207,"./project-badge":208,"./styles":211,"./task-badge":212,"react/addons":24,"underscore":197}],215:[function(require,module,exports){
+},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./palette":214,"./project-badge":215,"./styles":219,"./task-badge":220,"react/addons":24,"underscore":200}],223:[function(require,module,exports){
 var React = require('react');
-var _ = require('underscore');
 
 var Styles = require('./styles');
-var Palette = require('./palette');
+
+var Modal = require('./modal');
+var ProjectForm = require('./project-form');
+var stateShortcuts = require('./mixins/stateShortcuts');
+
 
 var WorkspaceHeader = React.createClass({displayName: "WorkspaceHeader",
+    mixins: [stateShortcuts],
+    //TODO: yell at ReactJS developers for making this necessary... this is what should happen by default, without me putting the function
+    getInitialState: function() {
+        return {};
+    },
     render: function() {
-        var border = '2px solid ' + Palette.lightest;
         return (
-            React.createElement("div", {style: Styles.with('fullWidth', {height: 80})}, 
-                React.createElement("p", {style: {position: 'absolute', padding: 0, left: 0, top: 0, backgroundColor: Palette.brown, borderRight: border, borderBottom: border, color: Palette.lightest, fontSize: 16, padding: 5}}, "London Fog"), 
-                React.createElement("div", {style: {position: 'absolute', right: 0, top: 0, fontSize: 14, padding: 5}}, 
-                    React.createElement("span", null, "Jason "), 
-                    "| ", React.createElement("a", null, "Logoff")
-                )
+            React.createElement("div", {style: Styles.with('fullWidth', {height: 55, border: 'solid 1px red'})}, 
+                React.createElement("button", {type: "button", onClick: this.toggleState('showCreateProject')}, "Create Project"), 
+                this.state.showCreateProject ? React.createElement(Modal, {onClose: this.toggleState('showCreateProject')}, React.createElement(ProjectForm, {onSave: this.toggleState('showCreateProject')})) : null
             )
         );
     },
@@ -25500,12 +27085,12 @@ var WorkspaceHeader = React.createClass({displayName: "WorkspaceHeader",
 
 module.exports = WorkspaceHeader;
 
-
-},{"./palette":207,"./styles":211,"react":196,"underscore":197}],216:[function(require,module,exports){
+},{"./mixins/stateShortcuts":212,"./modal":213,"./project-form":216,"./styles":219,"react":196}],224:[function(require,module,exports){
 var React = require('react');
 
 var WorkspaceHeader = require('./workspace-header');
 var ColumnList = require('./column-list');
+var BasicList = require('./basic-list');
 
 var Workspace = React.createClass({displayName: "Workspace",
     render: function() {
@@ -25516,7 +27101,7 @@ var Workspace = React.createClass({displayName: "Workspace",
                 React.createElement(WorkspaceHeader, null), 
                 React.createElement("div", {className: "body"}, 
                     React.createElement(ColumnList, {collection: "todo", style: leftStyle}), 
-                    React.createElement(ColumnList, {collection: "project", style: rightStyle})
+                    React.createElement(BasicList, {collection: "project", style: rightStyle})
                 )
             )
         );
@@ -25525,4 +27110,4 @@ var Workspace = React.createClass({displayName: "Workspace",
 
 module.exports = Workspace;
 
-},{"./column-list":199,"./workspace-header":215,"react":196}]},{},[198]);
+},{"./basic-list":201,"./column-list":203,"./workspace-header":223,"react":196}]},{},[202]);

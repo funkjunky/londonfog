@@ -1,23 +1,26 @@
 var React = require('react');
-var _ = require('underscore');
 
 var Styles = require('./styles');
-var Palette = require('./palette');
+
+var Modal = require('./modal');
+var ProjectForm = require('./project-form');
+var stateShortcuts = require('./mixins/stateShortcuts');
+
 
 var WorkspaceHeader = React.createClass({
+    mixins: [stateShortcuts],
+    //TODO: yell at ReactJS developers for making this necessary... this is what should happen by default, without me putting the function
+    getInitialState: function() {
+        return {};
+    },
     render: function() {
-        var border = '2px solid ' + Palette.lightest;
         return (
-            <div style={Styles.with('fullWidth', {height: 80})}>
-                <p style={{position: 'absolute', padding: 0, left: 0, top: 0, backgroundColor: Palette.brown, borderRight: border, borderBottom: border, color: Palette.lightest, fontSize: 16, padding: 5}}>London Fog</p>
-                <div style={{position: 'absolute', right: 0, top: 0, fontSize: 14, padding: 5}}>
-                    <span>Jason </span>
-                    | <a>Logoff</a>
-                </div>
+            <div style={Styles.with('fullWidth', {height: 55, border: 'solid 1px red'})}>
+                <button type="button" onClick={this.toggleState('showCreateProject')}>Create Project</button>
+                {this.state.showCreateProject ? <Modal onClose={this.toggleState('showCreateProject')}><ProjectForm onSave={this.toggleState('showCreateProject')} /></Modal> : null }
             </div>
         );
     },
 });
 
 module.exports = WorkspaceHeader;
-

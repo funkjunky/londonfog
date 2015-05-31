@@ -5,6 +5,8 @@ var SocketMixin = require('./mixins/socketmixin');
 var CollectionMixin = require('./mixins/socketcollectionmixin');
 var Styles = require('./styles');
 
+//A LIST OF TODOS... nothing else... I should rename this class at some point.
+//This represents a list of quick to create items. With new items ready to be created just by typing and hitting enter in a single textbox.
 var ColumnList = React.createClass({
     url: 'http://localhost:1212/',
     dataKey: 'data',

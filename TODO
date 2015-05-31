@@ -20,19 +20,76 @@ TODO
 			*- style delete in there somehow.
 
 	- get task and project working as intended in London Fog
-		- first tasks
-			- tasks are like TODOs, but with status buttons on the right, show these status buttons and ensure they work (no checkbox)
-			- ensure you can create and save current tasks
+		- projects
+			*- add arrow
+			*- tasks take a prop to be called whenever their state changes.
+			*- ensure a blank task is given a create button
+			- add a button in the workspace header to add a project
+				*- create a “modal” component
+					*- style: blacked out 70% alpha background
+					*- expects style to added
+					*- element to be transcluded
+				*- create project-form [modelmixin]
+					*- add the necessary fields
+					*- add their events for setState
+				*- rename workspace header to header
+				*- create the workspace header that well have our create project button [eventually filters and stuff too]
+				*- add the modal with project-form to workspace header, under a ternary for this.showCreateProject
+					*- add controls to button
+					*- fix what’s causing some issue in transclusion…
+					*- make sure the button works.
+					*- make sure all the styles are correct for modal structure
+					*- add styling for the form
+					*- make sure the modal goes away if we click outside
+					*- make sure the project form saves when we click save.
+					*- make sure the project shows up in the project list on the right after.
+					*- on save make modal close
+			- in project.jsx component, add a ‘create tasks’ and ‘create todos’ buttons, to the right of the title.
+				*- when clicking these buttons, the style changes to show they are turned on.
+				*- the buttons should be mutually exclusive
+				*- when the create tasks button is clicked, change state.creatingTasks
+				*- when the create todos button is clicked, change state.creatingTodos
+				*- make a mixin for stateShortcuts
+				*- allow the task to do new instances…
+				*- show create task and todos when respect button is pressed and styled.
+	
+				*- fix styling for things thus far.
+					*- background colour of the project label should be blank or the purple
+					*- foreground should be fg colour
+					*- remove large padding left on first project
+
+				*- get the “create todos” to work
+				*- make sure the styling is ok for TODOs
+					*- get the width up to 100%
+					*- Increase font size, add text effect and unique native font.
+				*- improve the styling of the task at least in a basic sense
+					*- same background colour and forecolour as TODOs for now
+					*- ensure the project badge is there
+					*- ensure the full width is there
+
+				- be able to turn back on autosync for projects and get it to work
+					- When saving in modelmixin, check to see if the model has changed using _getModel and oldModel [which I well not cache]
+				- Add a content-editable on the left most for acronyms [Enough for 3 letters at Most. Large font like ]
+				- allow user to set a colour by a predetermined set of colours.
+				- ensure the project badge shows for todos, then tasks
+					- show acronym, and make background colour the same as project
+			- ensure status buttons work for the tasks
+			- ensure you can save and edit current tasks
 			- style status buttons nicely using colour scheme, rounded borders, etc.
 			- add type drop down like pivotal icons, dropdown of icons. bug, feature, upgrade [green up arrow] (for system updates, like allowing a system to work faster, or easier to use, or less code, etc. no direct affect to API, but not a bug fix)
 				- ensure this actually sets the status correctly. [also put the words beside the icon when showing dropdown [ie <bug> bug, <star> feature, <arrow> upgrade]]
+				**get here before end of night**
 			- add arrow on the left most space like pivotal
+			- add code to show tasks under project, change icon as well
 			- add code to show todos under the task, when the arrow is clicked [this.state.showTodos]
 				- indent TODOs!
-		- projects
-			- show name and have arrow, then also have an expand-all button that well expand all subtasks todos as well.
-		
+	- Add basic filters and style workspace header
+		- add a text filter to be applied to everything [just checking title for now]
+		- style the create project button and the text filter nicely.
+		- style and organize projects, tasks, and todos appropriately.
+			~Nitpick on colours etc at this point
 
+	- see about using this.props.children more often… i found out about transclusion in reactjs too late… i could probably use it in a number of places to great affect… like adding buttons (del or create) to itemInstances, etc.
 	- grab data on server side, then update on client afterwards [see SO QA]
 
  	- improve tooling
@@ -71,6 +128,7 @@ TODO
  	- add mobile controls. [like Google inbox? swiping, right to complete, left to downgrade (high priority->normal priority. normal -> icebox, icebox -> delete ?? keep there for a second before fading away, so a user can swipe three times on the spot to delete?)]
 		- add reactmq to work with tablets and phones
  	- add homepage with a little marketing pizzaz, perhaps stellar or something neat. Big sign up form and such too. Tkae notes from other reallyt good home pages.
+		- add mission priorities to front page, priorities for London Fog, so whenever i take feedback i ALWAYS consider these prioritis [something like simplicity first [TODO is text, done or not, everything else is still simple, the next priority, or whatever]]
  	- double check there isn’t anything imperative I’m missing, before considering release… something very important and necessary for PM software…
  	- [look to buy the web domain londonfog-pm]
  	- deploy my new awesome software!
@@ -80,11 +138,18 @@ TODO
 		- autofocus on new todo in todo list.
 		- focus on new todo when just created a new task in the project list.
 		- hide delete button for todos, unless they are focused, OR the top filters delete button is pressed.
-
-FUTURE:
- - add github hooks
- - add —-flags to generic rest server, then push to github
- - setup more secure rest server…??? hmmm or extend generic rest server with security measures??
+		- modal should handle the opening and closing based on a variable, itsself. So instead of wrapping it in a ternary, it should be it’s own element, ie: <Modal closeToggle={this.showCreateProject}>…</Modal>
+	
+	-add cool features
+		 - add github hooks
+			 - projects attached to github repos
+			 - organizations attached to github organizations
+				- automaticly asking them if they want to start a new project for recent github project and vice versa
+			- quick marking of commits when completing a task or todo
+			- perhaps more? This could be a huge boon to the software
+		 - add —-flags to generic rest server, then push to github
+		 - Make sure generic rest server is adequately secure. Consult Zak on this perhaps.
+		 - come up with more cool features
 
 DONE:
 ———

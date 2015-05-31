@@ -2,6 +2,7 @@ var React = require('react');
 
 var WorkspaceHeader = require('./workspace-header');
 var ColumnList = require('./column-list');
+var BasicList = require('./basic-list');
 
 var Workspace = React.createClass({
     render: function() {
@@ -12,7 +13,7 @@ var Workspace = React.createClass({
                 <WorkspaceHeader></WorkspaceHeader>
                 <div className="body">
                     <ColumnList collection="todo" style={leftStyle} />
-                    <ColumnList collection="project" style={rightStyle} />
+                    <BasicList collection="project" style={rightStyle} />
                 </div>
             </div>
         );

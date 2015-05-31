@@ -33,12 +33,14 @@ var  SocketModelMixin = {
         }.bind(this));
     },
 
+    //TODO: this shouldn't be necessary =\
     shouldComponentUpdate: function(nextProps, nextState) {
         return JSON.stringify(nextState) != JSON.stringify(this.state);
     },
 
     componentDidUpdate: function(prevProps, prevState) {
-        if(!this.autosync || !prevState || !something(prevState))   //TODO: remove hacky stuff, once I figure out a way to fix reactjs
+        //TODO: remove hacky stuff, once I figure out a way to fix reactjs
+        if(!this.autosync || !prevState || !something(prevState))
             return;
 
         this.saveModel(this._getData(), function(error, result) {

@@ -4,6 +4,7 @@ var Locations = Router.Locations;
 var Location = Router.Location;
 
 //TODO: dynamically load each route somehow...
+var Header = require('./header');
 var Home = require('./home');
 var ItemInstance = require('./item-instance');
 var Todo = require('./todo');
@@ -22,6 +23,7 @@ var Routes = React.createClass({displayName: "Routes",
                     React.createElement("link", {rel: "stylesheet", href: "//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"})
                 ), 
                 React.createElement("body", null, 
+                    React.createElement(Header, null), 
                     React.createElement(Locations, {path: this.props.path}, 
                         React.createElement(Location, {path: "/", handler: React.createElement(Home, null)}), 
                         React.createElement(Location, {path: "/home", handler: React.createElement(Home, null)}), 

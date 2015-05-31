@@ -4,6 +4,7 @@ var Locations = Router.Locations;
 var Location = Router.Location;
 
 //TODO: dynamically load each route somehow...
+var Header = require('./header');
 var Home = require('./home');
 var ItemInstance = require('./item-instance');
 var Todo = require('./todo');
@@ -22,6 +23,7 @@ var Routes = React.createClass({
                     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
                 </head>
                 <body>
+                    <Header />
                     <Locations path={this.props.path}>
                         <Location path="/" handler={<Home />} />
                         <Location path="/home" handler={<Home />} />

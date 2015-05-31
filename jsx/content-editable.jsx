@@ -12,6 +12,7 @@ var ContentEditable = React.createClass({
             onBlur={this.emitChange}
             contentEditable
             autoFocus={this.props.autofocus}
+            placeholder={this.props.placeholder}
             dangerouslySetInnerHTML={{__html: html}}></span>;
     },
     shouldComponentUpdate: function(nextProps){

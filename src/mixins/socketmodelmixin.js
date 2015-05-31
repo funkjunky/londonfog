@@ -27,6 +27,8 @@ var  SocketModelMixin = {
         if(!this.autosync)
             return;
 
+        this.oldModel = this._getData();
+
         socketHandler.addModelEvents(this.url, this.props.collection, this.getId(), function(item) {
             console.log('SOCKET ON UPDATED - item: ', item);
             this._setData(item);
@@ -40,13 +42,19 @@ var  SocketModelMixin = {
 
     componentDidUpdate: function(prevProps, prevState) {
         //TODO: remove hacky stuff, once I figure out a way to fix reactjs
-        if(!this.autosync || !prevState || !something(prevState))
+        if(!this.autosync || !prevState || !something(prevState) || objectsAreEqual(this._getData(), this.oldModel))
             return;
+
+        this.oldModel = this._getData();
 
         this.saveModel(this._getData(), function(error, result) {
             this._setData(result);
         }.bind(this));
     },
+};
+
+function objectsAreEqual(obj1, obj2) {
+    return JSON.stringify(obj1) == JSON.stringify(obj2);
 };
 
 //TODO: putsomewhere better. This is duplicated in rest and maybe elsewhere?

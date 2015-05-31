@@ -16,6 +16,7 @@ var ProjectBadge = React.createClass({
    },
 });
 
+//TODO: duplicated in project.jsx
 function getAcronym(text) {
     return text.split(' ').reduce(function(collector, item) {
         return collector + item.substr(0,1);

@@ -13,7 +13,6 @@ var Todo = require('./todo');
 
 var Project = React.createClass({displayName: "Project",
     url: 'http://localhost:1212/',
-    dataKey: 'data',
 
     mixins: [SocketMixin, ModelMixin, stateShortcuts],
     getDefaultProps: function() {
@@ -21,12 +20,25 @@ var Project = React.createClass({displayName: "Project",
         return {collection: 'project', data: {name: '', tasks: [],}};
     },
     getInitialState: function() {
+        //TODO: yuck...
         this.props.data.tasks = this.props.data.tasks || []; //TODO: remove... shouldn't be needed. getNewProject should have this instead
-        return {expanded: false, name: this.props.data.name};
+        var acronym = this.props.data.acronym || '';
+        return {expanded: false, name: this.props.data.name, acronym: acronym};
     },
-    //TODO: this is bad practice... you're not supposed to set props. So figure out a way to build a new project to replace this one?
     setData: function(model) {
-        this.setProps({ data: model });
+        this.setState({data: model});
+    },
+    //TODO: too long and two different ways of setting up model is bad.
+    getData: function() {
+        var model = {
+            name: this.state.name,
+            _id: this.props.data._id,
+        };
+        console.log('acronym: ', this.state.acronym);
+        if(this.state.acronym && this.state.acronym != '')
+            model.acronym = this.state.acronym;
+
+        return model;
     },
     taskChanged: function(index, newTask) {
         this.setState({ data: { tasks: { $splice: [[index, 1, newTask]] } } });
@@ -39,8 +51,11 @@ var Project = React.createClass({displayName: "Project",
     handleTitleChange: function(event) {
         this.setState({name: event.target.value});
     },
+    handleAcronymChange: function(event) {
+        this.setState({acronym: event.target.value});
+    },
     componentDidMount: function() {
-        this.autosync = false;
+        //this.autosync = false;
     },
     render: function() {
         var modes = ['creatingTasks', 'creatingTodos'];
@@ -50,7 +65,8 @@ var Project = React.createClass({displayName: "Project",
                 React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette.notice, color: Palette.noticeFG})}, 
                     React.createElement("div", {style: Styles.columnRowRow}, 
                         React.createElement("i", {className: "fa fa-arrow-right", onClick: this.setState.bind(this, {expanded: true}, null)}), 
-                        React.createElement(ContentEditable, {html: this.state.name, onChange: this.handleTitleChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
+                        React.createElement(ContentEditable, {html: this.state.acronym, onChange: this.handleAcronymChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', width: 50, padding: 2, fontSize: 24}}), 
+                        React.createElement(ContentEditable, {html: this.state.name, onChange: this.handleTitleChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, padding: 2}}), 
                         React.createElement("span", {style:  (this.state.creatingTasks) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleExclusiveState(modes[0], modes)}, "Create Tasks..."), 
                         React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleExclusiveState(modes[1], modes)}, "Create Todos...")
                     )
@@ -69,5 +85,12 @@ var Project = React.createClass({displayName: "Project",
         );
     },
 });
+
+//TODO: duplicated in project.jsx
+function getAcronym(text) {
+    return text.split(' ').reduce(function(collector, item) {
+        return collector + item.substr(0,1);
+    }, '');
+}
 
 module.exports = Project;

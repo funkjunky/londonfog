@@ -26145,7 +26145,7 @@ var BasicList = React.createClass({displayName: "BasicList",
 
 module.exports = BasicList;
 
-},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":219,"react":196}],202:[function(require,module,exports){
+},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":220,"react":196}],202:[function(require,module,exports){
 var React = require('react');
 var Routes = React.createFactory(require('./routes'));
 
@@ -26155,7 +26155,7 @@ if(typeof window !== 'undefined') {
     }
 }
 
-},{"./routes":218,"react":196}],203:[function(require,module,exports){
+},{"./routes":219,"react":196}],203:[function(require,module,exports){
 var React = require('react');
 
 var ItemInstance = require('./item-instance');
@@ -26210,7 +26210,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
 
 module.exports = ColumnList;
 
-},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":219,"react":196}],204:[function(require,module,exports){
+},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":220,"react":196}],204:[function(require,module,exports){
 var React = require('react');
 
 var ContentEditable = React.createClass({displayName: "ContentEditable",
@@ -26276,7 +26276,7 @@ var Header = React.createClass({displayName: "Header",
 
 module.exports = Header;
 
-},{"./palette":214,"./styles":219,"react":196,"underscore":200}],206:[function(require,module,exports){
+},{"./palette":214,"./styles":220,"react":196,"underscore":200}],206:[function(require,module,exports){
 var React = require('react');
 
 var Home = React.createClass({displayName: "Home",
@@ -26317,7 +26317,7 @@ var ItemInstance = React.createClass({displayName: "ItemInstance",
 
 module.exports = ItemInstance;
 
-},{"./project":217,"./task":221,"./todo":222,"react":196}],208:[function(require,module,exports){
+},{"./project":217,"./task":222,"./todo":223,"react":196}],208:[function(require,module,exports){
 //REQUIRES SOCKETMIXIN
 var socketHandler = require('./sockethandler');
 
@@ -26648,7 +26648,7 @@ var Modal = React.createClass({displayName: "Modal",
 
 module.exports = Modal;
 
-},{"./styles":219,"react":196}],214:[function(require,module,exports){
+},{"./styles":220,"react":196}],214:[function(require,module,exports){
 var Palette = {
     light: '#F8EDC1',
     lighter: '#F6E7B3',
@@ -26689,9 +26689,13 @@ var ProjectBadge = React.createClass({displayName: "ProjectBadge",
    render: function() {
         console.log('badge props: ', this.props);
         var acronym = this.props.project.acronym || getAcronym(this.props.project.title);
+        //TODO: duplicated in project-form
+        var colour = '#' + this.props.project.colour.reduce(function(collector, item) {
+            return collector + ((item==0) ? '00' : item.toString(16)); //this is a lazy version. If any number is less than 16, then it won't give a 6 char hex
+        }, '');
         return (
             React.createElement("span", null, 
-                React.createElement("span", {style: Styles.badgeFont}, acronym.toUpperCase())
+                React.createElement("span", {style: Styles.with('badgeFont', {color: colour})}, acronym.toUpperCase())
             )
         )
    },
@@ -26706,11 +26710,14 @@ function getAcronym(text) {
 
 module.exports = ProjectBadge;
 
-},{"./styles":219,"react":196}],216:[function(require,module,exports){
+},{"./styles":220,"react":196}],216:[function(require,module,exports){
 var React = require('react');
 var request = require('superagent');
 
 var Styles = require('./styles');
+
+var RotatingColours = require('./rotating-colours');
+var colourIndex = Math.floor(Math.random() * RotatingColours.length);
 
 var ProjectForm = React.createClass({displayName: "ProjectForm",
     //TODO: yell at ReactJS developers for making this necessary... this is what should happen by default, without me putting the function
@@ -26718,10 +26725,13 @@ var ProjectForm = React.createClass({displayName: "ProjectForm",
         return {};
     },
     render: function() {
-        console.log('fullWidth: ', Styles.fullWidth);
+        var colour = '#' + RotatingColours[colourIndex].reduce(function(collector, item) {
+            return collector + ((item==0) ? '00' : item.toString(16)); //this is a lazy version. If any number is less than 16, then it won't give a 6 char hex
+        }, '');
         return (
             React.createElement("div", null, 
                 React.createElement("input", {type: "text", placeholder: "Project Name", onChange: this.setStateToInput('name'), style: Styles.fullWidth}), 
+                React.createElement("input", {type: "text", placeholder: "Project Acronym", onChange: this.setStateToInput('acronym'), style: Styles.fullWidth}), React.createElement("span", {style: {fontSize: 24, color: colour}}, this.state.acronym), 
                 React.createElement("input", {type: "text", placeholder: "https://github.com/funkjunky/londonfog", onChange: this.setStateToInput('github'), style: Styles.fullWidth}), 
                 this.state.githubValid
                     ? React.createElement("p", null, "TODO: show github stuff here...")
@@ -26746,17 +26756,22 @@ var ProjectForm = React.createClass({displayName: "ProjectForm",
         request('post', 'http://localhost:1212/project')
             .send({
                 name: this.state.name,
+                acronym: this.state.acronym,
+                colour: RotatingColours[colourIndex],
                 github: this.state.github
             }).end(function(err, res) {
                 console.log('done saving project: ', err, res);
                 this.props.onSave(res);
+                
+                if(colourIndex < RotatingColours.length)    ++colourIndex;
+                else                                        colourIndex = 0;
             }.bind(this));
     },
 });
 
 module.exports = ProjectForm;
 
-},{"./styles":219,"react":196,"superagent":197}],217:[function(require,module,exports){
+},{"./rotating-colours":218,"./styles":220,"react":196,"superagent":197}],217:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
@@ -26818,22 +26833,26 @@ var Project = React.createClass({displayName: "Project",
     },
     render: function() {
         var modes = ['creatingTasks', 'creatingTodos'];
+        //TODO: duplicated in project-form
+        var colour = '#' + this.props.data.colour.reduce(function(collector, item) {
+            return collector + ((item==0) ? '00' : item.toString(16)); //this is a lazy version. If any number is less than 16, then it won't give a 6 char hex
+        }, '');
         //TODO: display: none for for tasks when NOT expanded, otherwise display block. Or just set a show prop
         return (
             React.createElement("div", null, 
                 React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette.notice, color: Palette.noticeFG})}, 
                     React.createElement("div", {style: Styles.columnRowRow}, 
                         React.createElement("i", {className: "fa fa-arrow-right", onClick: this.setState.bind(this, {expanded: true}, null)}), 
-                        React.createElement(ContentEditable, {html: this.state.acronym, onChange: this.handleAcronymChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', width: 50, padding: 2, fontSize: 24}}), 
+                        React.createElement(ContentEditable, {html: this.state.acronym, onChange: this.handleAcronymChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', width: 50, padding: 2, fontSize: 24, backgroundColor: 'white', color: colour}}), 
                         React.createElement(ContentEditable, {html: this.state.name, onChange: this.handleTitleChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, padding: 2}}), 
                         React.createElement("span", {style:  (this.state.creatingTasks) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleExclusiveState(modes[0], modes)}, "Create Tasks..."), 
                         React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleExclusiveState(modes[1], modes)}, "Create Todos...")
                     )
                 ), 
                  this.state.creatingTasks ?
-                    React.createElement(Task, {data: {project: {_id: this.props.data._id, title: this.state.name}}}) : null, 
+                    React.createElement(Task, {data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}}) : null, 
                  this.state.creatingTodos ?
-                    React.createElement(Todo, {data: {project: {_id: this.props.data._id, title: this.state.name}}}) : null, 
+                    React.createElement(Todo, {data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}}) : null, 
                  this.state.expanded ?
                     React.createElement("div", {style: Styles.columnRowRow}, 
                          this.props.data.tasks.map(function(item, index) {
@@ -26854,7 +26873,45 @@ function getAcronym(text) {
 
 module.exports = Project;
 
-},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./mixins/stateShortcuts":212,"./palette":214,"./styles":219,"./task":221,"./todo":222,"react":196}],218:[function(require,module,exports){
+},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./mixins/stateShortcuts":212,"./palette":214,"./styles":220,"./task":222,"./todo":223,"react":196}],218:[function(require,module,exports){
+function RotatingColours() {
+    var rotatingColours = [
+        [255,255,0],
+        [0,255,255],
+        [255,0,255],
+    ];
+    var subtractMap = function(arr) {
+        return arr.map(function(item) {
+            if(item > 0)
+                return item - 25;
+            else
+                return item;
+        });
+    };
+
+    var colours = [];
+    for(var i=0; i!=6; ++i) {
+        rotatingColours.forEach(function(rgb, index) {
+            colours.push(rotatingColours[index] = subtractMap(rgb));
+        });
+        rotatingColours.forEach(function(rgb, index) {
+            rgb.some(function(c, i) {
+                if(c == 0)  return false;
+
+                var newRgb = rgb.slice();
+                newRgb[i] -= 25;
+                colours.push(newRgb);
+                return true;
+            });
+        });
+    }
+
+    return colours;
+}
+
+module.exports = RotatingColours();
+
+},{}],219:[function(require,module,exports){
 var React = require('react');
 var Router = require('react-router-component');
 var Locations = Router.Locations;
@@ -26896,7 +26953,7 @@ var Routes = React.createClass({displayName: "Routes",
 
 module.exports = Routes;
 
-},{"./header":205,"./home":206,"./item-instance":207,"./project":217,"./task":221,"./todo":222,"./workspace":224,"react":196,"react-router-component":4}],219:[function(require,module,exports){
+},{"./header":205,"./home":206,"./item-instance":207,"./project":217,"./task":222,"./todo":223,"./workspace":225,"react":196,"react-router-component":4}],220:[function(require,module,exports){
 var _ = require('underscore');
 
 var Palette = require('./palette');
@@ -26926,7 +26983,7 @@ Styles.aboveOverlay = {zIndex: 30, backgroundColor: 'white'};
 
 module.exports = Styles;
 
-},{"./palette":214,"underscore":200}],220:[function(require,module,exports){
+},{"./palette":214,"underscore":200}],221:[function(require,module,exports){
 var React = require('react');
 
 var TaskBadge = React.createClass({displayName: "TaskBadge",
@@ -26943,7 +27000,7 @@ var TaskBadge = React.createClass({displayName: "TaskBadge",
 
 module.exports = TaskBadge;
 
-},{"react":196}],221:[function(require,module,exports){
+},{"react":196}],222:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
@@ -27011,7 +27068,7 @@ var Task = React.createClass({displayName: "Task",
 
 module.exports = Task;
 
-},{"./content-editable":204,"./palette":214,"./project-badge":215,"./styles":219,"react":196}],222:[function(require,module,exports){
+},{"./content-editable":204,"./palette":214,"./project-badge":215,"./styles":220,"react":196}],223:[function(require,module,exports){
 var React = require('react/addons');
 var _ = require('underscore');
 
@@ -27090,7 +27147,7 @@ function objmap(obj, fnc, context) {
 
 module.exports = Todo;
 
-},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./palette":214,"./project-badge":215,"./styles":219,"./task-badge":220,"react/addons":24,"underscore":200}],223:[function(require,module,exports){
+},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./palette":214,"./project-badge":215,"./styles":220,"./task-badge":221,"react/addons":24,"underscore":200}],224:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
@@ -27118,7 +27175,7 @@ var WorkspaceHeader = React.createClass({displayName: "WorkspaceHeader",
 
 module.exports = WorkspaceHeader;
 
-},{"./mixins/stateShortcuts":212,"./modal":213,"./project-form":216,"./styles":219,"react":196}],224:[function(require,module,exports){
+},{"./mixins/stateShortcuts":212,"./modal":213,"./project-form":216,"./styles":220,"react":196}],225:[function(require,module,exports){
 var React = require('react');
 
 var WorkspaceHeader = require('./workspace-header');
@@ -27143,4 +27200,4 @@ var Workspace = React.createClass({displayName: "Workspace",
 
 module.exports = Workspace;
 
-},{"./basic-list":201,"./column-list":203,"./workspace-header":223,"react":196}]},{},[202]);
+},{"./basic-list":201,"./column-list":203,"./workspace-header":224,"react":196}]},{},[202]);

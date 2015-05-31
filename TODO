@@ -70,11 +70,12 @@ TODO
 				*- be able to turn back on autosync for projects and get it to work
 					*- When saving in modelmixin, check to see if the model has changed using _getModel and oldModel [which I well not cache]
 				*- Add a content-editable on the left most for acronyms [Enough for 3 letters at Most. Large font like ]
-				- make an ordered colour list that sets colours as differently as possible
-				- automatically give a project a colour based on the number of projects that already exist
-					- remember to attach it to the Todo, and Task, and getData
-				- ensure the project badge shows for todos, then tasks
-					- show acronym, and make background colour the same as project
+				*- make an ordered colour list that sets colours as differently as possible
+				*- automatically give a project a colour based on the number of projects that already exist
+					*- remember to attach it to the Todo, and Task, and getData
+				*- ensure the project badge shows for todos, then tasks
+					*- show acronym, and make background colour the same as project
+
 			- ensure status buttons work for the tasks
 			- ensure you can save and edit current tasks
 			- style status buttons nicely using colour scheme, rounded borders, etc.

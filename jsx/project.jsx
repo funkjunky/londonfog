@@ -59,22 +59,26 @@ var Project = React.createClass({
     },
     render: function() {
         var modes = ['creatingTasks', 'creatingTodos'];
+        //TODO: duplicated in project-form
+        var colour = '#' + this.props.data.colour.reduce(function(collector, item) {
+            return collector + ((item==0) ? '00' : item.toString(16)); //this is a lazy version. If any number is less than 16, then it won't give a 6 char hex
+        }, '');
         //TODO: display: none for for tasks when NOT expanded, otherwise display block. Or just set a show prop
         return (
             <div>
                 <div style={Styles.with('columnRowTable', {backgroundColor: Palette.notice, color: Palette.noticeFG})}>
                     <div style={Styles.columnRowRow}>
                         <i className="fa fa-arrow-right" onClick={this.setState.bind(this, {expanded: true}, null)}></i>
-                        <ContentEditable html={this.state.acronym} onChange={this.handleAcronymChange} style={{display: 'table-cell', verticalAlign: 'middle', height: '100%', width: 50, padding: 2, fontSize: 24}}></ContentEditable>
+                        <ContentEditable html={this.state.acronym} onChange={this.handleAcronymChange} style={{display: 'table-cell', verticalAlign: 'middle', height: '100%', width: 50, padding: 2, fontSize: 24, backgroundColor: 'white', color: colour}}></ContentEditable>
                         <ContentEditable html={this.state.name} onChange={this.handleTitleChange} style={{display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, padding: 2}}></ContentEditable>
                         <span style={ (this.state.creatingTasks) ? Styles.basicButtonPressed : Styles.basicButton } onClick={this.toggleExclusiveState(modes[0], modes)}>Create Tasks...</span>
                         <span style={ (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton } onClick={this.toggleExclusiveState(modes[1], modes)}>Create Todos...</span>
                     </div>
                 </div>
                 { this.state.creatingTasks ?
-                    <Task data={{project: {_id: this.props.data._id, title: this.state.name}}} /> : null }
+                    <Task data={{project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}} /> : null }
                 { this.state.creatingTodos ?
-                    <Todo data={{project: {_id: this.props.data._id, title: this.state.name}}} /> : null }
+                    <Todo data={{project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}} /> : null }
                 { this.state.expanded ?
                     <div style={Styles.columnRowRow}>
                         { this.props.data.tasks.map(function(item, index) {

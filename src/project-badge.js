@@ -8,9 +8,13 @@ var ProjectBadge = React.createClass({displayName: "ProjectBadge",
    render: function() {
         console.log('badge props: ', this.props);
         var acronym = this.props.project.acronym || getAcronym(this.props.project.title);
+        //TODO: duplicated in project-form
+        var colour = '#' + this.props.project.colour.reduce(function(collector, item) {
+            return collector + ((item==0) ? '00' : item.toString(16)); //this is a lazy version. If any number is less than 16, then it won't give a 6 char hex
+        }, '');
         return (
             React.createElement("span", null, 
-                React.createElement("span", {style: Styles.badgeFont}, acronym.toUpperCase())
+                React.createElement("span", {style: Styles.with('badgeFont', {color: colour})}, acronym.toUpperCase())
             )
         )
    },

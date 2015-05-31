@@ -59,22 +59,26 @@ var Project = React.createClass({displayName: "Project",
     },
     render: function() {
         var modes = ['creatingTasks', 'creatingTodos'];
+        //TODO: duplicated in project-form
+        var colour = '#' + this.props.data.colour.reduce(function(collector, item) {
+            return collector + ((item==0) ? '00' : item.toString(16)); //this is a lazy version. If any number is less than 16, then it won't give a 6 char hex
+        }, '');
         //TODO: display: none for for tasks when NOT expanded, otherwise display block. Or just set a show prop
         return (
             React.createElement("div", null, 
                 React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette.notice, color: Palette.noticeFG})}, 
                     React.createElement("div", {style: Styles.columnRowRow}, 
                         React.createElement("i", {className: "fa fa-arrow-right", onClick: this.setState.bind(this, {expanded: true}, null)}), 
-                        React.createElement(ContentEditable, {html: this.state.acronym, onChange: this.handleAcronymChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', width: 50, padding: 2, fontSize: 24}}), 
+                        React.createElement(ContentEditable, {html: this.state.acronym, onChange: this.handleAcronymChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', width: 50, padding: 2, fontSize: 24, backgroundColor: 'white', color: colour}}), 
                         React.createElement(ContentEditable, {html: this.state.name, onChange: this.handleTitleChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, padding: 2}}), 
                         React.createElement("span", {style:  (this.state.creatingTasks) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleExclusiveState(modes[0], modes)}, "Create Tasks..."), 
                         React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleExclusiveState(modes[1], modes)}, "Create Todos...")
                     )
                 ), 
                  this.state.creatingTasks ?
-                    React.createElement(Task, {data: {project: {_id: this.props.data._id, title: this.state.name}}}) : null, 
+                    React.createElement(Task, {data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}}) : null, 
                  this.state.creatingTodos ?
-                    React.createElement(Todo, {data: {project: {_id: this.props.data._id, title: this.state.name}}}) : null, 
+                    React.createElement(Todo, {data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}}) : null, 
                  this.state.expanded ?
                     React.createElement("div", {style: Styles.columnRowRow}, 
                          this.props.data.tasks.map(function(item, index) {

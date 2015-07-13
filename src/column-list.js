@@ -26,7 +26,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
     },
     render: function() {
         return (
-            React.createElement("div", {style: this.props.style}, 
+            React.createElement("div", null, 
                 React.createElement("div", {key: "newItem"}, 
                     React.createElement(ItemInstance, {autofocus: true, tag: this.props.collection})
                 ), 
@@ -37,7 +37,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
                         )
                     );
                 }, this), 
-                this.state.data.map(function(item, index) {
+                this.state.data.reverse().map(function(item, index) {
                     return (
                         React.createElement("div", {key: item._id, style: Styles.fullWidth}, 
                             React.createElement(ItemInstance, {data: item, tag: this.props.collection}), 

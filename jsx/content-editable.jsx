@@ -1,10 +1,15 @@
 var React = require('react');
 
 var ContentEditable = React.createClass({
+    getInitialState: function() {
+        var state = {};
+        state.html = this.props.html || '';
+        return state;
+    },
     render: function(){
         //TODO: find where html=undefined and fix it! So I can remove this? Maybe I should keep this safety.
-        var html = this.props.html || '';
-        console.log('content editable render, html: ', this.props.html);
+        var html = this.state.html || '';
+        console.log('content editable render, html: ', html);
         console.log('content editable render, style: ', this.props.style);
         return <span id="contenteditable"
             style={this.props.style}
@@ -15,8 +20,8 @@ var ContentEditable = React.createClass({
             placeholder={this.props.placeholder}
             dangerouslySetInnerHTML={{__html: html}}></span>;
     },
-    shouldComponentUpdate: function(nextProps){
-        return nextProps.html !== this.getDOMNode().innerHTML;
+    shouldComponentUpdate: function(nextProps, nextState){
+        return nextState.html !== this.getDOMNode().innerHTML;
     },
     
     emitChange: function(event){

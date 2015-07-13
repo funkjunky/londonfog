@@ -5,6 +5,7 @@ var TaskBadge = require('./task-badge');
 var ProjectBadge = require('./project-badge');
 var ContentEditable = require('./content-editable');
 var SocketModelMixin = require('./mixins/socketmodelmixin');
+var StateShortcuts = require('./mixins/stateshortcuts');
 var SocketMixin = require('./mixins/socketmixin');
 var Palette = require('./palette');
 var Styles = require('./styles');
@@ -19,17 +20,26 @@ var Todo = React.createClass({displayName: "Todo",
     dataKey: '#root', //this means we put the data directly in the state.
     //the button states and labels displayed while in each state.
 
-    mixins: [SocketMixin, SocketModelMixin],
+    mixins: [SocketMixin, SocketModelMixin, StateShortcuts],
     getDefaultProps: function() {
         return {collection: 'todo', data: blankTodo()};
     },
     getInitialState: function() {
+        if(this.props.editingTitle)
+            this.props.data.editingTitle = this.props.editingTitle;
+        //TODO: this is hella ugly...
         return this.props.data;
     },
     saveModelAndClear: function() {
-        this.saveModel(this._getData(), function() {
+        if(this.props.createOverride) {
+            this.props.createOverride(this._getData());
+            //TODO: createOverrride should return a promise, which we use to blank the todo... Everything shouldj be promises!!!
             this._setData(blankTodo());
-        }.bind(this));
+        }
+        else
+            this.saveModel(this._getData(), function() {
+                this._setData(blankTodo());
+            }.bind(this));
     },
     handleTitleChange: function(event) {
         this.setState({title: event.target.value});
@@ -45,33 +55,65 @@ var Todo = React.createClass({displayName: "Todo",
         else
             return 'unassigned';
     },
+    componentDidUpdate: function() {
+        if(this.props.stateChanged)
+            this.props.stateChanged(this._getData());
+
+        if(this.state.editingTitle) {
+            console.log('focusing: ', this.state.title);
+            console.log('focusing: ', this.refs.todoTitle.props.value);
+            React.findDOMNode(this.refs.todoTitle).focus();
+        }
+            
+    },
+    componentWillmount: function() {
+        if(this.isNew()) {
+            console.log('is new: ', this.state);
+            this.setState('editingTitle', true);
+        }
+    },
+    componentDidMount: function() {
+        if(this.state.editingTitle)
+            React.findDOMNode(this.refs.todoTitle).focus();
+    },
+    isNew: function() {
+        return !this.props._id && !this.props.data._id && (typeof this.props.data.id === 'undefined');
+    },
+    //calls the provided function if enter is hit.
+    enter: function(cb) {
+        return function(event) {
+            if(event.keyCode == 13)
+                cb.call(this);
+        }.bind(this);
+    },
     render: function() {
+        if(this.state.editingTitle)
+            console.log('eiditng title!!!!!');
         var status = this.getStatus();
-        var isNew = !this.props._id && !this.props.data._id;
+        var style = this.props.style || {};
+        style.backgroundColor = Palette[status];
+        var inputStyle = {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', midWidth: 50, margin: 2};
+
 console.log('AUTOFOCUS: ', this.props.autofocus);
+        //<ContentEditable autofocus={this.props.autofocus} html={this.state.title} onChange={this.handleTitleChange} onSubmit={this.saveModelAndClear} style={{backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}></ContentEditable>
         return (
-            React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette[status]})}, 
-                 isNew
+            React.createElement("div", {style: Styles.with('columnRowTable', style)}, 
+                 this.isNew()
                 ?   React.createElement("span", {onClick: this.saveModelAndClear, style: Styles.with('rowButton', {backgroundColor: 'white', fontSize: 20})}, "Create")
                 :   React.createElement("span", {onClick: this.complete, style: Styles.with('rowButton', {backgroundColor: 'white'})}, 
                         React.createElement("input", {type: "hidden", value: this.state.completed}), 
                          this.state.complete ? React.createElement("i", {className: "fa fa-check"}) : React.createElement("i", {className: "fa"})
                     ), 
-                React.createElement(ContentEditable, {autofocus: this.props.autofocus, html: this.state.title, onChange: this.handleTitleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
-                 this.state.task ? React.createElement(TaskBadge, {task: this.state.task}) : null, 
+                 this.state.editingTitle
+                    ? React.createElement("input", {ref: "todoTitle", onBlur: this.toggleState('editingTitle'), onChange: this.handleTitleChange, onKeyUp: this.enter(this.saveModelAndClear), style: inputStyle, value: this.state.title})
+                    : React.createElement("span", {onClick: this.toggleState('editingTitle'), style: inputStyle}, this.state.title), 
+                 this.state.task ? ( React.createElement(TaskBadge, {task: this.state.task})  ) : null, 
+                 this.state.task ? ( React.createElement(ProjectBadge, {project: this.state.task.project})  ) : null, 
                  this.state.project ? React.createElement(ProjectBadge, {project: this.state.project}) : null, 
                  (!this.state.task && !this.state.project) ? React.createElement("span", {style: Styles.with('rowBadge', {backgroundColor: 'white'})}, "Task?") : null
             )
         );
    },
 });
-
-function objmap(obj, fnc, context) {
-    var arr = [];
-    for(var k in obj)
-        arr.push(fnc.call(context, obj[k], k, obj));
-
-    return arr;
-}
 
 module.exports = Todo;

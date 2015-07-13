@@ -76,22 +76,69 @@ TODO
 				*- ensure the project badge shows for todos, then tasks
 					*- show acronym, and make background colour the same as project
 
-			- ensure status buttons work for the tasks
-			- ensure you can save and edit current tasks
-			- style status buttons nicely using colour scheme, rounded borders, etc.
-			- add type drop down like pivotal icons, dropdown of icons. bug, feature, upgrade [green up arrow] (for system updates, like allowing a system to work faster, or easier to use, or less code, etc. no direct affect to API, but not a bug fix)
-				- ensure this actually sets the status correctly. [also put the words beside the icon when showing dropdown [ie <bug> bug, <star> feature, <arrow> upgrade]]
-				**get here before end of night**
-			- add arrow on the left most space like pivotal
-			- add code to show tasks under project, change icon as well
-			- add code to show todos under the task, when the arrow is clicked [this.state.showTodos]
-				- indent TODOs!
+			*- add type drop down like pivotal icons, dropdown of icons. bug, feature, upgrade
+				*- ensure the bug shows up in the row aligned well
+				*- instead show an icon based on the type and set the type to ‘bug’ by default.
+				*- build html menu with different icons and names of what they are beside it.
+				*- make onclick for menu work
+				*- ensure clicking an icon changes the type
+			*- ensure you can create a task
+				*- ensure new tasks shows up as another thing under the project
+				*- make sure the style is 100% width
+				*- make sure the project is saving when this occurs.
+				*- make it so the arrow is needed to be clicked again,rather than || true 
+				*- ensure the status buttons show up instead of the create button if it’s no longer new
+			*- ensure tasks being edited are being savd in their projects, and the project is making the save call
+
+			*- ensure status buttons work for the tasks
+				*- ensure the status buttons change as needed
+				*- ensure the project is being saved as the task is updated.
+				*- status buttons aren’t initially showing up… I think im not saving the id or something during saving.
+			*- style status buttons nicely using colour scheme, rounded borders,
+				*- use similar to create tasks and todos with shadows, but add rounded borders
+			*- add arrow on the left most space for tasks
+			*- only show arrow for project or tasks when there are tasks or todos under them.
+			*- add button to add todos to tasks, like with project
+			*- get the badge to show the task and project, when the task is set. [so fo the project badge, we need to show project if task is not set, or task.project if task is set]
+			*- ensure that when we create a new todo we add it to the task, which adds it to the project, which should save the project.
+			*- add code to show todos under the task, when the arrow is clicked [this.state.expanded]
+			*- change the arrow when we expand to a down arrow
+			*- add code to show todos under a project, but NOT under a task.
+			*- in the left TODOs pane, show all todos and all todos under all projects and all todos under all tasks.
+				*- create a todo-list, that shows all todos for projects, then all todos for the tasks under that project, then the next project, etc. No headers for projects or tasks… JUST the todos
+				*- I need to reformat the workspace so the left column contains todo columnlist, then a todo-list…
+			*- add Indenting for tasks under project, then todos under those tasks.
+			*- todos from tasks aren’t showing up immediately…
+			*- Figure out how to clear the textbox no matter what!! [worst case have a span that turns into an input.]
+			*- Figure out how to get focus automatically
+				*- first on creating a new todo
+				*- then when “creating tasks” or “creating todos” both on project and task, do it to the task or todo, after hitting the button.
+			*- hitting enter should add the newly created item
+				*- focus wont gp back to new item. im pretty sure its cause react is using th old new input as the new item input.
+			*- after hitting enter focus should be kept to the new item
+			*- When we hit “create todos” we need to focus our new todo.
+			- commit, based on adding focus features
+			- convert the task to spans and input toggle
+			- convert the project to span and input toggle
+			- when we hit “create tasks” we need to focus the text of the new task
+			- when we create a new todo or task under a project we need to expand the project if not expanded
+			- when we create a new todo under a task we need to expand the task if not already expanded
+			- display todos in reverse order.
+			- hitting enter should blur the input [toggle the editingTitle]
+			- the acronym for projects should always be caps, even while typing in the box
+			- commit and push
+
+			? How to associate current TODOs with tasks and projects???
+
+???? If tasks are all a part of one big project… then what happens if there are a lot of tasks on one project and we have to constantly update the project?? It might be too taxing…
 
 	- Add basic filters and style workspace header
 		- add a text filter to be applied to everything [just checking title for now]
 		- style the create project button and the text filter nicely.
 		- style and organize projects, tasks, and todos appropriately.
 			~Nitpick on colours etc at this point
+
+ *** MAJOR CODE CLEAN UP TIME!!  [PERFECT CODE]  ***
 
 	- see about using this.props.children more often… i found out about transclusion in reactjs too late… i could probably use it in a number of places to great affect… like adding buttons (del or create) to itemInstances, etc.
 	- grab data on server side, then update on client afterwards [see SO QA]
@@ -107,6 +154,8 @@ TODO
 		- setup everything to use commonjs properly, ie. including files needed in each file
 		- client side errors are hard to trace because of one file, see about making a mapping file for it.
 		- stop tracking compiled files. Deploy script should create the files or something… but I don’t like committing double the files.
+
+*** Tooling Improvements ***
 
 	- update generic rest git
 		- add generic user creation and authentication/authorization using authorization header. PS I may need to add an allow header thing for ‘authorization’?
@@ -126,9 +175,12 @@ TODO
 	- add promises to all callback functionality, and all socket stuff.
 	- all emits should work off of promises
 	- update restmixin to work again
+	- todo and other things shouldn’t save when we toggle states. Ie. with TODO and editingTitle.
 	- clean up ALL todos.
 	- make sure the webpage doesn’t break horribly if the socket server goes down…
 		
+*** getting ready to publish!! ***
+
  	- add mobile controls. [like Google inbox? swiping, right to complete, left to downgrade (high priority->normal priority. normal -> icebox, icebox -> delete ?? keep there for a second before fading away, so a user can swipe three times on the spot to delete?)]
 		- add reactmq to work with tablets and phones
  	- add homepage with a little marketing pizzaz, perhaps stellar or something neat. Big sign up form and such too. Tkae notes from other reallyt good home pages.

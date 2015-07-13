@@ -41,6 +41,7 @@ var  SocketModelMixin = {
     },
 
     componentDidUpdate: function(prevProps, prevState) {
+        console.log('component did update: ', this.oldModel, this._getData());
         //TODO: remove hacky stuff, once I figure out a way to fix reactjs
         if(!this.autosync || !prevState || !something(prevState) || objectsAreEqual(this._getData(), this.oldModel))
             return;

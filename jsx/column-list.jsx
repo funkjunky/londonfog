@@ -26,7 +26,7 @@ var ColumnList = React.createClass({
     },
     render: function() {
         return (
-            <div style={this.props.style}>
+            <div>
                 <div key='newItem'>
                     <ItemInstance autofocus={true} tag={this.props.collection} />
                 </div>
@@ -37,7 +37,7 @@ var ColumnList = React.createClass({
                         </div>
                     );
                 }, this)}
-                {this.state.data.map(function(item, index) {
+                {this.state.data.reverse().map(function(item, index) {
                     return (
                         <div key={item._id} style={Styles.fullWidth}>
                             <ItemInstance data={item} tag={this.props.collection} />

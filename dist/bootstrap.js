@@ -26145,7 +26145,7 @@ var BasicList = React.createClass({displayName: "BasicList",
 
 module.exports = BasicList;
 
-},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":220,"react":196}],202:[function(require,module,exports){
+},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":221,"react":196}],202:[function(require,module,exports){
 var React = require('react');
 var Routes = React.createFactory(require('./routes'));
 
@@ -26155,7 +26155,7 @@ if(typeof window !== 'undefined') {
     }
 }
 
-},{"./routes":219,"react":196}],203:[function(require,module,exports){
+},{"./routes":220,"react":196}],203:[function(require,module,exports){
 var React = require('react');
 
 var ItemInstance = require('./item-instance');
@@ -26184,7 +26184,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
     },
     render: function() {
         return (
-            React.createElement("div", {style: this.props.style}, 
+            React.createElement("div", null, 
                 React.createElement("div", {key: "newItem"}, 
                     React.createElement(ItemInstance, {autofocus: true, tag: this.props.collection})
                 ), 
@@ -26195,7 +26195,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
                         )
                     );
                 }, this), 
-                this.state.data.map(function(item, index) {
+                this.state.data.reverse().map(function(item, index) {
                     return (
                         React.createElement("div", {key: item._id, style: Styles.fullWidth}, 
                             React.createElement(ItemInstance, {data: item, tag: this.props.collection}), 
@@ -26210,14 +26210,19 @@ var ColumnList = React.createClass({displayName: "ColumnList",
 
 module.exports = ColumnList;
 
-},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":220,"react":196}],204:[function(require,module,exports){
+},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":221,"react":196}],204:[function(require,module,exports){
 var React = require('react');
 
 var ContentEditable = React.createClass({displayName: "ContentEditable",
+    getInitialState: function() {
+        var state = {};
+        state.html = this.props.html || '';
+        return state;
+    },
     render: function(){
         //TODO: find where html=undefined and fix it! So I can remove this? Maybe I should keep this safety.
-        var html = this.props.html || '';
-        console.log('content editable render, html: ', this.props.html);
+        var html = this.state.html || '';
+        console.log('content editable render, html: ', html);
         console.log('content editable render, style: ', this.props.style);
         return React.createElement("span", {id: "contenteditable", 
             style: this.props.style, 
@@ -26228,8 +26233,8 @@ var ContentEditable = React.createClass({displayName: "ContentEditable",
             placeholder: this.props.placeholder, 
             dangerouslySetInnerHTML: {__html: html}});
     },
-    shouldComponentUpdate: function(nextProps){
-        return nextProps.html !== this.getDOMNode().innerHTML;
+    shouldComponentUpdate: function(nextProps, nextState){
+        return nextState.html !== this.getDOMNode().innerHTML;
     },
     
     emitChange: function(event){
@@ -26276,7 +26281,7 @@ var Header = React.createClass({displayName: "Header",
 
 module.exports = Header;
 
-},{"./palette":214,"./styles":220,"react":196,"underscore":200}],206:[function(require,module,exports){
+},{"./palette":215,"./styles":221,"react":196,"underscore":200}],206:[function(require,module,exports){
 var React = require('react');
 
 var Home = React.createClass({displayName: "Home",
@@ -26317,7 +26322,7 @@ var ItemInstance = React.createClass({displayName: "ItemInstance",
 
 module.exports = ItemInstance;
 
-},{"./project":217,"./task":222,"./todo":223,"react":196}],208:[function(require,module,exports){
+},{"./project":218,"./task":223,"./todo":225,"react":196}],208:[function(require,module,exports){
 //REQUIRES SOCKETMIXIN
 var socketHandler = require('./sockethandler');
 
@@ -26570,6 +26575,7 @@ var  SocketModelMixin = {
     },
 
     componentDidUpdate: function(prevProps, prevState) {
+        console.log('component did update: ', this.oldModel, this._getData());
         //TODO: remove hacky stuff, once I figure out a way to fix reactjs
         if(!this.autosync || !prevState || !something(prevState) || objectsAreEqual(this._getData(), this.oldModel))
             return;
@@ -26628,6 +26634,8 @@ var stateShortcuts = {
 module.exports = stateShortcuts;
 
 },{}],213:[function(require,module,exports){
+arguments[4][212][0].apply(exports,arguments)
+},{"dup":212}],214:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
@@ -26648,7 +26656,7 @@ var Modal = React.createClass({displayName: "Modal",
 
 module.exports = Modal;
 
-},{"./styles":220,"react":196}],214:[function(require,module,exports){
+},{"./styles":221,"react":196}],215:[function(require,module,exports){
 var Palette = {
     light: '#F8EDC1',
     lighter: '#F6E7B3',
@@ -26678,7 +26686,7 @@ Palette.finishedlight = Palette.finished;
 
 module.exports = Palette;
 
-},{}],215:[function(require,module,exports){
+},{}],216:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
@@ -26710,7 +26718,7 @@ function getAcronym(text) {
 
 module.exports = ProjectBadge;
 
-},{"./styles":220,"react":196}],216:[function(require,module,exports){
+},{"./styles":221,"react":196}],217:[function(require,module,exports){
 var React = require('react');
 var request = require('superagent');
 
@@ -26771,7 +26779,7 @@ var ProjectForm = React.createClass({displayName: "ProjectForm",
 
 module.exports = ProjectForm;
 
-},{"./rotating-colours":218,"./styles":220,"react":196,"superagent":197}],217:[function(require,module,exports){
+},{"./rotating-colours":219,"./styles":221,"react":196,"superagent":197}],218:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
@@ -26779,7 +26787,7 @@ var Palette = require('./palette');
 
 var SocketMixin = require('./mixins/socketmixin');
 var ModelMixin = require('./mixins/socketmodelmixin');
-var stateShortcuts = require('./mixins/stateShortcuts');
+var StateShortcuts = require('./mixins/stateShortcuts');
 
 var ContentEditable = require('./content-editable');
 var Task = require('./task');
@@ -26788,37 +26796,62 @@ var Todo = require('./todo');
 var Project = React.createClass({displayName: "Project",
     url: 'http://localhost:1212/',
 
-    mixins: [SocketMixin, ModelMixin, stateShortcuts],
+    mixins: [SocketMixin, ModelMixin, StateShortcuts],
     getDefaultProps: function() {
         //TODO: should use getNewItem() function for data, but apparently 'this' isn't instantiated yet.
-        return {collection: 'project', data: {name: '', tasks: [],}};
+        return {collection: 'project', data: {}};
     },
     getInitialState: function() {
-        //TODO: yuck...
-        this.props.data.tasks = this.props.data.tasks || []; //TODO: remove... shouldn't be needed. getNewProject should have this instead
+        var name = this.props.data.name || '';
+        var tasks = this.props.data.tasks || [];
+        var todos = this.props.data.todos || [];
         var acronym = this.props.data.acronym || '';
-        return {expanded: false, name: this.props.data.name, acronym: acronym};
+        return {expanded: false, name: name, acronym: acronym, tasks: tasks, todos: todos}; //TODO: this is really bad. I keep forgetting to put the new item here... duplication is bad!!!!
     },
     setData: function(model) {
-        this.setState({data: model});
+        var name = model.name || '';
+        var tasks = model.tasks || [];
+        var acronym = model.acronym || '';
+        this.setState({name: name, acronym: acronym, tasks: tasks});
     },
     //TODO: too long and two different ways of setting up model is bad.
     getData: function() {
         var model = {
             name: this.state.name,
             _id: this.props.data._id,
+            tasks: this.state.tasks,
+            todos: this.state.todos,
         };
-        console.log('acronym: ', this.state.acronym);
         if(this.state.acronym && this.state.acronym != '')
             model.acronym = this.state.acronym;
 
         return model;
     },
-    taskChanged: function(index, newTask) {
-        this.setState({ data: { tasks: { $splice: [[index, 1, newTask]] } } });
+    //TODO: code essentially duplicated in task. Could probably throw this into modelmixin, or make another helper mixin
+    todoChanged: function(index, todo) {
+        this.setState(React.addons.update(this.state, { todos: { $splice: [[index, 1, todo]] } }));
+    },
+    todoCreated: function(newTodo) {
+        if(this.state.todos.length)
+            newTodo.id = Math.max.apply(Math, this.state.todos);
+        else
+            newTodo.id = 0;
+
+        this.setState(React.addons.update(this.state, { todos: { $push: [newTodo] } }));
+        return newTodo;
+    },
+    //TODO: code essentially duplicated in task. Could probably throw this into modelmixin, or make another helper mixin
+    taskChanged: function(index, task) {
+        this.setState(React.addons.update(this.state, { tasks: { $splice: [[index, 1, task]] } }));
     },
     taskCreated: function(newTask) {
-        this.setState({ data: { tasks: { $push: newTask } } });
+        if(this.state.tasks.length)
+            newTask.id = Math.max.apply(Math, this.state.tasks);
+        else
+            newTask.id = 0;
+
+        this.setState(React.addons.update(this.state, { tasks: { $push: [newTask] } }));
+        return newTask;
     },
     //TODO: make a wrapper fucntion that provides vaule as a parameter instead of event.
     //TODO: better name to be similar to above Changed functions
@@ -26837,12 +26870,17 @@ var Project = React.createClass({displayName: "Project",
         var colour = '#' + this.props.data.colour.reduce(function(collector, item) {
             return collector + ((item==0) ? '00' : item.toString(16)); //this is a lazy version. If any number is less than 16, then it won't give a 6 char hex
         }, '');
+        console.log('render project: ', this.state);
         //TODO: display: none for for tasks when NOT expanded, otherwise display block. Or just set a show prop
         return (
             React.createElement("div", null, 
                 React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette.notice, color: Palette.noticeFG})}, 
                     React.createElement("div", {style: Styles.columnRowRow}, 
-                        React.createElement("i", {className: "fa fa-arrow-right", onClick: this.setState.bind(this, {expanded: true}, null)}), 
+                         (this.state.tasks.length || this.state.todos.length) ? 
+                            ((this.state.expanded)
+                                ? React.createElement("i", {className: "fa fa-arrow-down", onClick: this.toggleState('expanded')})
+                                : React.createElement("i", {className: "fa fa-arrow-right", onClick: this.toggleState('expanded')}))
+                        : null, 
                         React.createElement(ContentEditable, {html: this.state.acronym, onChange: this.handleAcronymChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', width: 50, padding: 2, fontSize: 24, backgroundColor: 'white', color: colour}}), 
                         React.createElement(ContentEditable, {html: this.state.name, onChange: this.handleTitleChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, padding: 2}}), 
                         React.createElement("span", {style:  (this.state.creatingTasks) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleExclusiveState(modes[0], modes)}, "Create Tasks..."), 
@@ -26850,15 +26888,20 @@ var Project = React.createClass({displayName: "Project",
                     )
                 ), 
                  this.state.creatingTasks ?
-                    React.createElement(Task, {data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}}) : null, 
+                    React.createElement(Task, {data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}, 
+                            saveCreatedTask: this.taskCreated, editTask: this.taskChanged}) : null, 
                  this.state.creatingTodos ?
-                    React.createElement(Todo, {data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}}) : null, 
-                 this.state.expanded ?
-                    React.createElement("div", {style: Styles.columnRowRow}, 
-                         this.props.data.tasks.map(function(item, index) {
-                            return React.createElement(Task, {data: item, index: index, statechanged: this.taskChanged})
-                        })
-                    ) : null
+                    React.createElement(Todo, {editingTitle: true, data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}, createOverride: this.todoCreated}) : null, 
+                 (this.state.expanded) ?
+                    this.state.todos.map(function(item, index) {
+                        return React.createElement(Todo, {data: item, stateChanged: this.todoChanged.bind(this, index), style: {marginLeft: 20}})
+                    }, this)
+                : null, 
+                 (this.state.expanded) ?
+                    this.state.tasks.map(function(item, index) {
+                        return React.createElement(Task, {data: item, stateChanged: this.taskChanged.bind(this, index), style: {marginLeft: 20}})
+                    }, this)
+                : null
             )
         );
     },
@@ -26873,7 +26916,7 @@ function getAcronym(text) {
 
 module.exports = Project;
 
-},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./mixins/stateShortcuts":212,"./palette":214,"./styles":220,"./task":222,"./todo":223,"react":196}],218:[function(require,module,exports){
+},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./mixins/stateShortcuts":212,"./palette":215,"./styles":221,"./task":223,"./todo":225,"react":196}],219:[function(require,module,exports){
 function RotatingColours() {
     var rotatingColours = [
         [255,255,0],
@@ -26911,7 +26954,7 @@ function RotatingColours() {
 
 module.exports = RotatingColours();
 
-},{}],219:[function(require,module,exports){
+},{}],220:[function(require,module,exports){
 var React = require('react');
 var Router = require('react-router-component');
 var Locations = Router.Locations;
@@ -26953,7 +26996,7 @@ var Routes = React.createClass({displayName: "Routes",
 
 module.exports = Routes;
 
-},{"./header":205,"./home":206,"./item-instance":207,"./project":217,"./task":222,"./todo":223,"./workspace":225,"react":196,"react-router-component":4}],220:[function(require,module,exports){
+},{"./header":205,"./home":206,"./item-instance":207,"./project":218,"./task":223,"./todo":225,"./workspace":227,"react":196,"react-router-component":4}],221:[function(require,module,exports){
 var _ = require('underscore');
 
 var Palette = require('./palette');
@@ -26983,16 +27026,21 @@ Styles.aboveOverlay = {zIndex: 30, backgroundColor: 'white'};
 
 module.exports = Styles;
 
-},{"./palette":214,"underscore":200}],221:[function(require,module,exports){
+},{"./palette":215,"underscore":200}],222:[function(require,module,exports){
 var React = require('react');
 
 var TaskBadge = React.createClass({displayName: "TaskBadge",
+    types: {
+        bug: 'fa fa-bug',
+        feature: 'fa fa-star',
+        upgrade: 'fa fa-level-up',
+    },
     //TODO: add colours and borders nicely according to the task colour?
     //the border and font should be the colour, while the background is a much ligher shade
    render: function() {
         return (
-            React.createElement("span", null, 
-                React.createElement("span", null, this.project.acronym || this.task.title)
+            React.createElement("span", {style: {border: 'solid 1px blue'}}, 
+                React.createElement("i", {className: this.types[this.props.task.type]}), React.createElement("span", null, " #", this.props.task.id)
             )
         )
    },
@@ -27000,14 +27048,17 @@ var TaskBadge = React.createClass({displayName: "TaskBadge",
 
 module.exports = TaskBadge;
 
-},{"react":196}],222:[function(require,module,exports){
+},{"react":196}],223:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
 var Palette = require('./palette');
 
+var StateShortcuts = require('./mixins/stateshortcuts');
+
 var ContentEditable = require('./content-editable');
 var ProjectBadge = require('./project-badge');
+var Todo = require('./todo');
 
 function getNewTask() {
     return {
@@ -27017,6 +27068,8 @@ function getNewTask() {
 }
 
 var Task = React.createClass({displayName: "Task",
+    mixins: [StateShortcuts],
+
     states: {
         new: {active: 'Start',},
         active: {paused: 'Pause', finished: 'Finish',},
@@ -27024,51 +27077,189 @@ var Task = React.createClass({displayName: "Task",
         frozen: {paused: 'Unfreeze',},
         finished: {active: 'Not Yet Done',},
     },
+    types: {
+        bug: 'fa fa-bug',
+        feature: 'fa fa-star',
+        upgrade: 'fa fa-level-up',
+    },
 
     getInitialState: function() {
         //TODO: all the code in this function is too inconsistent. I need a better way to say x = z.y or default. Regardless of whether z is undefined or not.
         var initialState = {
             title: (this.props.data) ? this.props.data.title : '',
             expanded: false,
+            todos: [],
         };
+        console.log('initial state task: ', initialState.todos, initialState.todos.length, this.props.data);
         if(this.props.data) {
             initialState.project = this.props.data.project;
             initialState.status = this.props.data.status || 'new';
+            initialState.type = this.props.data.type || 'bug';
+            initialState.todos = this.props.data.todos || [];
         }
+        console.log('initial state task: ', initialState.todos, initialState.todos.length);
 
         return initialState;
     },
 
+    getData: function() {
+        var task = {
+            title: this.state.title,
+            status: this.state.status,
+            type: this.state.type,
+            todos: this.state.todos,
+        };
+        if(this.state.project)
+            task.project = this.state.project;
+        if(this.props.data.id || this.props.data.id === 0)
+            task.id = this.props.data.id;
+
+        return task;
+    },
+
     saveAndClear: function() {
-        this.props.stateChanged();
-        this.setState(getNewTask());
+        var savedTask = this.props.saveCreatedTask(this.getData())
     },
 
     handleTitleChange: function(event) {
         this.setState({title: event.target.value});
     },
 
+    setType: function(type) {
+        this.setState({type: type, typeDropdown: false});
+    },
+
+    todoCreated: function(newTodo) {
+        if(this.state.todos.length)
+            newTodo.id = Math.max.apply(Math, this.state.todos);
+        else
+            newTodo.id = 0;
+
+        this.setState(React.addons.update(this.state, { todos: { $push: [newTodo] } }));
+        return newTodo;
+    },
+
+    todoChanged: function(index, todo) {
+        this.setState(React.addons.update(this.state, { todos: { $splice: [[index, 1, todo]] } }));
+    },
+
+    componentDidUpdate: function() {
+        if(this.props.stateChanged) {
+            this.props.stateChanged(this.getData());
+        }
+    },
+
     render: function() {
-        var isNew = !this.props._id && !this.props.data._id;
+        console.log('task state: ', this.state);
+        var isNew = typeof this.props.data.id === 'undefined';
+        var todos = this.state.todos || []; //TODO: not need to define this with a default... why does this happen again? I think I solved it before.
         return (
-            React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette[this.state.status]})}, 
-                 isNew
-                    ? React.createElement("span", {style: Styles.with('rowButton', {backgroundColor: 'white', fontSize: 20}), onClick: this.saveModelAndClear}, "Create")
-                    : objmap(this.states[this.state.status], function(item, key) {
-                        console.log('key, item: ', key, item);
-                        return ( React.createElement("button", {style: {height: 16, fontSize: 10, verticalAlign: 'center'}, type: "button", onClick:  this.setState.bind(this, {status: key}, null) }, item) );
-                    }, this), 
-                
-                React.createElement(ContentEditable, {autofocus: this.props.autofocus, html: this.state.title, onChange: this.handleTitleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
-                React.createElement(ProjectBadge, {project: this.state.project})
+            React.createElement("div", {style: this.props.style}, 
+                React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette[this.state.status]})}, 
+                     (todos.length) ? 
+                        ((this.state.expanded)
+                            ? React.createElement("i", {className: "fa fa-arrow-down", onClick: this.toggleState('expanded')})
+                            : React.createElement("i", {className: "fa fa-arrow-right", onClick: this.toggleState('expanded')}))
+                    : null, 
+                     isNew
+                        ? React.createElement("span", {style: Styles.with('rowButton', {backgroundColor: 'white', fontSize: 20}), onClick: this.saveAndClear}, "Create")
+                        : objmap(this.states[this.state.status], function(item, key) {
+                            return ( React.createElement("span", {style:  Styles.basicButton, onClick:  this.setState.bind(this, {status: key}, null) }, item) );
+                        }, this), 
+                    
+                    React.createElement("span", {style: {display: 'table-cell'}}, React.createElement("i", {className: this.types[this.state.type], onClick: this.setState.bind(this, {typeDropdown: true}, null)})), 
+                     this.state.typeDropdown ?
+                        React.createElement("div", {style: {position: 'absolute', left: 60, top: 30, width: 100, backgroundColor: 'white'}}, 
+                            objmap(this.types, function(icon, type) {
+                                return (
+                                    React.createElement("div", {style: {position: 'relative', width: '100%', cursor: 'pointer', border: 'solid gray 1px'}, onClick: this.setType.bind(this, type)}, 
+                                        React.createElement("i", {className: icon}), 
+                                        React.createElement("span", null, type)
+                                    )
+                                );
+                            }, this)
+                        )
+                        : null, 
+                    React.createElement(ContentEditable, {autofocus: this.props.autofocus, html: this.state.title, onChange: this.handleTitleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
+                    React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleState('creatingTodos')}, "Create Todos..."), 
+                    React.createElement(ProjectBadge, {project: this.state.project})
+                ), 
+                 this.state.creatingTodos ?
+                    React.createElement(Todo, {data: {task: this.getData()}, createOverride: this.todoCreated}) : null, 
+                 (this.state.expanded) ?
+                    this.state.todos.map(function(item, index) {
+                        return React.createElement(Todo, {data: item, stateChanged: this.todoChanged.bind(this, index), style: {marginLeft: 20}})
+                    }, this)
+                : null
             )
         );
     },
 });
 
+function objmap(obj, fnc, context) {
+    var arr = [];
+    for(var k in obj)
+        arr.push(fnc.call(context, obj[k], k, obj));
+
+    return arr;
+}
+
 module.exports = Task;
 
-},{"./content-editable":204,"./palette":214,"./project-badge":215,"./styles":220,"react":196}],223:[function(require,module,exports){
+},{"./content-editable":204,"./mixins/stateshortcuts":213,"./palette":215,"./project-badge":216,"./styles":221,"./todo":225,"react":196}],224:[function(require,module,exports){
+var React = require('react');
+
+var Todo = require('./todo');
+var SocketMixin = require('./mixins/socketmixin');
+var CollectionMixin = require('./mixins/socketcollectionmixin');
+var Styles = require('./styles');
+
+//This represents a list of slower items. Things you need to add manually over time.
+var BasicList = React.createClass({displayName: "BasicList",
+    url: 'http://localhost:1212/',
+    dataKey: 'data',
+
+    mixins: [SocketMixin, CollectionMixin],
+    getDefaultProps: function() {
+        return {collection: 'project'};
+    },
+    getInitialState: function() {
+        return {
+            data: [],
+        };
+    },
+    render: function() {
+        return (
+            React.createElement("div", null, 
+                React.createElement("div", null, "----"), 
+                this.state.data.map(function(project, index) {
+                    return project.todos.map(function(todo, index) {
+                        return (
+                            React.createElement("div", {key: todo._id, style: Styles.with('fullWidth', {marginLeft: 20})}, 
+                                React.createElement(Todo, {data: todo, tag: this.props.collection})
+                            )
+                        );
+                    }, this)
+                    .concat(project.tasks.map(function(task, index) {
+                        console.log('todolist task: ', task);
+                        return task.todos.map(function(todo, index) {
+                            console.log('todo task: ', todo);
+                            return (
+                                React.createElement("div", {key: todo._id, style: Styles.with('fullWidth', {marginLeft: 40})}, 
+                                    React.createElement(Todo, {data: todo, tag: this.props.collection})
+                                )
+                            );
+                        }, this);
+                    }, this));
+                }, this)
+            )
+        );
+    },
+});
+
+module.exports = BasicList;
+
+},{"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":221,"./todo":225,"react":196}],225:[function(require,module,exports){
 var React = require('react/addons');
 var _ = require('underscore');
 
@@ -27076,6 +27267,7 @@ var TaskBadge = require('./task-badge');
 var ProjectBadge = require('./project-badge');
 var ContentEditable = require('./content-editable');
 var SocketModelMixin = require('./mixins/socketmodelmixin');
+var StateShortcuts = require('./mixins/stateshortcuts');
 var SocketMixin = require('./mixins/socketmixin');
 var Palette = require('./palette');
 var Styles = require('./styles');
@@ -27090,17 +27282,26 @@ var Todo = React.createClass({displayName: "Todo",
     dataKey: '#root', //this means we put the data directly in the state.
     //the button states and labels displayed while in each state.
 
-    mixins: [SocketMixin, SocketModelMixin],
+    mixins: [SocketMixin, SocketModelMixin, StateShortcuts],
     getDefaultProps: function() {
         return {collection: 'todo', data: blankTodo()};
     },
     getInitialState: function() {
+        if(this.props.editingTitle)
+            this.props.data.editingTitle = this.props.editingTitle;
+        //TODO: this is hella ugly...
         return this.props.data;
     },
     saveModelAndClear: function() {
-        this.saveModel(this._getData(), function() {
+        if(this.props.createOverride) {
+            this.props.createOverride(this._getData());
+            //TODO: createOverrride should return a promise, which we use to blank the todo... Everything shouldj be promises!!!
             this._setData(blankTodo());
-        }.bind(this));
+        }
+        else
+            this.saveModel(this._getData(), function() {
+                this._setData(blankTodo());
+            }.bind(this));
     },
     handleTitleChange: function(event) {
         this.setState({title: event.target.value});
@@ -27116,20 +27317,60 @@ var Todo = React.createClass({displayName: "Todo",
         else
             return 'unassigned';
     },
+    componentDidUpdate: function() {
+        if(this.props.stateChanged)
+            this.props.stateChanged(this._getData());
+
+        if(this.state.editingTitle) {
+            console.log('focusing: ', this.state.title);
+            console.log('focusing: ', this.refs.todoTitle.props.value);
+            React.findDOMNode(this.refs.todoTitle).focus();
+        }
+            
+    },
+    componentWillmount: function() {
+        if(this.isNew()) {
+            console.log('is new: ', this.state);
+            this.setState('editingTitle', true);
+        }
+    },
+    componentDidMount: function() {
+        if(this.state.editingTitle)
+            React.findDOMNode(this.refs.todoTitle).focus();
+    },
+    isNew: function() {
+        return !this.props._id && !this.props.data._id && (typeof this.props.data.id === 'undefined');
+    },
+    //calls the provided function if enter is hit.
+    enter: function(cb) {
+        return function(event) {
+            if(event.keyCode == 13)
+                cb.call(this);
+        }.bind(this);
+    },
     render: function() {
+        if(this.state.editingTitle)
+            console.log('eiditng title!!!!!');
         var status = this.getStatus();
-        var isNew = !this.props._id && !this.props.data._id;
+        var style = this.props.style || {};
+        style.backgroundColor = Palette[status];
+        var inputStyle = {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', midWidth: 50, margin: 2};
+
 console.log('AUTOFOCUS: ', this.props.autofocus);
+        //<ContentEditable autofocus={this.props.autofocus} html={this.state.title} onChange={this.handleTitleChange} onSubmit={this.saveModelAndClear} style={{backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}></ContentEditable>
         return (
-            React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette[status]})}, 
-                 isNew
+            React.createElement("div", {style: Styles.with('columnRowTable', style)}, 
+                 this.isNew()
                 ?   React.createElement("span", {onClick: this.saveModelAndClear, style: Styles.with('rowButton', {backgroundColor: 'white', fontSize: 20})}, "Create")
                 :   React.createElement("span", {onClick: this.complete, style: Styles.with('rowButton', {backgroundColor: 'white'})}, 
                         React.createElement("input", {type: "hidden", value: this.state.completed}), 
                          this.state.complete ? React.createElement("i", {className: "fa fa-check"}) : React.createElement("i", {className: "fa"})
                     ), 
-                React.createElement(ContentEditable, {autofocus: this.props.autofocus, html: this.state.title, onChange: this.handleTitleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
-                 this.state.task ? React.createElement(TaskBadge, {task: this.state.task}) : null, 
+                 this.state.editingTitle
+                    ? React.createElement("input", {ref: "todoTitle", onBlur: this.toggleState('editingTitle'), onChange: this.handleTitleChange, onKeyUp: this.enter(this.saveModelAndClear), style: inputStyle, value: this.state.title})
+                    : React.createElement("span", {onClick: this.toggleState('editingTitle'), style: inputStyle}, this.state.title), 
+                 this.state.task ? ( React.createElement(TaskBadge, {task: this.state.task})  ) : null, 
+                 this.state.task ? ( React.createElement(ProjectBadge, {project: this.state.task.project})  ) : null, 
                  this.state.project ? React.createElement(ProjectBadge, {project: this.state.project}) : null, 
                  (!this.state.task && !this.state.project) ? React.createElement("span", {style: Styles.with('rowBadge', {backgroundColor: 'white'})}, "Task?") : null
             )
@@ -27137,17 +27378,9 @@ console.log('AUTOFOCUS: ', this.props.autofocus);
    },
 });
 
-function objmap(obj, fnc, context) {
-    var arr = [];
-    for(var k in obj)
-        arr.push(fnc.call(context, obj[k], k, obj));
-
-    return arr;
-}
-
 module.exports = Todo;
 
-},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./palette":214,"./project-badge":215,"./styles":220,"./task-badge":221,"react/addons":24,"underscore":200}],224:[function(require,module,exports){
+},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./mixins/stateshortcuts":213,"./palette":215,"./project-badge":216,"./styles":221,"./task-badge":222,"react/addons":24,"underscore":200}],226:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
@@ -27175,12 +27408,13 @@ var WorkspaceHeader = React.createClass({displayName: "WorkspaceHeader",
 
 module.exports = WorkspaceHeader;
 
-},{"./mixins/stateShortcuts":212,"./modal":213,"./project-form":216,"./styles":220,"react":196}],225:[function(require,module,exports){
+},{"./mixins/stateShortcuts":212,"./modal":214,"./project-form":217,"./styles":221,"react":196}],227:[function(require,module,exports){
 var React = require('react');
 
 var WorkspaceHeader = require('./workspace-header');
 var ColumnList = require('./column-list');
 var BasicList = require('./basic-list');
+var TodoList = require('./todo-list');
 
 var Workspace = React.createClass({displayName: "Workspace",
     render: function() {
@@ -27190,7 +27424,10 @@ var Workspace = React.createClass({displayName: "Workspace",
             React.createElement("div", null, 
                 React.createElement(WorkspaceHeader, null), 
                 React.createElement("div", {className: "body"}, 
-                    React.createElement(ColumnList, {collection: "todo", style: leftStyle}), 
+                    React.createElement("div", {style: leftStyle}, 
+                        React.createElement(ColumnList, {collection: "todo"}), 
+                        React.createElement(TodoList, null)
+                    ), 
                     React.createElement(BasicList, {collection: "project", style: rightStyle})
                 )
             )
@@ -27200,4 +27437,4 @@ var Workspace = React.createClass({displayName: "Workspace",
 
 module.exports = Workspace;
 
-},{"./basic-list":201,"./column-list":203,"./workspace-header":224,"react":196}]},{},[202]);
+},{"./basic-list":201,"./column-list":203,"./todo-list":224,"./workspace-header":226,"react":196}]},{},[202]);

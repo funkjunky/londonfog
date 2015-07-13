@@ -117,12 +117,13 @@ TODO
 				*- focus wont gp back to new item. im pretty sure its cause react is using th old new input as the new item input.
 			*- after hitting enter focus should be kept to the new item
 			*- When we hit “create todos” we need to focus our new todo.
-			- commit, based on adding focus features
-			- convert the task to spans and input toggle
-			- convert the project to span and input toggle
-			- when we hit “create tasks” we need to focus the text of the new task
-			- when we create a new todo or task under a project we need to expand the project if not expanded
-			- when we create a new todo under a task we need to expand the task if not already expanded
+			*- commit, based on adding focus features
+			*- when we create a new todo or task under a project we need to expand the project if not expanded
+			*- convert the task to spans and input toggle
+			*- when we hit “create tasks” we need to focus the text of the new task
+			*- we need to ensure the divs are wide enough to be clicked.
+			*- when we create a new todo under a task we need to expand the task if not already expanded
+			*- when page first loads, give focus to creating a new TODO
 			- display todos in reverse order.
 			- hitting enter should blur the input [toggle the editingTitle]
 			- the acronym for projects should always be caps, even while typing in the box

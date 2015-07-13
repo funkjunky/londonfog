@@ -1,3 +1,4 @@
+//<ContentEditable autofocus={this.props.autofocus} html={this.state.title} onChange={this.handleTitleChange} onSubmit={this.saveModelAndClear} style={{backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}></ContentEditable>
 var React = require('react');
 
 var Styles = require('./styles');
@@ -38,7 +39,11 @@ var Task = React.createClass({displayName: "Task",
             title: (this.props.data) ? this.props.data.title : '',
             expanded: false,
             todos: [],
+            editingTitle: false,
         };
+        if(this.props.editingTitle)
+            initialState.editingTitle = true;
+
         console.log('initial state task: ', initialState.todos, initialState.todos.length, this.props.data);
         if(this.props.data) {
             initialState.project = this.props.data.project;
@@ -96,12 +101,31 @@ var Task = React.createClass({displayName: "Task",
         if(this.props.stateChanged) {
             this.props.stateChanged(this.getData());
         }
+
+        if(this.state.editingTitle) {
+            console.log('focusing: ', this.state.title);
+            console.log('focusing: ', this.refs.taskTitle.props.value);
+            React.findDOMNode(this.refs.taskTitle).focus();
+        }
+    },
+
+    componentDidMount: function() {
+        if(this.state.editingTitle)
+            React.findDOMNode(this.refs.taskTitle).focus();
+    },
+
+    expandTodoCreation: function() {
+        this.toggleState('creatingTodos')();
+        //Note: toggle state hasn't updated the variable yet, so we need to check the opposite.
+        if(!this.state.creatingTodos)
+            this.setState({expanded: true});
     },
 
     render: function() {
         console.log('task state: ', this.state);
         var isNew = typeof this.props.data.id === 'undefined';
         var todos = this.state.todos || []; //TODO: not need to define this with a default... why does this happen again? I think I solved it before.
+        var inputStyle = {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2};
         return (
             React.createElement("div", {style: this.props.style}, 
                 React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette[this.state.status]})}, 
@@ -129,12 +153,14 @@ var Task = React.createClass({displayName: "Task",
                             }, this)
                         )
                         : null, 
-                    React.createElement(ContentEditable, {autofocus: this.props.autofocus, html: this.state.title, onChange: this.handleTitleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
-                    React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleState('creatingTodos')}, "Create Todos..."), 
+                     this.state.editingTitle
+                        ? React.createElement("input", {ref: "taskTitle", onBlur: this.toggleState('editingTitle'), onChange: this.handleTitleChange, onKeyUp: this.enter(this.saveModelAndClear), style: inputStyle, value: this.state.title})
+                        : React.createElement("span", {onClick: this.toggleState('editingTitle'), style: inputStyle}, this.state.title), 
+                    React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.expandTodoCreation}, "Create Todos..."), 
                     React.createElement(ProjectBadge, {project: this.state.project})
                 ), 
                  this.state.creatingTodos ?
-                    React.createElement(Todo, {data: {task: this.getData()}, createOverride: this.todoCreated}) : null, 
+                    React.createElement(Todo, {editingTitle: true, data: {task: this.getData()}, createOverride: this.todoCreated}) : null, 
                  (this.state.expanded) ?
                     this.state.todos.map(function(item, index) {
                         return React.createElement(Todo, {data: item, stateChanged: this.todoChanged.bind(this, index), style: {marginLeft: 20}})

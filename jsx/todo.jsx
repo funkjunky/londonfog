@@ -25,6 +25,8 @@ var Todo = React.createClass({
         return {collection: 'todo', data: blankTodo()};
     },
     getInitialState: function() {
+        //TODO: so bad...
+        this.props.data.editingTitle = false;
         if(this.props.editingTitle)
             this.props.data.editingTitle = this.props.editingTitle;
         //TODO: this is hella ugly...
@@ -68,6 +70,7 @@ var Todo = React.createClass({
     },
     componentWillmount: function() {
         if(this.isNew()) {
+        //TODO: is this needed? I don't think it is. Other things set editingTitle as necessary.
             console.log('is new: ', this.state);
             this.setState('editingTitle', true);
         }
@@ -79,23 +82,13 @@ var Todo = React.createClass({
     isNew: function() {
         return !this.props._id && !this.props.data._id && (typeof this.props.data.id === 'undefined');
     },
-    //calls the provided function if enter is hit.
-    enter: function(cb) {
-        return function(event) {
-            if(event.keyCode == 13)
-                cb.call(this);
-        }.bind(this);
-    },
     render: function() {
-        if(this.state.editingTitle)
-            console.log('eiditng title!!!!!');
         var status = this.getStatus();
         var style = this.props.style || {};
         style.backgroundColor = Palette[status];
-        var inputStyle = {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', midWidth: 50, margin: 2};
+        var inputStyle = {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2};
 
-console.log('AUTOFOCUS: ', this.props.autofocus);
-        //<ContentEditable autofocus={this.props.autofocus} html={this.state.title} onChange={this.handleTitleChange} onSubmit={this.saveModelAndClear} style={{backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}></ContentEditable>
+        //<ContentEditable html={this.state.title} onChange={this.handleTitleChange} onSubmit={this.saveModelAndClear} style={{backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}></ContentEditable>
         return (
             <div style={Styles.with('columnRowTable', style)}>
                 { this.isNew()

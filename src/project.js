@@ -82,8 +82,20 @@ var Project = React.createClass({displayName: "Project",
     componentDidMount: function() {
         //this.autosync = false;
     },
+    modes: ['creatingTasks', 'creatingTodos'],
+    expandTodoCreation: function() {
+        this.toggleExclusiveState(this.modes[1], this.modes)();
+        //Note: toggle state hasn't updated the variable yet, so we need to check the opposite.
+        if(!this.state.creatingTodos) 
+            this.setState({expanded: true});
+    },
+    expandTaskCreation: function() {
+        this.toggleExclusiveState(this.modes[0], this.modes)();
+        //Note: toggle state hasn't updated the variable yet, so we need to check the opposite.
+        if(!this.state.creatingTasks)
+            this.setState({expanded: true});
+    },
     render: function() {
-        var modes = ['creatingTasks', 'creatingTodos'];
         //TODO: duplicated in project-form
         var colour = '#' + this.props.data.colour.reduce(function(collector, item) {
             return collector + ((item==0) ? '00' : item.toString(16)); //this is a lazy version. If any number is less than 16, then it won't give a 6 char hex
@@ -101,12 +113,12 @@ var Project = React.createClass({displayName: "Project",
                         : null, 
                         React.createElement(ContentEditable, {html: this.state.acronym, onChange: this.handleAcronymChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', width: 50, padding: 2, fontSize: 24, backgroundColor: 'white', color: colour}}), 
                         React.createElement(ContentEditable, {html: this.state.name, onChange: this.handleTitleChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, padding: 2}}), 
-                        React.createElement("span", {style:  (this.state.creatingTasks) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleExclusiveState(modes[0], modes)}, "Create Tasks..."), 
-                        React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleExclusiveState(modes[1], modes)}, "Create Todos...")
+                        React.createElement("span", {style:  (this.state.creatingTasks) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.expandTaskCreation}, "Create Tasks..."), 
+                        React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.expandTodoCreation}, "Create Todos...")
                     )
                 ), 
                  this.state.creatingTasks ?
-                    React.createElement(Task, {data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}, 
+                    React.createElement(Task, {editingTitle: true, data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}, 
                             saveCreatedTask: this.taskCreated, editTask: this.taskChanged}) : null, 
                  this.state.creatingTodos ?
                     React.createElement(Todo, {editingTitle: true, data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}, createOverride: this.todoCreated}) : null, 

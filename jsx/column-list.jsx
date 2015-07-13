@@ -1,6 +1,6 @@
 var React = require('react');
 
-var ItemInstance = require('./item-instance');
+var Todo = require('./todo');
 var SocketMixin = require('./mixins/socketmixin');
 var CollectionMixin = require('./mixins/socketcollectionmixin');
 var Styles = require('./styles');
@@ -28,7 +28,7 @@ var ColumnList = React.createClass({
         return (
             <div>
                 <div key='newItem'>
-                    <ItemInstance autofocus={true} tag={this.props.collection} />
+                    <Todo editingTitle={true} />
                 </div>
                 {this.state.beingSaved.map(function(item, index) {
                     return (

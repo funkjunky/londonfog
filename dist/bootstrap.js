@@ -26158,7 +26158,7 @@ if(typeof window !== 'undefined') {
 },{"./routes":220,"react":196}],203:[function(require,module,exports){
 var React = require('react');
 
-var ItemInstance = require('./item-instance');
+var Todo = require('./todo');
 var SocketMixin = require('./mixins/socketmixin');
 var CollectionMixin = require('./mixins/socketcollectionmixin');
 var Styles = require('./styles');
@@ -26186,7 +26186,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
         return (
             React.createElement("div", null, 
                 React.createElement("div", {key: "newItem"}, 
-                    React.createElement(ItemInstance, {autofocus: true, tag: this.props.collection})
+                    React.createElement(Todo, {editingTitle: true})
                 ), 
                 this.state.beingSaved.map(function(item, index) {
                     return (
@@ -26210,7 +26210,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
 
 module.exports = ColumnList;
 
-},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":221,"react":196}],204:[function(require,module,exports){
+},{"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":221,"./todo":225,"react":196}],204:[function(require,module,exports){
 var React = require('react');
 
 var ContentEditable = React.createClass({displayName: "ContentEditable",
@@ -26606,6 +26606,13 @@ module.exports = SocketModelMixin;
 
 },{"./sockethandler":209}],212:[function(require,module,exports){
 var stateShortcuts = {
+    //calls the provided function if enter is hit.
+    enter: function(cb) {
+        return function(event) {
+            if(event.keyCode == 13)
+                cb.call(this);
+        }.bind(this);
+    },
     //convinience function for setting states in react components
     toggleState: function(state) {
         return function() {
@@ -26864,8 +26871,20 @@ var Project = React.createClass({displayName: "Project",
     componentDidMount: function() {
         //this.autosync = false;
     },
+    modes: ['creatingTasks', 'creatingTodos'],
+    expandTodoCreation: function() {
+        this.toggleExclusiveState(this.modes[1], this.modes)();
+        //Note: toggle state hasn't updated the variable yet, so we need to check the opposite.
+        if(!this.state.creatingTodos) 
+            this.setState({expanded: true});
+    },
+    expandTaskCreation: function() {
+        this.toggleExclusiveState(this.modes[0], this.modes)();
+        //Note: toggle state hasn't updated the variable yet, so we need to check the opposite.
+        if(!this.state.creatingTasks)
+            this.setState({expanded: true});
+    },
     render: function() {
-        var modes = ['creatingTasks', 'creatingTodos'];
         //TODO: duplicated in project-form
         var colour = '#' + this.props.data.colour.reduce(function(collector, item) {
             return collector + ((item==0) ? '00' : item.toString(16)); //this is a lazy version. If any number is less than 16, then it won't give a 6 char hex
@@ -26883,12 +26902,12 @@ var Project = React.createClass({displayName: "Project",
                         : null, 
                         React.createElement(ContentEditable, {html: this.state.acronym, onChange: this.handleAcronymChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', width: 50, padding: 2, fontSize: 24, backgroundColor: 'white', color: colour}}), 
                         React.createElement(ContentEditable, {html: this.state.name, onChange: this.handleTitleChange, style: {display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, padding: 2}}), 
-                        React.createElement("span", {style:  (this.state.creatingTasks) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleExclusiveState(modes[0], modes)}, "Create Tasks..."), 
-                        React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleExclusiveState(modes[1], modes)}, "Create Todos...")
+                        React.createElement("span", {style:  (this.state.creatingTasks) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.expandTaskCreation}, "Create Tasks..."), 
+                        React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.expandTodoCreation}, "Create Todos...")
                     )
                 ), 
                  this.state.creatingTasks ?
-                    React.createElement(Task, {data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}, 
+                    React.createElement(Task, {editingTitle: true, data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}, 
                             saveCreatedTask: this.taskCreated, editTask: this.taskChanged}) : null, 
                  this.state.creatingTodos ?
                     React.createElement(Todo, {editingTitle: true, data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}, createOverride: this.todoCreated}) : null, 
@@ -27049,6 +27068,7 @@ var TaskBadge = React.createClass({displayName: "TaskBadge",
 module.exports = TaskBadge;
 
 },{"react":196}],223:[function(require,module,exports){
+//<ContentEditable autofocus={this.props.autofocus} html={this.state.title} onChange={this.handleTitleChange} onSubmit={this.saveModelAndClear} style={{backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}></ContentEditable>
 var React = require('react');
 
 var Styles = require('./styles');
@@ -27089,7 +27109,11 @@ var Task = React.createClass({displayName: "Task",
             title: (this.props.data) ? this.props.data.title : '',
             expanded: false,
             todos: [],
+            editingTitle: false,
         };
+        if(this.props.editingTitle)
+            initialState.editingTitle = true;
+
         console.log('initial state task: ', initialState.todos, initialState.todos.length, this.props.data);
         if(this.props.data) {
             initialState.project = this.props.data.project;
@@ -27147,12 +27171,31 @@ var Task = React.createClass({displayName: "Task",
         if(this.props.stateChanged) {
             this.props.stateChanged(this.getData());
         }
+
+        if(this.state.editingTitle) {
+            console.log('focusing: ', this.state.title);
+            console.log('focusing: ', this.refs.taskTitle.props.value);
+            React.findDOMNode(this.refs.taskTitle).focus();
+        }
+    },
+
+    componentDidMount: function() {
+        if(this.state.editingTitle)
+            React.findDOMNode(this.refs.taskTitle).focus();
+    },
+
+    expandTodoCreation: function() {
+        this.toggleState('creatingTodos')();
+        //Note: toggle state hasn't updated the variable yet, so we need to check the opposite.
+        if(!this.state.creatingTodos)
+            this.setState({expanded: true});
     },
 
     render: function() {
         console.log('task state: ', this.state);
         var isNew = typeof this.props.data.id === 'undefined';
         var todos = this.state.todos || []; //TODO: not need to define this with a default... why does this happen again? I think I solved it before.
+        var inputStyle = {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2};
         return (
             React.createElement("div", {style: this.props.style}, 
                 React.createElement("div", {style: Styles.with('columnRowTable', {backgroundColor: Palette[this.state.status]})}, 
@@ -27180,12 +27223,14 @@ var Task = React.createClass({displayName: "Task",
                             }, this)
                         )
                         : null, 
-                    React.createElement(ContentEditable, {autofocus: this.props.autofocus, html: this.state.title, onChange: this.handleTitleChange, onSubmit: this.saveModelAndClear, style: {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}), 
-                    React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.toggleState('creatingTodos')}, "Create Todos..."), 
+                     this.state.editingTitle
+                        ? React.createElement("input", {ref: "taskTitle", onBlur: this.toggleState('editingTitle'), onChange: this.handleTitleChange, onKeyUp: this.enter(this.saveModelAndClear), style: inputStyle, value: this.state.title})
+                        : React.createElement("span", {onClick: this.toggleState('editingTitle'), style: inputStyle}, this.state.title), 
+                    React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.expandTodoCreation}, "Create Todos..."), 
                     React.createElement(ProjectBadge, {project: this.state.project})
                 ), 
                  this.state.creatingTodos ?
-                    React.createElement(Todo, {data: {task: this.getData()}, createOverride: this.todoCreated}) : null, 
+                    React.createElement(Todo, {editingTitle: true, data: {task: this.getData()}, createOverride: this.todoCreated}) : null, 
                  (this.state.expanded) ?
                     this.state.todos.map(function(item, index) {
                         return React.createElement(Todo, {data: item, stateChanged: this.todoChanged.bind(this, index), style: {marginLeft: 20}})
@@ -27287,6 +27332,8 @@ var Todo = React.createClass({displayName: "Todo",
         return {collection: 'todo', data: blankTodo()};
     },
     getInitialState: function() {
+        //TODO: so bad...
+        this.props.data.editingTitle = false;
         if(this.props.editingTitle)
             this.props.data.editingTitle = this.props.editingTitle;
         //TODO: this is hella ugly...
@@ -27330,6 +27377,7 @@ var Todo = React.createClass({displayName: "Todo",
     },
     componentWillmount: function() {
         if(this.isNew()) {
+        //TODO: is this needed? I don't think it is. Other things set editingTitle as necessary.
             console.log('is new: ', this.state);
             this.setState('editingTitle', true);
         }
@@ -27341,23 +27389,13 @@ var Todo = React.createClass({displayName: "Todo",
     isNew: function() {
         return !this.props._id && !this.props.data._id && (typeof this.props.data.id === 'undefined');
     },
-    //calls the provided function if enter is hit.
-    enter: function(cb) {
-        return function(event) {
-            if(event.keyCode == 13)
-                cb.call(this);
-        }.bind(this);
-    },
     render: function() {
-        if(this.state.editingTitle)
-            console.log('eiditng title!!!!!');
         var status = this.getStatus();
         var style = this.props.style || {};
         style.backgroundColor = Palette[status];
-        var inputStyle = {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', midWidth: 50, margin: 2};
+        var inputStyle = {backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2};
 
-console.log('AUTOFOCUS: ', this.props.autofocus);
-        //<ContentEditable autofocus={this.props.autofocus} html={this.state.title} onChange={this.handleTitleChange} onSubmit={this.saveModelAndClear} style={{backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}></ContentEditable>
+        //<ContentEditable html={this.state.title} onChange={this.handleTitleChange} onSubmit={this.saveModelAndClear} style={{backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}></ContentEditable>
         return (
             React.createElement("div", {style: Styles.with('columnRowTable', style)}, 
                  this.isNew()

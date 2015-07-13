@@ -1,4 +1,11 @@
 var stateShortcuts = {
+    //calls the provided function if enter is hit.
+    enter: function(cb) {
+        return function(event) {
+            if(event.keyCode == 13)
+                cb.call(this);
+        }.bind(this);
+    },
     //convinience function for setting states in react components
     toggleState: function(state) {
         return function() {

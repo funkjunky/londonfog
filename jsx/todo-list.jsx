@@ -6,7 +6,7 @@ var CollectionMixin = require('./mixins/socketcollectionmixin');
 var Styles = require('./styles');
 
 //This represents a list of slower items. Things you need to add manually over time.
-var BasicList = React.createClass({
+var TodoList = React.createClass({
     url: 'http://localhost:1212/',
     dataKey: 'data',
 
@@ -24,14 +24,14 @@ var BasicList = React.createClass({
             <div>
                 <div>----</div>
                 {this.state.data.map(function(project, index) {
-                    return project.todos.map(function(todo, index) {
+                    return project.todos.reverse().map(function(todo, index) {
                         return (
                             <div key={todo._id} style={Styles.with('fullWidth', {marginLeft: 20})}>
                                 <Todo data={todo} tag={this.props.collection} />
                             </div>
                         );
                     }, this)
-                    .concat(project.tasks.map(function(task, index) {
+                    .concat(project.tasks.reverse().map(function(task, index) {
                         console.log('todolist task: ', task);
                         return task.todos.map(function(todo, index) {
                             console.log('todo task: ', todo);
@@ -48,4 +48,4 @@ var BasicList = React.createClass({
     },
 });
 
-module.exports = BasicList;
+module.exports = TodoList;

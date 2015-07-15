@@ -123,7 +123,7 @@ var Project = React.createClass({displayName: "Project",
                  this.state.creatingTodos ?
                     React.createElement(Todo, {editingTitle: true, data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}, createOverride: this.todoCreated}) : null, 
                  (this.state.expanded) ?
-                    this.state.todos.map(function(item, index) {
+                    this.state.todos.reverse().map(function(item, index) {
                         return React.createElement(Todo, {data: item, stateChanged: this.todoChanged.bind(this, index), style: {marginLeft: 20}})
                     }, this)
                 : null, 

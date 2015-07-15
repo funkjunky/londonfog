@@ -26159,6 +26159,7 @@ if(typeof window !== 'undefined') {
 var React = require('react');
 
 var Todo = require('./todo');
+var ItemInstance = require('./item-instance');
 var SocketMixin = require('./mixins/socketmixin');
 var CollectionMixin = require('./mixins/socketcollectionmixin');
 var Styles = require('./styles');
@@ -26210,7 +26211,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
 
 module.exports = ColumnList;
 
-},{"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":221,"./todo":225,"react":196}],204:[function(require,module,exports){
+},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":221,"./todo":225,"react":196}],204:[function(require,module,exports){
 var React = require('react');
 
 var ContentEditable = React.createClass({displayName: "ContentEditable",
@@ -26912,7 +26913,7 @@ var Project = React.createClass({displayName: "Project",
                  this.state.creatingTodos ?
                     React.createElement(Todo, {editingTitle: true, data: {project: {_id: this.props.data._id, title: this.state.name, colour: this.props.data.colour, acronym: this.state.acronym}}, createOverride: this.todoCreated}) : null, 
                  (this.state.expanded) ?
-                    this.state.todos.map(function(item, index) {
+                    this.state.todos.reverse().map(function(item, index) {
                         return React.createElement(Todo, {data: item, stateChanged: this.todoChanged.bind(this, index), style: {marginLeft: 20}})
                     }, this)
                 : null, 
@@ -27232,7 +27233,7 @@ var Task = React.createClass({displayName: "Task",
                  this.state.creatingTodos ?
                     React.createElement(Todo, {editingTitle: true, data: {task: this.getData()}, createOverride: this.todoCreated}) : null, 
                  (this.state.expanded) ?
-                    this.state.todos.map(function(item, index) {
+                    this.state.todos.reverse().map(function(item, index) {
                         return React.createElement(Todo, {data: item, stateChanged: this.todoChanged.bind(this, index), style: {marginLeft: 20}})
                     }, this)
                 : null
@@ -27260,7 +27261,7 @@ var CollectionMixin = require('./mixins/socketcollectionmixin');
 var Styles = require('./styles');
 
 //This represents a list of slower items. Things you need to add manually over time.
-var BasicList = React.createClass({displayName: "BasicList",
+var TodoList = React.createClass({displayName: "TodoList",
     url: 'http://localhost:1212/',
     dataKey: 'data',
 
@@ -27278,14 +27279,14 @@ var BasicList = React.createClass({displayName: "BasicList",
             React.createElement("div", null, 
                 React.createElement("div", null, "----"), 
                 this.state.data.map(function(project, index) {
-                    return project.todos.map(function(todo, index) {
+                    return project.todos.reverse().map(function(todo, index) {
                         return (
                             React.createElement("div", {key: todo._id, style: Styles.with('fullWidth', {marginLeft: 20})}, 
                                 React.createElement(Todo, {data: todo, tag: this.props.collection})
                             )
                         );
                     }, this)
-                    .concat(project.tasks.map(function(task, index) {
+                    .concat(project.tasks.reverse().map(function(task, index) {
                         console.log('todolist task: ', task);
                         return task.todos.map(function(todo, index) {
                             console.log('todo task: ', todo);
@@ -27302,7 +27303,7 @@ var BasicList = React.createClass({displayName: "BasicList",
     },
 });
 
-module.exports = BasicList;
+module.exports = TodoList;
 
 },{"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":221,"./todo":225,"react":196}],225:[function(require,module,exports){
 var React = require('react/addons');

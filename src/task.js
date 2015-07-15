@@ -162,7 +162,7 @@ var Task = React.createClass({displayName: "Task",
                  this.state.creatingTodos ?
                     React.createElement(Todo, {editingTitle: true, data: {task: this.getData()}, createOverride: this.todoCreated}) : null, 
                  (this.state.expanded) ?
-                    this.state.todos.map(function(item, index) {
+                    this.state.todos.reverse().map(function(item, index) {
                         return React.createElement(Todo, {data: item, stateChanged: this.todoChanged.bind(this, index), style: {marginLeft: 20}})
                     }, this)
                 : null

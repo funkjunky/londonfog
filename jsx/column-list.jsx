@@ -1,6 +1,7 @@
 var React = require('react');
 
 var Todo = require('./todo');
+var ItemInstance = require('./item-instance');
 var SocketMixin = require('./mixins/socketmixin');
 var CollectionMixin = require('./mixins/socketcollectionmixin');
 var Styles = require('./styles');

@@ -26145,7 +26145,7 @@ var BasicList = React.createClass({displayName: "BasicList",
 
 module.exports = BasicList;
 
-},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":221,"react":196}],202:[function(require,module,exports){
+},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":222,"react":196}],202:[function(require,module,exports){
 var React = require('react');
 var Routes = React.createFactory(require('./routes'));
 
@@ -26211,7 +26211,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
 
 module.exports = ColumnList;
 
-},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":221,"./todo":225,"react":196}],204:[function(require,module,exports){
+},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":222,"./todo":226,"react":196}],204:[function(require,module,exports){
 var React = require('react');
 
 var ContentEditable = React.createClass({displayName: "ContentEditable",
@@ -26282,7 +26282,7 @@ var Header = React.createClass({displayName: "Header",
 
 module.exports = Header;
 
-},{"./palette":215,"./styles":221,"react":196,"underscore":200}],206:[function(require,module,exports){
+},{"./palette":215,"./styles":222,"react":196,"underscore":200}],206:[function(require,module,exports){
 var React = require('react');
 
 var Home = React.createClass({displayName: "Home",
@@ -26323,7 +26323,7 @@ var ItemInstance = React.createClass({displayName: "ItemInstance",
 
 module.exports = ItemInstance;
 
-},{"./project":218,"./task":223,"./todo":225,"react":196}],208:[function(require,module,exports){
+},{"./project":218,"./task":224,"./todo":226,"react":196}],208:[function(require,module,exports){
 //REQUIRES SOCKETMIXIN
 var socketHandler = require('./sockethandler');
 
@@ -26331,6 +26331,7 @@ var  SocketCollectionMixin = {
     refreshData: function() {
         this.socket().emit(this.props.collection + '::find', {}, function(error, data) {
             console.log('REFRESH - SOCKET ON UPDATED - collection: ', data);
+            localStorage.setItem(this.props.collection + 's', JSON.stringify(data));
             this._setData(data);
         }.bind(this));
     },
@@ -26637,6 +26638,12 @@ var stateShortcuts = {
             this.setState(obj);
         }.bind(this);
     },
+    setStateValue: function(key) {
+        return function(value) {
+            this.setState(key, value);
+            console.log('current state: ', this.state);
+        };
+    },
 };
 
 module.exports = stateShortcuts;
@@ -26664,7 +26671,7 @@ var Modal = React.createClass({displayName: "Modal",
 
 module.exports = Modal;
 
-},{"./styles":221,"react":196}],215:[function(require,module,exports){
+},{"./styles":222,"react":196}],215:[function(require,module,exports){
 var Palette = {
     light: '#F8EDC1',
     lighter: '#F6E7B3',
@@ -26726,7 +26733,7 @@ function getAcronym(text) {
 
 module.exports = ProjectBadge;
 
-},{"./styles":221,"react":196}],217:[function(require,module,exports){
+},{"./styles":222,"react":196}],217:[function(require,module,exports){
 var React = require('react');
 var request = require('superagent');
 
@@ -26774,7 +26781,9 @@ var ProjectForm = React.createClass({displayName: "ProjectForm",
                 name: this.state.name,
                 acronym: this.state.acronym,
                 colour: RotatingColours[colourIndex],
-                github: this.state.github
+                github: this.state.github,
+                tasks: [],
+                todos: [],
             }).end(function(err, res) {
                 console.log('done saving project: ', err, res);
                 this.props.onSave(res);
@@ -26787,7 +26796,7 @@ var ProjectForm = React.createClass({displayName: "ProjectForm",
 
 module.exports = ProjectForm;
 
-},{"./rotating-colours":219,"./styles":221,"react":196,"superagent":197}],218:[function(require,module,exports){
+},{"./rotating-colours":219,"./styles":222,"react":196,"superagent":197}],218:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
@@ -26936,7 +26945,7 @@ function getAcronym(text) {
 
 module.exports = Project;
 
-},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./mixins/stateShortcuts":212,"./palette":215,"./styles":221,"./task":223,"./todo":225,"react":196}],219:[function(require,module,exports){
+},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./mixins/stateShortcuts":212,"./palette":215,"./styles":222,"./task":224,"./todo":226,"react":196}],219:[function(require,module,exports){
 function RotatingColours() {
     var rotatingColours = [
         [255,255,0],
@@ -27016,7 +27025,113 @@ var Routes = React.createClass({displayName: "Routes",
 
 module.exports = Routes;
 
-},{"./header":205,"./home":206,"./item-instance":207,"./project":218,"./task":223,"./todo":225,"./workspace":227,"react":196,"react-router-component":4}],221:[function(require,module,exports){
+},{"./header":205,"./home":206,"./item-instance":207,"./project":218,"./task":224,"./todo":226,"./workspace":228,"react":196,"react-router-component":4}],221:[function(require,module,exports){
+var React = require('react');
+
+//Props: options => Array, choiceCB => fnc, closeCB => fnc
+var SelectionModal = React.createClass({displayName: "SelectionModal",
+    componentDidMount: function() {
+        React.findDOMNode(this.refs.filter).focus();
+        if(this.props.options.length <= 0)
+            throw "Modal needs options yo! The array was empty, or it's not an array.";
+
+        //select the first option to start
+        this.setState({selected: this.props.options[0].value});
+    },
+
+    getInitialState: function() {
+        return {
+            filter: '',
+        };
+    },
+
+    render: function() {
+        console.log('render state: ', this.state);
+        var options = this.props.options.filter(function(option) {
+            console.log('option: ', option);
+            return option.value.toUpperCase().indexOf(this.state.filter.toUpperCase()) !== -1;
+        }.bind(this));
+
+        var unselectedOption = {border: 'solid 1px black', width: 200, backgroundColor: 'white'};
+        var selectedOption = {border: 'solid 1px black', width: 200, backgroundColor: '#EEEEFF', boxShadow: '0px 0px 10px 10px #8888FF', zIndex: 11};
+
+        return (
+            React.createElement("div", null, 
+                React.createElement("div", {style: {position: 'fixed', top: 0, left: 0, backgroundColor: 'black', opacity: 0.5, width: '100%', height: '100%', zIndex: 100,}}), 
+                React.createElement("div", {style: {position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', border: '1px dotted gray', padding: 5, zIndex: 102, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', fontSize: 24}, onClick: this.props.closeCB}, 
+                    React.createElement("input", {ref: "filter", onClick: this.preventDefault, style: {fontSize: 24, width: 180, fontFamily: 'FontAwesome'}, type: "text", placeholder: "", onChange: this.setFilterValue, onKeyUp: this.handleKey}), 
+                    options.map(function(item, index) {
+                        return (
+                            React.createElement("div", {style: (item.value == this.state.selected) ? selectedOption : unselectedOption, onClick: this.optionChoosen.bind(this, item.key)}, item.value)
+                        );
+                    }, this)
+                )
+            )
+        );
+    },
+
+    setFilterValue: function(event) {
+        this.setState({'filter': event.target.value});
+    },
+
+    //Keys: escape => close, enter => chooses visibly selected option, up/down => changes selection
+    //note: as items are filtered, your selected item remains selected until it's no longer visible, then is unselected 
+    handleKey: function(event) {
+        event.preventDefault();
+
+        //TODO: think of a nicer way to do this... it's duplicated and too much code...
+        var options = this.props.options.filter(function(option) {
+            return option.value.toUpperCase().indexOf(this.state.filter.toUpperCase()) !== -1;
+        }.bind(this));
+
+        //get the options index of the currently selected
+        var index = options.findIndex(function(item) {
+            return item.value == this.state.selected;
+        }, this);
+
+        //close modal if escape key was hit
+        if(event.keyCode == 27)
+            this.props.closeCB();
+
+        //next step is setting selected back to 0 if old selection is gone.
+        //If there are no options then we set to null and get out.
+        if(index == -1) {
+            if(!options.length) {
+                this.setState({selected: null});
+                return;
+            }
+
+            index = 0;
+        }
+            
+
+        //move up or down on the index based on the key pressed. Or select an item if it's still visible.
+        if(event.keyCode == 38 && index > 0)
+            --index;
+        else if(event.keyCode == 40 && index < (options.length - 1))
+            ++index;
+        else if(event.keyCode == 13 && index != -1) {
+            this.optionChoosen(options[this.state.selIndex].value, event);
+            this.closeCB();
+        }
+
+        //set new selected
+        this.setState({selected: options[index].value});
+    },
+
+    preventDefault: function(event) {
+        event.stopPropagation();
+    },
+
+    optionChoosen: function(item, event) {
+        this.props.choiceCB(item);
+        //closeCB is called automatically.
+    },
+});
+
+module.exports = SelectionModal;
+
+},{"react":196}],222:[function(require,module,exports){
 var _ = require('underscore');
 
 var Palette = require('./palette');
@@ -27046,7 +27161,7 @@ Styles.aboveOverlay = {zIndex: 30, backgroundColor: 'white'};
 
 module.exports = Styles;
 
-},{"./palette":215,"underscore":200}],222:[function(require,module,exports){
+},{"./palette":215,"underscore":200}],223:[function(require,module,exports){
 var React = require('react');
 
 var TaskBadge = React.createClass({displayName: "TaskBadge",
@@ -27068,7 +27183,7 @@ var TaskBadge = React.createClass({displayName: "TaskBadge",
 
 module.exports = TaskBadge;
 
-},{"react":196}],223:[function(require,module,exports){
+},{"react":196}],224:[function(require,module,exports){
 //<ContentEditable autofocus={this.props.autofocus} html={this.state.title} onChange={this.handleTitleChange} onSubmit={this.saveModelAndClear} style={{backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}></ContentEditable>
 var React = require('react');
 
@@ -27213,7 +27328,7 @@ var Task = React.createClass({displayName: "Task",
                     
                     React.createElement("span", {style: {display: 'table-cell'}}, React.createElement("i", {className: this.types[this.state.type], onClick: this.setState.bind(this, {typeDropdown: true}, null)})), 
                      this.state.typeDropdown ?
-                        React.createElement("div", {style: {position: 'absolute', left: 60, top: 30, width: 100, backgroundColor: 'white'}}, 
+                        React.createElement("div", {style: {position: 'absolute', left: 60, top: 30, width: 100, zIndex: 10, backgroundColor: 'white'}}, 
                             objmap(this.types, function(icon, type) {
                                 return (
                                     React.createElement("div", {style: {position: 'relative', width: '100%', cursor: 'pointer', border: 'solid gray 1px'}, onClick: this.setType.bind(this, type)}, 
@@ -27252,7 +27367,7 @@ function objmap(obj, fnc, context) {
 
 module.exports = Task;
 
-},{"./content-editable":204,"./mixins/stateshortcuts":213,"./palette":215,"./project-badge":216,"./styles":221,"./todo":225,"react":196}],224:[function(require,module,exports){
+},{"./content-editable":204,"./mixins/stateshortcuts":213,"./palette":215,"./project-badge":216,"./styles":222,"./todo":226,"react":196}],225:[function(require,module,exports){
 var React = require('react');
 
 var Todo = require('./todo');
@@ -27305,13 +27420,15 @@ var TodoList = React.createClass({displayName: "TodoList",
 
 module.exports = TodoList;
 
-},{"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":221,"./todo":225,"react":196}],225:[function(require,module,exports){
+},{"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":222,"./todo":226,"react":196}],226:[function(require,module,exports){
 var React = require('react/addons');
 var _ = require('underscore');
 
 var TaskBadge = require('./task-badge');
 var ProjectBadge = require('./project-badge');
 var ContentEditable = require('./content-editable');
+var SelectionModal = require('./selection-modal');
+
 var SocketModelMixin = require('./mixins/socketmodelmixin');
 var StateShortcuts = require('./mixins/stateshortcuts');
 var SocketMixin = require('./mixins/socketmixin');
@@ -27408,18 +27525,40 @@ var Todo = React.createClass({displayName: "Todo",
                  this.state.editingTitle
                     ? React.createElement("input", {ref: "todoTitle", onBlur: this.toggleState('editingTitle'), onChange: this.handleTitleChange, onKeyUp: this.enter(this.saveModelAndClear), style: inputStyle, value: this.state.title})
                     : React.createElement("span", {onClick: this.toggleState('editingTitle'), style: inputStyle}, this.state.title), 
-                 this.state.task ? ( React.createElement(TaskBadge, {task: this.state.task})  ) : null, 
-                 this.state.task ? ( React.createElement(ProjectBadge, {project: this.state.task.project})  ) : null, 
-                 this.state.project ? React.createElement(ProjectBadge, {project: this.state.project}) : null, 
-                 (!this.state.task && !this.state.project) ? React.createElement("span", {style: Styles.with('rowBadge', {backgroundColor: 'white'})}, "Task?") : null
+                React.createElement("span", {onClick: this.toggleState('selectingBadge')}, 
+                     this.state.task ? ( React.createElement(TaskBadge, {task: this.state.task})  ) : null, 
+                     this.state.task ? ( React.createElement(ProjectBadge, {project: this.state.task.project})  ) : null, 
+                     this.state.project ? React.createElement(ProjectBadge, {project: this.state.project}) : null, 
+                     (!this.state.task && !this.state.project) ? React.createElement("span", {style: Styles.with('rowBadge', {backgroundColor: 'white'})}, "Task?") : null
+                ), 
+                 this.state.selectingBadge
+                    ? React.createElement(SelectionModal, {options: this.projectsAndTasks(), choiceCB: this.setTaskAndProject, closeCB: this.toggleState('selectingBadge')})
+                    : null
             )
         );
+   },
+
+   setTaskAndProject: function(taskAndProject) {
+        if(taskOrProject.task)
+            this.setState('task', taskOrProject.task);
+        if(taskOrProject.project)
+            this.setState('project', taskOrProject.project);
+   },
+
+   projectsAndTasks: function() {
+         var projects = JSON.parse(localStorage.getItem('projects')) || [];
+         
+         return projects.reduce(function(collector, project) {
+            return collector.concat([{key: {project: project}, value: project.name}], project.tasks.map(function(task) {
+                return {key: {task: task, project: project}, value: task.title};
+            }));
+         }, []);
    },
 });
 
 module.exports = Todo;
 
-},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./mixins/stateshortcuts":213,"./palette":215,"./project-badge":216,"./styles":221,"./task-badge":222,"react/addons":24,"underscore":200}],226:[function(require,module,exports){
+},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./mixins/stateshortcuts":213,"./palette":215,"./project-badge":216,"./selection-modal":221,"./styles":222,"./task-badge":223,"react/addons":24,"underscore":200}],227:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
@@ -27447,13 +27586,15 @@ var WorkspaceHeader = React.createClass({displayName: "WorkspaceHeader",
 
 module.exports = WorkspaceHeader;
 
-},{"./mixins/stateShortcuts":212,"./modal":214,"./project-form":217,"./styles":221,"react":196}],227:[function(require,module,exports){
+},{"./mixins/stateShortcuts":212,"./modal":214,"./project-form":217,"./styles":222,"react":196}],228:[function(require,module,exports){
 var React = require('react');
 
 var WorkspaceHeader = require('./workspace-header');
 var ColumnList = require('./column-list');
 var BasicList = require('./basic-list');
 var TodoList = require('./todo-list');
+
+var SelectionModal = require('./selection-modal');
 
 var Workspace = React.createClass({displayName: "Workspace",
     render: function() {
@@ -27476,4 +27617,4 @@ var Workspace = React.createClass({displayName: "Workspace",
 
 module.exports = Workspace;
 
-},{"./basic-list":201,"./column-list":203,"./todo-list":224,"./workspace-header":226,"react":196}]},{},[202]);
+},{"./basic-list":201,"./column-list":203,"./selection-modal":221,"./todo-list":225,"./workspace-header":227,"react":196}]},{},[202]);

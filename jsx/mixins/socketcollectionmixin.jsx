@@ -5,6 +5,7 @@ var  SocketCollectionMixin = {
     refreshData: function() {
         this.socket().emit(this.props.collection + '::find', {}, function(error, data) {
             console.log('REFRESH - SOCKET ON UPDATED - collection: ', data);
+            localStorage.setItem(this.props.collection + 's', JSON.stringify(data));
             this._setData(data);
         }.bind(this));
     },

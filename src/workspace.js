@@ -5,6 +5,8 @@ var ColumnList = require('./column-list');
 var BasicList = require('./basic-list');
 var TodoList = require('./todo-list');
 
+var SelectionModal = require('./selection-modal');
+
 var Workspace = React.createClass({displayName: "Workspace",
     render: function() {
         var leftStyle = {width: '45%', height: '100%', border: 'solid 1px black', position: 'absolute', top: 80, margin: 10, };

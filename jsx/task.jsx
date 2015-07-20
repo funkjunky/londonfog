@@ -142,7 +142,7 @@ var Task = React.createClass({
                     }
                     <span style={{display: 'table-cell'}}><i className={this.types[this.state.type]} onClick={this.setState.bind(this, {typeDropdown: true}, null)}></i></span>
                     { this.state.typeDropdown ?
-                        <div style={{position: 'absolute', left: 60, top: 30, width: 100, backgroundColor: 'white'}}>
+                        <div style={{position: 'absolute', left: 60, top: 30, width: 100, zIndex: 10, backgroundColor: 'white'}}>
                             {objmap(this.types, function(icon, type) {
                                 return (
                                     <div style={{position: 'relative', width: '100%', cursor: 'pointer', border: 'solid gray 1px'}} onClick={this.setType.bind(this, type)}>

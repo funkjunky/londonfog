@@ -29,6 +29,12 @@ var stateShortcuts = {
             this.setState(obj);
         }.bind(this);
     },
+    setStateValue: function(key) {
+        return function(value) {
+            this.setState(key, value);
+            console.log('current state: ', this.state);
+        };
+    },
 };
 
 module.exports = stateShortcuts;

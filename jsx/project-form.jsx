@@ -45,7 +45,9 @@ var ProjectForm = React.createClass({
                 name: this.state.name,
                 acronym: this.state.acronym,
                 colour: RotatingColours[colourIndex],
-                github: this.state.github
+                github: this.state.github,
+                tasks: [],
+                todos: [],
             }).end(function(err, res) {
                 console.log('done saving project: ', err, res);
                 this.props.onSave(res);

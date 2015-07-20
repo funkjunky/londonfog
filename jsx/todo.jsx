@@ -4,6 +4,8 @@ var _ = require('underscore');
 var TaskBadge = require('./task-badge');
 var ProjectBadge = require('./project-badge');
 var ContentEditable = require('./content-editable');
+var SelectionModal = require('./selection-modal');
+
 var SocketModelMixin = require('./mixins/socketmodelmixin');
 var StateShortcuts = require('./mixins/stateshortcuts');
 var SocketMixin = require('./mixins/socketmixin');
@@ -100,12 +102,34 @@ var Todo = React.createClass({
                 { this.state.editingTitle
                     ? <input ref="todoTitle" onBlur={this.toggleState('editingTitle')} onChange={this.handleTitleChange} onKeyUp={this.enter(this.saveModelAndClear)} style={inputStyle} value={this.state.title} />
                     : <span onClick={this.toggleState('editingTitle')} style={inputStyle}>{this.state.title}</span> }
-                { this.state.task ? ( <TaskBadge task={this.state.task} />  ) : null }
-                { this.state.task ? ( <ProjectBadge project={this.state.task.project} />  ) : null }
-                { this.state.project ? <ProjectBadge project={this.state.project} /> : null }
-                { (!this.state.task && !this.state.project) ? <span style={Styles.with('rowBadge', {backgroundColor: 'white'})}>Task?</span> : null }
+                <span onClick={this.toggleState('selectingBadge')}>
+                    { this.state.task ? ( <TaskBadge task={this.state.task} />  ) : null }
+                    { this.state.task ? ( <ProjectBadge project={this.state.task.project} />  ) : null }
+                    { this.state.project ? <ProjectBadge project={this.state.project} /> : null }
+                    { (!this.state.task && !this.state.project) ? <span style={Styles.with('rowBadge', {backgroundColor: 'white'})}>Task?</span> : null }
+                </span>
+                { this.state.selectingBadge
+                    ? <SelectionModal options={this.projectsAndTasks()} choiceCB={this.setTaskAndProject} closeCB={this.toggleState('selectingBadge')}></SelectionModal>
+                    : null }
             </div>
         );
+   },
+
+   setTaskAndProject: function(taskAndProject) {
+        if(taskOrProject.task)
+            this.setState('task', taskOrProject.task);
+        if(taskOrProject.project)
+            this.setState('project', taskOrProject.project);
+   },
+
+   projectsAndTasks: function() {
+         var projects = JSON.parse(localStorage.getItem('projects')) || [];
+         
+         return projects.reduce(function(collector, project) {
+            return collector.concat([{key: {project: project}, value: project.name}], project.tasks.map(function(task) {
+                return {key: {task: task, project: project}, value: task.title};
+            }));
+         }, []);
    },
 });
 

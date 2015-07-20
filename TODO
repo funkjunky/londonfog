@@ -125,19 +125,45 @@ TODO
 			*- when we create a new todo under a task we need to expand the task if not already expanded
 			*- when page first loads, give focus to creating a new TODO
 			*- display tasks and todos in reverse order.
-			- commit and push
+			*- commit and push
 
-			? How to associate current TODOs with tasks and projects???
+			- make a component selection-modal, which is a position absolute with backdrop, autocomplete, and selection of items.
+				- Basics
+					*- make the backdrop, input and divs for clicking just for looks for now.
+					*- add the attribute callback choiceCB={myCallback} and closeCB={changeToClosed}
+					*- onClick of the divs, call this.props.choiceCB with the key of the choice.
+						*- and call closeCB after.
+				*- First Testing
+					*- add this new component shown based on some state, onClick of task? show it.
+					*- get close working
+					*- get selection working
+						*- I need to allow the selection-modal to accept an array of objects
+					*- use local storage to store projects so they can be grabbed for badges
+						*- set projects in local storage during workspace?
+					*- create more projects and tasks to see how it shows
 
-???? If tasks are all a part of one big project… then what happens if there are a lot of tasks on one project and we have to constantly update the project?? It might be too taxing…
+				- Functionality
+					*- onChange (assuming onChange is live) of the autocomplete, filter the divs shown.
+					*- focus the autocomplete when this component is rendered or shown.
+					*- if escape, then call closeCB
+					*- onKeyUp of anything in the component, if it’s up or down, then highlight a div. If enter, then call this.props.choiceCB
+				-Advanced for TODO
+					- format tasks, so they have a box on the right that shows their project with the colour and acronym.
 
-	- Add basic filters and style workspace header
-		- add a text filter to be applied to everything [just checking title for now]
+	- use bower to include socket.io, instead of using a cdn!!
+	
+	- add a text filter to be applied to everything [just checking title for now]
+
+	- Style workspace header & fix bugs
+		- make sure we aren’t saving things when we shouldn’t like during meaningless state changes
+		- figure out why the project title gets cleared and all it’s tasks get erased…
 		- style the create project button and the text filter nicely.
 		- style and organize projects, tasks, and todos appropriately.
 			~Nitpick on colours etc at this point
 
  *** MAJOR CODE CLEAN UP TIME!!  [PERFECT CODE]  ***
+	
+	- ZERO inline styling. Put it in variables outside the html.
 
 	- see about using this.props.children more often… i found out about transclusion in reactjs too late… i could probably use it in a number of places to great affect… like adding buttons (del or create) to itemInstances, etc.
 	- grab data on server side, then update on client afterwards [see SO QA]
@@ -206,6 +232,11 @@ TODO
 		 - Make sure generic rest server is adequately secure. Consult Zak on this perhaps.
 		 - come up with more cool features
 
+	- Improve scalability, so save todos and tasks in their own collection.
+		- so give tasks a collection
+		- tasks now have an array of ids for todos
+		- projects now have an array of ids for tasks and for todos
+		* a project’s last_activity_at datetime would be the newest updated_at time for it’s child todos and tasks; same for tasks with todos. Also including the project or task itsself (because maybe the title was the latest update)
 DONE:
 ———
  - Testing Reacts with forms:

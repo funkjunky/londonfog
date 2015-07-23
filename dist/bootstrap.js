@@ -27004,9 +27004,9 @@ var Routes = React.createClass({displayName: "Routes",
             React.createElement("html", null, 
                 React.createElement("head", null, 
                     React.createElement("title", null, "React London Fog thingy"), 
-                    React.createElement("script", {src: "https://cdn.socket.io/socket.io-1.3.5.js"}), 
+                    React.createElement("script", {src: "/dist/socket.io-1.3.5.js"}), 
                     React.createElement("link", {rel: "stylesheet", href: "/dist/reset.css"}), 
-                    React.createElement("link", {rel: "stylesheet", href: "//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"})
+                    React.createElement("link", {rel: "stylesheet", href: "/dist/font-awesome.min.css"})
                 ), 
                 React.createElement("body", null, 
                     React.createElement(Header, null), 
@@ -27061,8 +27061,9 @@ var SelectionModal = React.createClass({displayName: "SelectionModal",
                 React.createElement("div", {style: {position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', border: '1px dotted gray', padding: 5, zIndex: 102, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', fontSize: 24}, onClick: this.props.closeCB}, 
                     React.createElement("input", {ref: "filter", onClick: this.preventDefault, style: {fontSize: 24, width: 180, fontFamily: 'FontAwesome'}, type: "text", placeholder: "", onChange: this.setFilterValue, onKeyUp: this.handleKey}), 
                     options.map(function(item, index) {
+                        var html = item.html || item.value;
                         return (
-                            React.createElement("div", {style: (item.value == this.state.selected) ? selectedOption : unselectedOption, onClick: this.optionChoosen.bind(this, item.key)}, item.value)
+                            React.createElement("div", {style: (item.value == this.state.selected) ? selectedOption : unselectedOption, onClick: this.optionChoosen.bind(this, item.key)}, html)
                         );
                     }, this)
                 )
@@ -27549,9 +27550,12 @@ var Todo = React.createClass({displayName: "Todo",
          var projects = JSON.parse(localStorage.getItem('projects')) || [];
          
          return projects.reduce(function(collector, project) {
-            return collector.concat([{key: {project: project}, value: project.name}], project.tasks.map(function(task) {
-                return {key: {task: task, project: project}, value: task.title};
-            }));
+            return collector.concat(
+                project.tasks.map(function(task) {
+                    return {key: {task: task, project: project}, value: task.title, html: ( React.createElement("span", null, task.title, " ", React.createElement(ProjectBadge, {project: project})) )};
+                }),
+                [{key: {project: project}, value: project.name, html: ( React.createElement("span", null, React.createElement(ProjectBadge, {project: project}), " ", React.createElement("span", {style: {fontWeight: 'bold'}}, project.name)) )}]
+            );
          }, []);
    },
 });

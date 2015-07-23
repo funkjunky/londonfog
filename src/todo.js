@@ -126,9 +126,12 @@ var Todo = React.createClass({displayName: "Todo",
          var projects = JSON.parse(localStorage.getItem('projects')) || [];
          
          return projects.reduce(function(collector, project) {
-            return collector.concat([{key: {project: project}, value: project.name}], project.tasks.map(function(task) {
-                return {key: {task: task, project: project}, value: task.title};
-            }));
+            return collector.concat(
+                project.tasks.map(function(task) {
+                    return {key: {task: task, project: project}, value: task.title, html: ( React.createElement("span", null, task.title, " ", React.createElement(ProjectBadge, {project: project})) )};
+                }),
+                [{key: {project: project}, value: project.name, html: ( React.createElement("span", null, React.createElement(ProjectBadge, {project: project}), " ", React.createElement("span", {style: {fontWeight: 'bold'}}, project.name)) )}]
+            );
          }, []);
    },
 });

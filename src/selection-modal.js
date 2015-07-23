@@ -33,8 +33,9 @@ var SelectionModal = React.createClass({displayName: "SelectionModal",
                 React.createElement("div", {style: {position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', border: '1px dotted gray', padding: 5, zIndex: 102, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', fontSize: 24}, onClick: this.props.closeCB}, 
                     React.createElement("input", {ref: "filter", onClick: this.preventDefault, style: {fontSize: 24, width: 180, fontFamily: 'FontAwesome'}, type: "text", placeholder: "", onChange: this.setFilterValue, onKeyUp: this.handleKey}), 
                     options.map(function(item, index) {
+                        var html = item.html || item.value;
                         return (
-                            React.createElement("div", {style: (item.value == this.state.selected) ? selectedOption : unselectedOption, onClick: this.optionChoosen.bind(this, item.key)}, item.value)
+                            React.createElement("div", {style: (item.value == this.state.selected) ? selectedOption : unselectedOption, onClick: this.optionChoosen.bind(this, item.key)}, html)
                         );
                     }, this)
                 )

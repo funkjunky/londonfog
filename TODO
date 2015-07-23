@@ -142,15 +142,16 @@ TODO
 						*- set projects in local storage during workspace?
 					*- create more projects and tasks to see how it shows
 
-				- Functionality
+				*- Functionality
 					*- onChange (assuming onChange is live) of the autocomplete, filter the divs shown.
 					*- focus the autocomplete when this component is rendered or shown.
 					*- if escape, then call closeCB
 					*- onKeyUp of anything in the component, if it’s up or down, then highlight a div. If enter, then call this.props.choiceCB
-				-Advanced for TODO
-					- format tasks, so they have a box on the right that shows their project with the colour and acronym.
 
-	- use bower to include socket.io, instead of using a cdn!!
+				*-Advanced for TODO
+					*- format tasks, so they have a box on the right that shows their project with the colour and acronym.
+
+	*- use bower to include socket.io, instead of using a cdn!!
 	
 	- add a text filter to be applied to everything [just checking title for now]
 

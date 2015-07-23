@@ -18,9 +18,9 @@ var Routes = React.createClass({displayName: "Routes",
             React.createElement("html", null, 
                 React.createElement("head", null, 
                     React.createElement("title", null, "React London Fog thingy"), 
-                    React.createElement("script", {src: "https://cdn.socket.io/socket.io-1.3.5.js"}), 
+                    React.createElement("script", {src: "/dist/socket.io-1.3.5.js"}), 
                     React.createElement("link", {rel: "stylesheet", href: "/dist/reset.css"}), 
-                    React.createElement("link", {rel: "stylesheet", href: "//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"})
+                    React.createElement("link", {rel: "stylesheet", href: "/dist/font-awesome.min.css"})
                 ), 
                 React.createElement("body", null, 
                     React.createElement(Header, null), 

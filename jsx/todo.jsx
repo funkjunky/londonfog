@@ -126,9 +126,12 @@ var Todo = React.createClass({
          var projects = JSON.parse(localStorage.getItem('projects')) || [];
          
          return projects.reduce(function(collector, project) {
-            return collector.concat([{key: {project: project}, value: project.name}], project.tasks.map(function(task) {
-                return {key: {task: task, project: project}, value: task.title};
-            }));
+            return collector.concat(
+                project.tasks.map(function(task) {
+                    return {key: {task: task, project: project}, value: task.title, html: ( <span>{task.title} <ProjectBadge project={project} /></span> )};
+                }),
+                [{key: {project: project}, value: project.name, html: ( <span><ProjectBadge project={project} /> <span style={{fontWeight: 'bold'}}>{project.name}</span></span> )}]
+            );
          }, []);
    },
 });

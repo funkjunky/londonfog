@@ -17,11 +17,14 @@ var  SocketCollectionMixin = {
                 
                 this.setState({data: this._getData().concat([newItem])});
             }.bind(this), function itemDeleted(deletedItem) {
+                console.log('checking to see to delete...', deletedItem);
                 var data = this._getData().slice(0);
                 //TODO: clean up messy too lengthy code. This is a simple operation, and the code should be just as simple.
                 var foundIndex = data.findIndex(function(item) {
-                    for(key in item)
-                        if(item[key] != deletedItem[key])
+                    console.log('other items: ', item);
+                    for(key in deletedItem)
+                        //TODO: this equality is super shaky.
+                        if(typeof deletedItem[key] != 'object' && item[key] != deletedItem[key])
                             return false;
 
                     return true;

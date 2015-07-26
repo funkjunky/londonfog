@@ -57,15 +57,15 @@ var socketHandler = require('./sockethandler');
         componentDidMount: function() {
             if(!this.url)
                 throw 'SocketMixin requires url to be set in component class';
+            //if(this.props.data)
+            //    this._setData({data: this.props.data});
             if(!this.autosync)
                 return;
 
             this.socket().on('connect', function() {
                 console.log('connected to the socket [' + this.url + ']! collection, id: ', this.props.collection);
 
-                if(this.props.data)
-                    this._setData({data: this.props.data});
-                else
+                if(!this.props.data)
                     this.refreshData();
             }.bind(this));
         },

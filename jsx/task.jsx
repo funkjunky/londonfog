@@ -10,7 +10,7 @@ var ContentEditable = require('./content-editable');
 var ProjectBadge = require('./project-badge');
 var Todo = require('./todo');
 
-function getNewTask() {
+function blankTask() {
     return {
         title: '',
         status: 'new',
@@ -73,6 +73,7 @@ var Task = React.createClass({
 
     saveAndClear: function() {
         var savedTask = this.props.saveCreatedTask(this.getData())
+        this.setState(blankTask());
     },
 
     handleTitleChange: function(event) {
@@ -153,8 +154,11 @@ var Task = React.createClass({
                             }, this)}
                         </div>
                         : null }
+                    { this.state.typeDropdown ? 
+                        <div style={{position: 'fixed', width: '100%', height: '100%', top: 0, left: 0, zIndex: 9}} onClick={this.toggleState('typeDropdown')}></div>
+                        : null }
                     { this.state.editingTitle
-                        ? <input ref="taskTitle" onBlur={this.toggleState('editingTitle')} onChange={this.handleTitleChange} onKeyUp={this.enter(this.saveModelAndClear)} style={inputStyle} value={this.state.title} />
+                        ? <input ref="taskTitle" onBlur={this.toggleState('editingTitle')} onChange={this.handleTitleChange} onKeyUp={this.enter(this.saveAndClear)} style={inputStyle} value={this.state.title} />
                         : <span onClick={this.toggleState('editingTitle')} style={inputStyle}>{this.state.title}</span> }
                     <span style={ (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton } onClick={this.expandTodoCreation}>Create Todos...</span>
                     <ProjectBadge project={this.state.project} />

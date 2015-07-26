@@ -26117,6 +26117,8 @@ var SocketMixin = require('./mixins/socketmixin');
 var CollectionMixin = require('./mixins/socketcollectionmixin');
 var Styles = require('./styles');
 
+var CommonFilters = require('./helpers/commonfilters');
+
 //This represents a list of slower items. Things you need to add manually over time.
 var BasicList = React.createClass({displayName: "BasicList",
     url: 'http://localhost:1212/',
@@ -26129,9 +26131,13 @@ var BasicList = React.createClass({displayName: "BasicList",
         };
     },
     render: function() {
+        var filteredItems = this.state.data;
+        if(this.props.filter)
+            filteredItems = filteredItems.filter(CommonFilters.byAnyElementSubstring(this.props.filter));
+
         return (
             React.createElement("div", {style: this.props.style}, 
-                this.state.data.map(function(item, index) {
+                filteredItems.map(function(item, index) {
                     return (
                         React.createElement("div", {key: item._id, style: Styles.fullWidth}, 
                             React.createElement(ItemInstance, {data: item, tag: this.props.collection})
@@ -26145,7 +26151,7 @@ var BasicList = React.createClass({displayName: "BasicList",
 
 module.exports = BasicList;
 
-},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":222,"react":196}],202:[function(require,module,exports){
+},{"./helpers/commonfilters":206,"./item-instance":208,"./mixins/socketcollectionmixin":209,"./mixins/socketmixin":211,"./styles":223,"react":196}],202:[function(require,module,exports){
 var React = require('react');
 var Routes = React.createFactory(require('./routes'));
 
@@ -26155,7 +26161,7 @@ if(typeof window !== 'undefined') {
     }
 }
 
-},{"./routes":220,"react":196}],203:[function(require,module,exports){
+},{"./routes":221,"react":196}],203:[function(require,module,exports){
 var React = require('react');
 
 var Todo = require('./todo');
@@ -26163,6 +26169,8 @@ var ItemInstance = require('./item-instance');
 var SocketMixin = require('./mixins/socketmixin');
 var CollectionMixin = require('./mixins/socketcollectionmixin');
 var Styles = require('./styles');
+
+var CommonFilters = require('./helpers/commonfilters');
 
 //A LIST OF TODOS... nothing else... I should rename this class at some point.
 //This represents a list of quick to create items. With new items ready to be created just by typing and hitting enter in a single textbox.
@@ -26184,6 +26192,10 @@ var ColumnList = React.createClass({displayName: "ColumnList",
         //this.setState({ data: this.state.data });
     },
     render: function() {
+        var filteredItems = this.state.data;
+        filteredItems = filteredItems.filter(CommonFilters.byAnyElementSubstring(this.props.filter));
+        console.log('rendering...');
+
         return (
             React.createElement("div", null, 
                 React.createElement("div", {key: "newItem"}, 
@@ -26196,7 +26208,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
                         )
                     );
                 }, this), 
-                this.state.data.reverse().map(function(item, index) {
+                filteredItems.map(function(item, index) {
                     return (
                         React.createElement("div", {key: item._id, style: Styles.fullWidth}, 
                             React.createElement(ItemInstance, {data: item, tag: this.props.collection}), 
@@ -26211,7 +26223,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
 
 module.exports = ColumnList;
 
-},{"./item-instance":207,"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":222,"./todo":226,"react":196}],204:[function(require,module,exports){
+},{"./helpers/commonfilters":206,"./item-instance":208,"./mixins/socketcollectionmixin":209,"./mixins/socketmixin":211,"./styles":223,"./todo":227,"react":196}],204:[function(require,module,exports){
 var React = require('react');
 
 var ContentEditable = React.createClass({displayName: "ContentEditable",
@@ -26223,8 +26235,6 @@ var ContentEditable = React.createClass({displayName: "ContentEditable",
     render: function(){
         //TODO: find where html=undefined and fix it! So I can remove this? Maybe I should keep this safety.
         var html = this.state.html || '';
-        console.log('content editable render, html: ', html);
-        console.log('content editable render, style: ', this.props.style);
         return React.createElement("span", {id: "contenteditable", 
             style: this.props.style, 
             onKeyUp: this.emitChange, 
@@ -26282,7 +26292,37 @@ var Header = React.createClass({displayName: "Header",
 
 module.exports = Header;
 
-},{"./palette":215,"./styles":222,"react":196,"underscore":200}],206:[function(require,module,exports){
+},{"./palette":216,"./styles":223,"react":196,"underscore":200}],206:[function(require,module,exports){
+var CommonFilters = {
+    byAnyElementSubstring: function(string, caseSensitive) {
+        function caseSensitiveSubset(set, subset) {
+            if(typeof subset !== 'string' || subset == '')
+                return true;
+            else
+                //if it isn't a string, then we filter out the item automatically
+                return typeof set === 'string' && set.indexOf(subset) != -1;
+        }
+        function caseInsensitiveSubset(set, subset) {
+            if(typeof subset !== 'string' || subset == '')
+                return true;
+            else
+                return typeof set === 'string' && set.toUpperCase().indexOf(subset.toUpperCase()) != -1;
+        }
+        var isSubset = (caseSensitive) ? caseSensitiveSubset : caseInsensitiveSubset;
+
+        return function(item) {
+            for(var key in item)
+                if(isSubset(item[key], string))
+                    return true;
+
+            return false;
+        };
+    },
+};
+
+module.exports = CommonFilters;
+
+},{}],207:[function(require,module,exports){
 var React = require('react');
 
 var Home = React.createClass({displayName: "Home",
@@ -26295,7 +26335,7 @@ var Home = React.createClass({displayName: "Home",
 
 module.exports = Home;
 
-},{"react":196}],207:[function(require,module,exports){
+},{"react":196}],208:[function(require,module,exports){
 var React = require('react');
 var Project = require('./project');
 var Task = require('./task');
@@ -26323,7 +26363,7 @@ var ItemInstance = React.createClass({displayName: "ItemInstance",
 
 module.exports = ItemInstance;
 
-},{"./project":218,"./task":224,"./todo":226,"react":196}],208:[function(require,module,exports){
+},{"./project":219,"./task":225,"./todo":227,"react":196}],209:[function(require,module,exports){
 //REQUIRES SOCKETMIXIN
 var socketHandler = require('./sockethandler');
 
@@ -26343,11 +26383,14 @@ var  SocketCollectionMixin = {
                 
                 this.setState({data: this._getData().concat([newItem])});
             }.bind(this), function itemDeleted(deletedItem) {
+                console.log('checking to see to delete...', deletedItem);
                 var data = this._getData().slice(0);
                 //TODO: clean up messy too lengthy code. This is a simple operation, and the code should be just as simple.
                 var foundIndex = data.findIndex(function(item) {
-                    for(key in item)
-                        if(item[key] != deletedItem[key])
+                    console.log('other items: ', item);
+                    for(key in deletedItem)
+                        //TODO: this equality is super shaky.
+                        if(typeof deletedItem[key] != 'object' && item[key] != deletedItem[key])
                             return false;
 
                     return true;
@@ -26387,7 +26430,7 @@ if (!Array.prototype.findIndex) {
 
 module.exports = SocketCollectionMixin;
 
-},{"./sockethandler":209}],209:[function(require,module,exports){
+},{"./sockethandler":210}],210:[function(require,module,exports){
 function SocketHandler() {
     this.callbacks = {};
     this.sockets = {};
@@ -26456,7 +26499,7 @@ var socketHandler = SocketHandler();
 
 module.exports = socketHandler;
 
-},{}],210:[function(require,module,exports){
+},{}],211:[function(require,module,exports){
 /**
  * Note: This mixin can't be used without either SocketCollectionMixin or SocketModelMixin!
  **/
@@ -26516,15 +26559,15 @@ var socketHandler = require('./sockethandler');
         componentDidMount: function() {
             if(!this.url)
                 throw 'SocketMixin requires url to be set in component class';
+            //if(this.props.data)
+            //    this._setData({data: this.props.data});
             if(!this.autosync)
                 return;
 
             this.socket().on('connect', function() {
                 console.log('connected to the socket [' + this.url + ']! collection, id: ', this.props.collection);
 
-                if(this.props.data)
-                    this._setData({data: this.props.data});
-                else
+                if(!this.props.data)
                     this.refreshData();
             }.bind(this));
         },
@@ -26533,7 +26576,7 @@ var socketHandler = require('./sockethandler');
     module.exports = SocketMixin;
 })();
 
-},{"./sockethandler":209,"underscore":200}],211:[function(require,module,exports){
+},{"./sockethandler":210,"underscore":200}],212:[function(require,module,exports){
 //REQUIRES SOCKETMIXIN
 var socketHandler = require('./sockethandler');
 
@@ -26577,7 +26620,6 @@ var  SocketModelMixin = {
     },
 
     componentDidUpdate: function(prevProps, prevState) {
-        console.log('component did update: ', this.oldModel, this._getData());
         //TODO: remove hacky stuff, once I figure out a way to fix reactjs
         if(!this.autosync || !prevState || !something(prevState) || objectsAreEqual(this._getData(), this.oldModel))
             return;
@@ -26606,8 +26648,11 @@ function hasItem(obj) {
 
 module.exports = SocketModelMixin;
 
-},{"./sockethandler":209}],212:[function(require,module,exports){
+},{"./sockethandler":210}],213:[function(require,module,exports){
 var stateShortcuts = {
+    getInitialState: function() {
+        return {};
+    },
     //calls the provided function if enter is hit.
     enter: function(cb) {
         return function(event) {
@@ -26618,7 +26663,6 @@ var stateShortcuts = {
     //convinience function for setting states in react components
     toggleState: function(state) {
         return function() {
-            console.log('this: ', this);
             var obj = {};
             obj[state] = !this.state[state];
             this.setState(obj);
@@ -26640,17 +26684,19 @@ var stateShortcuts = {
     },
     setStateValue: function(key) {
         return function(value) {
-            this.setState(key, value);
-            console.log('current state: ', this.state);
-        };
+            //TODO: find cleaner way to do this in JS
+            var obj = {};
+            obj[key] = value;
+            this.setState(obj);
+        }.bind(this);
     },
 };
 
 module.exports = stateShortcuts;
 
-},{}],213:[function(require,module,exports){
-arguments[4][212][0].apply(exports,arguments)
-},{"dup":212}],214:[function(require,module,exports){
+},{}],214:[function(require,module,exports){
+arguments[4][213][0].apply(exports,arguments)
+},{"dup":213}],215:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
@@ -26671,7 +26717,7 @@ var Modal = React.createClass({displayName: "Modal",
 
 module.exports = Modal;
 
-},{"./styles":222,"react":196}],215:[function(require,module,exports){
+},{"./styles":223,"react":196}],216:[function(require,module,exports){
 var Palette = {
     light: '#F8EDC1',
     lighter: '#F6E7B3',
@@ -26701,7 +26747,7 @@ Palette.finishedlight = Palette.finished;
 
 module.exports = Palette;
 
-},{}],216:[function(require,module,exports){
+},{}],217:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
@@ -26710,7 +26756,6 @@ var ProjectBadge = React.createClass({displayName: "ProjectBadge",
     //TODO: add colours and borders nicely according to the task colour?
     //the border and font should be the colour, while the background is a much ligher shade
    render: function() {
-        console.log('badge props: ', this.props);
         var acronym = this.props.project.acronym || getAcronym(this.props.project.title);
         //TODO: duplicated in project-form
         var colour = '#' + this.props.project.colour.reduce(function(collector, item) {
@@ -26733,7 +26778,7 @@ function getAcronym(text) {
 
 module.exports = ProjectBadge;
 
-},{"./styles":222,"react":196}],217:[function(require,module,exports){
+},{"./styles":223,"react":196}],218:[function(require,module,exports){
 var React = require('react');
 var request = require('superagent');
 
@@ -26796,7 +26841,7 @@ var ProjectForm = React.createClass({displayName: "ProjectForm",
 
 module.exports = ProjectForm;
 
-},{"./rotating-colours":219,"./styles":222,"react":196,"superagent":197}],218:[function(require,module,exports){
+},{"./rotating-colours":220,"./styles":223,"react":196,"superagent":197}],219:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
@@ -26826,6 +26871,7 @@ var Project = React.createClass({displayName: "Project",
         return {expanded: false, name: name, acronym: acronym, tasks: tasks, todos: todos}; //TODO: this is really bad. I keep forgetting to put the new item here... duplication is bad!!!!
     },
     setData: function(model) {
+        console.log('set data...');
         var name = model.name || '';
         var tasks = model.tasks || [];
         var acronym = model.acronym || '';
@@ -26899,7 +26945,6 @@ var Project = React.createClass({displayName: "Project",
         var colour = '#' + this.props.data.colour.reduce(function(collector, item) {
             return collector + ((item==0) ? '00' : item.toString(16)); //this is a lazy version. If any number is less than 16, then it won't give a 6 char hex
         }, '');
-        console.log('render project: ', this.state);
         //TODO: display: none for for tasks when NOT expanded, otherwise display block. Or just set a show prop
         return (
             React.createElement("div", null, 
@@ -26945,7 +26990,7 @@ function getAcronym(text) {
 
 module.exports = Project;
 
-},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./mixins/stateShortcuts":212,"./palette":215,"./styles":222,"./task":224,"./todo":226,"react":196}],219:[function(require,module,exports){
+},{"./content-editable":204,"./mixins/socketmixin":211,"./mixins/socketmodelmixin":212,"./mixins/stateShortcuts":213,"./palette":216,"./styles":223,"./task":225,"./todo":227,"react":196}],220:[function(require,module,exports){
 function RotatingColours() {
     var rotatingColours = [
         [255,255,0],
@@ -26983,7 +27028,7 @@ function RotatingColours() {
 
 module.exports = RotatingColours();
 
-},{}],220:[function(require,module,exports){
+},{}],221:[function(require,module,exports){
 var React = require('react');
 var Router = require('react-router-component');
 var Locations = Router.Locations;
@@ -27006,7 +27051,7 @@ var Routes = React.createClass({displayName: "Routes",
                     React.createElement("title", null, "React London Fog thingy"), 
                     React.createElement("script", {src: "/dist/socket.io-1.3.5.js"}), 
                     React.createElement("link", {rel: "stylesheet", href: "/dist/reset.css"}), 
-                    React.createElement("link", {rel: "stylesheet", href: "/dist/font-awesome.min.css"})
+                    React.createElement("link", {rel: "stylesheet", href: "/node_modules/font-awesome/css/font-awesome.min.css"})
                 ), 
                 React.createElement("body", null, 
                     React.createElement(Header, null), 
@@ -27025,7 +27070,7 @@ var Routes = React.createClass({displayName: "Routes",
 
 module.exports = Routes;
 
-},{"./header":205,"./home":206,"./item-instance":207,"./project":218,"./task":224,"./todo":226,"./workspace":228,"react":196,"react-router-component":4}],221:[function(require,module,exports){
+},{"./header":205,"./home":207,"./item-instance":208,"./project":219,"./task":225,"./todo":227,"./workspace":229,"react":196,"react-router-component":4}],222:[function(require,module,exports){
 var React = require('react');
 
 //Props: options => Array, choiceCB => fnc, closeCB => fnc
@@ -27046,9 +27091,7 @@ var SelectionModal = React.createClass({displayName: "SelectionModal",
     },
 
     render: function() {
-        console.log('render state: ', this.state);
         var options = this.props.options.filter(function(option) {
-            console.log('option: ', option);
             return option.value.toUpperCase().indexOf(this.state.filter.toUpperCase()) !== -1;
         }.bind(this));
 
@@ -27132,7 +27175,7 @@ var SelectionModal = React.createClass({displayName: "SelectionModal",
 
 module.exports = SelectionModal;
 
-},{"react":196}],222:[function(require,module,exports){
+},{"react":196}],223:[function(require,module,exports){
 var _ = require('underscore');
 
 var Palette = require('./palette');
@@ -27162,7 +27205,7 @@ Styles.aboveOverlay = {zIndex: 30, backgroundColor: 'white'};
 
 module.exports = Styles;
 
-},{"./palette":215,"underscore":200}],223:[function(require,module,exports){
+},{"./palette":216,"underscore":200}],224:[function(require,module,exports){
 var React = require('react');
 
 var TaskBadge = React.createClass({displayName: "TaskBadge",
@@ -27184,7 +27227,7 @@ var TaskBadge = React.createClass({displayName: "TaskBadge",
 
 module.exports = TaskBadge;
 
-},{"react":196}],224:[function(require,module,exports){
+},{"react":196}],225:[function(require,module,exports){
 //<ContentEditable autofocus={this.props.autofocus} html={this.state.title} onChange={this.handleTitleChange} onSubmit={this.saveModelAndClear} style={{backgroundColor: Palette[status + 'light'], display: 'table-cell', verticalAlign: 'middle', height: '100%', minWidth: 50, margin: 2}}></ContentEditable>
 var React = require('react');
 
@@ -27197,7 +27240,7 @@ var ContentEditable = require('./content-editable');
 var ProjectBadge = require('./project-badge');
 var Todo = require('./todo');
 
-function getNewTask() {
+function blankTask() {
     return {
         title: '',
         status: 'new',
@@ -27260,6 +27303,7 @@ var Task = React.createClass({displayName: "Task",
 
     saveAndClear: function() {
         var savedTask = this.props.saveCreatedTask(this.getData())
+        this.setState(blankTask());
     },
 
     handleTitleChange: function(event) {
@@ -27340,8 +27384,11 @@ var Task = React.createClass({displayName: "Task",
                             }, this)
                         )
                         : null, 
+                     this.state.typeDropdown ? 
+                        React.createElement("div", {style: {position: 'fixed', width: '100%', height: '100%', top: 0, left: 0, zIndex: 9}, onClick: this.toggleState('typeDropdown')})
+                        : null, 
                      this.state.editingTitle
-                        ? React.createElement("input", {ref: "taskTitle", onBlur: this.toggleState('editingTitle'), onChange: this.handleTitleChange, onKeyUp: this.enter(this.saveModelAndClear), style: inputStyle, value: this.state.title})
+                        ? React.createElement("input", {ref: "taskTitle", onBlur: this.toggleState('editingTitle'), onChange: this.handleTitleChange, onKeyUp: this.enter(this.saveAndClear), style: inputStyle, value: this.state.title})
                         : React.createElement("span", {onClick: this.toggleState('editingTitle'), style: inputStyle}, this.state.title), 
                     React.createElement("span", {style:  (this.state.creatingTodos) ? Styles.basicButtonPressed : Styles.basicButton, onClick: this.expandTodoCreation}, "Create Todos..."), 
                     React.createElement(ProjectBadge, {project: this.state.project})
@@ -27368,13 +27415,15 @@ function objmap(obj, fnc, context) {
 
 module.exports = Task;
 
-},{"./content-editable":204,"./mixins/stateshortcuts":213,"./palette":215,"./project-badge":216,"./styles":222,"./todo":226,"react":196}],225:[function(require,module,exports){
+},{"./content-editable":204,"./mixins/stateshortcuts":214,"./palette":216,"./project-badge":217,"./styles":223,"./todo":227,"react":196}],226:[function(require,module,exports){
 var React = require('react');
 
 var Todo = require('./todo');
 var SocketMixin = require('./mixins/socketmixin');
 var CollectionMixin = require('./mixins/socketcollectionmixin');
 var Styles = require('./styles');
+
+var CommonFilters = require('./helpers/commonfilters');
 
 //This represents a list of slower items. Things you need to add manually over time.
 var TodoList = React.createClass({displayName: "TodoList",
@@ -27395,35 +27444,44 @@ var TodoList = React.createClass({displayName: "TodoList",
             React.createElement("div", null, 
                 React.createElement("div", null, "----"), 
                 this.state.data.map(function(project, index) {
-                    return project.todos.reverse().map(function(todo, index) {
+                    return this.filterIfExists(project.todos).reverse().map(function(todo, index) {
                         return (
                             React.createElement("div", {key: todo._id, style: Styles.with('fullWidth', {marginLeft: 20})}, 
                                 React.createElement(Todo, {data: todo, tag: this.props.collection})
                             )
                         );
                     }, this)
-                    .concat(project.tasks.reverse().map(function(task, index) {
-                        console.log('todolist task: ', task);
-                        return task.todos.map(function(todo, index) {
-                            console.log('todo task: ', todo);
+                    .concat(project.tasks.reverse().reduce(function(collector, task) {
+                        //TODO: I should also include all TODOs from a task that matches the filter... So I need to tell the below filter to always pass if the task matches.
+                        return collector.concat(this.filterIfExists(task.todos).map(function(todo, index) {
                             return (
                                 React.createElement("div", {key: todo._id, style: Styles.with('fullWidth', {marginLeft: 40})}, 
                                     React.createElement(Todo, {data: todo, tag: this.props.collection})
                                 )
                             );
-                        }, this);
-                    }, this));
+                            //TODO: below: it's so inconsistent with bind... I should make it more consistent, or use my fancy way to fix it.
+                        }, this));
+                    }.bind(this), []));
                 }, this)
             )
         );
+    },
+
+    filterIfExists: function(arr) {
+        if(this.props.filter)
+            return arr.filter(CommonFilters.byAnyElementSubstring(this.props.filter)); 
+        else
+            return arr;
     },
 });
 
 module.exports = TodoList;
 
-},{"./mixins/socketcollectionmixin":208,"./mixins/socketmixin":210,"./styles":222,"./todo":226,"react":196}],226:[function(require,module,exports){
+},{"./helpers/commonfilters":206,"./mixins/socketcollectionmixin":209,"./mixins/socketmixin":211,"./styles":223,"./todo":227,"react":196}],227:[function(require,module,exports){
 var React = require('react/addons');
 var _ = require('underscore');
+
+var request = require('superagent');
 
 var TaskBadge = require('./task-badge');
 var ProjectBadge = require('./project-badge');
@@ -27443,7 +27501,6 @@ function blankTodo() {
 
 var Todo = React.createClass({displayName: "Todo",
     url: 'http://localhost:1212/',
-    dataKey: '#root', //this means we put the data directly in the state.
     //the button states and labels displayed while in each state.
 
     mixins: [SocketMixin, SocketModelMixin, StateShortcuts],
@@ -27457,6 +27514,19 @@ var Todo = React.createClass({displayName: "Todo",
             this.props.data.editingTitle = this.props.editingTitle;
         //TODO: this is hella ugly...
         return this.props.data;
+    },
+    getData: function() {
+        var data = {
+            title: this.state.title,
+            complete: this.state.complete,
+        };
+        if(this.state._id)
+            data._id = this.state._id;
+
+        return data;
+    },
+    setData: function(data) {
+        this.setState({title: data.title, complete: data.complete});
     },
     saveModelAndClear: function() {
         if(this.props.createOverride) {
@@ -27488,7 +27558,6 @@ var Todo = React.createClass({displayName: "Todo",
             this.props.stateChanged(this._getData());
 
         if(this.state.editingTitle) {
-            console.log('focusing: ', this.state.title);
             console.log('focusing: ', this.refs.todoTitle.props.value);
             React.findDOMNode(this.refs.todoTitle).focus();
         }
@@ -27540,10 +27609,8 @@ var Todo = React.createClass({displayName: "Todo",
    },
 
    setTaskAndProject: function(taskAndProject) {
-        if(taskOrProject.task)
-            this.setState('task', taskOrProject.task);
-        if(taskOrProject.project)
-            this.setState('project', taskOrProject.project);
+        //make a socket call to save the todo to the project
+        //make a socket call to delete the project
    },
 
    projectsAndTasks: function() {
@@ -27562,35 +27629,35 @@ var Todo = React.createClass({displayName: "Todo",
 
 module.exports = Todo;
 
-},{"./content-editable":204,"./mixins/socketmixin":210,"./mixins/socketmodelmixin":211,"./mixins/stateshortcuts":213,"./palette":215,"./project-badge":216,"./selection-modal":221,"./styles":222,"./task-badge":223,"react/addons":24,"underscore":200}],227:[function(require,module,exports){
+},{"./content-editable":204,"./mixins/socketmixin":211,"./mixins/socketmodelmixin":212,"./mixins/stateshortcuts":214,"./palette":216,"./project-badge":217,"./selection-modal":222,"./styles":223,"./task-badge":224,"react/addons":24,"superagent":197,"underscore":200}],228:[function(require,module,exports){
 var React = require('react');
 
 var Styles = require('./styles');
 
 var Modal = require('./modal');
 var ProjectForm = require('./project-form');
-var stateShortcuts = require('./mixins/stateShortcuts');
-
+var StateShortcuts = require('./mixins/stateShortcuts');
 
 var WorkspaceHeader = React.createClass({displayName: "WorkspaceHeader",
-    mixins: [stateShortcuts],
-    //TODO: yell at ReactJS developers for making this necessary... this is what should happen by default, without me putting the function
-    getInitialState: function() {
-        return {};
-    },
+    mixins: [StateShortcuts],
     render: function() {
         return (
-            React.createElement("div", {style: Styles.with('fullWidth', {height: 55, border: 'solid 1px red'})}, 
-                React.createElement("button", {type: "button", onClick: this.toggleState('showCreateProject')}, "Create Project"), 
+            React.createElement("div", {style: Styles.with('fullWidth', {height: 55, border: 'solid 1px red', display: 'flex', flexDirection: 'row', alignItems: 'center'})}, 
+                React.createElement("input", {type: "text", style: {fontFamily: 'FontAwesome', width: 300, fontSize: 24, marginLeft: 10}, placeholder: "", ref: "filter", onChange: this.setFilterValue}), 
+                React.createElement("button", {type: "button", onClick: this.toggleState('showCreateProject'), style: {fontSize: 24, marginLeft: 10}}, React.createElement("i", {className: "fa fa-plus-square-o"}), " Create Project"), 
                 this.state.showCreateProject ? React.createElement(Modal, {onClose: this.toggleState('showCreateProject')}, React.createElement(ProjectForm, {onSave: this.toggleState('showCreateProject')})) : null
             )
         );
+    },
+
+    setFilterValue: function(event) {
+        this.props.filterUpdated(event.target.value);
     },
 });
 
 module.exports = WorkspaceHeader;
 
-},{"./mixins/stateShortcuts":212,"./modal":214,"./project-form":217,"./styles":222,"react":196}],228:[function(require,module,exports){
+},{"./mixins/stateShortcuts":213,"./modal":215,"./project-form":218,"./styles":223,"react":196}],229:[function(require,module,exports){
 var React = require('react');
 
 var WorkspaceHeader = require('./workspace-header');
@@ -27600,19 +27667,22 @@ var TodoList = require('./todo-list');
 
 var SelectionModal = require('./selection-modal');
 
+var StateShortcuts = require('./mixins/stateShortcuts');
+
 var Workspace = React.createClass({displayName: "Workspace",
+    mixins: [StateShortcuts],
     render: function() {
         var leftStyle = {width: '45%', height: '100%', border: 'solid 1px black', position: 'absolute', top: 80, margin: 10, };
         var rightStyle = {width: '45%', height: '100%', border: 'solid 1px black', position: 'absolute', top: 80, margin: 10, left: '50%', };
         return (
             React.createElement("div", null, 
-                React.createElement(WorkspaceHeader, null), 
+                React.createElement(WorkspaceHeader, {filterUpdated: this.setStateValue('filter')}), 
                 React.createElement("div", {className: "body"}, 
                     React.createElement("div", {style: leftStyle}, 
-                        React.createElement(ColumnList, {collection: "todo"}), 
-                        React.createElement(TodoList, null)
+                        React.createElement(ColumnList, {collection: "todo", filter: this.state.filter}), 
+                        React.createElement(TodoList, {filter: this.state.filter})
                     ), 
-                    React.createElement(BasicList, {collection: "project", style: rightStyle})
+                    React.createElement(BasicList, {collection: "project", style: rightStyle, filter: this.state.filter})
                 )
             )
         );
@@ -27621,4 +27691,4 @@ var Workspace = React.createClass({displayName: "Workspace",
 
 module.exports = Workspace;
 
-},{"./basic-list":201,"./column-list":203,"./selection-modal":221,"./todo-list":225,"./workspace-header":227,"react":196}]},{},[202]);
+},{"./basic-list":201,"./column-list":203,"./mixins/stateShortcuts":213,"./selection-modal":222,"./todo-list":226,"./workspace-header":228,"react":196}]},{},[202]);

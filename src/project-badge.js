@@ -6,7 +6,6 @@ var ProjectBadge = React.createClass({displayName: "ProjectBadge",
     //TODO: add colours and borders nicely according to the task colour?
     //the border and font should be the colour, while the background is a much ligher shade
    render: function() {
-        console.log('badge props: ', this.props);
         var acronym = this.props.project.acronym || getAcronym(this.props.project.title);
         //TODO: duplicated in project-form
         var colour = '#' + this.props.project.colour.reduce(function(collector, item) {

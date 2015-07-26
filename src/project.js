@@ -27,6 +27,7 @@ var Project = React.createClass({displayName: "Project",
         return {expanded: false, name: name, acronym: acronym, tasks: tasks, todos: todos}; //TODO: this is really bad. I keep forgetting to put the new item here... duplication is bad!!!!
     },
     setData: function(model) {
+        console.log('set data...');
         var name = model.name || '';
         var tasks = model.tasks || [];
         var acronym = model.acronym || '';
@@ -100,7 +101,6 @@ var Project = React.createClass({displayName: "Project",
         var colour = '#' + this.props.data.colour.reduce(function(collector, item) {
             return collector + ((item==0) ? '00' : item.toString(16)); //this is a lazy version. If any number is less than 16, then it won't give a 6 char hex
         }, '');
-        console.log('render project: ', this.state);
         //TODO: display: none for for tasks when NOT expanded, otherwise display block. Or just set a show prop
         return (
             React.createElement("div", null, 

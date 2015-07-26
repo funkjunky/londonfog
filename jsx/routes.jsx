@@ -20,7 +20,7 @@ var Routes = React.createClass({
                     <title>React London Fog thingy</title>
                     <script src="/dist/socket.io-1.3.5.js"></script>
                     <link rel="stylesheet" href="/dist/reset.css" />
-                    <link rel="stylesheet" href="/dist/font-awesome.min.css" />
+                    <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css" />
                 </head>
                 <body>
                     <Header />

@@ -18,9 +18,7 @@ var SelectionModal = React.createClass({displayName: "SelectionModal",
     },
 
     render: function() {
-        console.log('render state: ', this.state);
         var options = this.props.options.filter(function(option) {
-            console.log('option: ', option);
             return option.value.toUpperCase().indexOf(this.state.filter.toUpperCase()) !== -1;
         }.bind(this));
 

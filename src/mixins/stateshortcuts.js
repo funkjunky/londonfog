@@ -1,4 +1,7 @@
 var stateShortcuts = {
+    getInitialState: function() {
+        return {};
+    },
     //calls the provided function if enter is hit.
     enter: function(cb) {
         return function(event) {
@@ -9,7 +12,6 @@ var stateShortcuts = {
     //convinience function for setting states in react components
     toggleState: function(state) {
         return function() {
-            console.log('this: ', this);
             var obj = {};
             obj[state] = !this.state[state];
             this.setState(obj);
@@ -31,9 +33,11 @@ var stateShortcuts = {
     },
     setStateValue: function(key) {
         return function(value) {
-            this.setState(key, value);
-            console.log('current state: ', this.state);
-        };
+            //TODO: find cleaner way to do this in JS
+            var obj = {};
+            obj[key] = value;
+            this.setState(obj);
+        }.bind(this);
     },
 };
 

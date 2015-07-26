@@ -6,6 +6,8 @@ var SocketMixin = require('./mixins/socketmixin');
 var CollectionMixin = require('./mixins/socketcollectionmixin');
 var Styles = require('./styles');
 
+var CommonFilters = require('./helpers/commonfilters');
+
 //A LIST OF TODOS... nothing else... I should rename this class at some point.
 //This represents a list of quick to create items. With new items ready to be created just by typing and hitting enter in a single textbox.
 var ColumnList = React.createClass({displayName: "ColumnList",
@@ -26,6 +28,10 @@ var ColumnList = React.createClass({displayName: "ColumnList",
         //this.setState({ data: this.state.data });
     },
     render: function() {
+        var filteredItems = this.state.data;
+        filteredItems = filteredItems.filter(CommonFilters.byAnyElementSubstring(this.props.filter));
+        console.log('rendering...');
+
         return (
             React.createElement("div", null, 
                 React.createElement("div", {key: "newItem"}, 
@@ -38,7 +44,7 @@ var ColumnList = React.createClass({displayName: "ColumnList",
                         )
                     );
                 }, this), 
-                this.state.data.reverse().map(function(item, index) {
+                filteredItems.map(function(item, index) {
                     return (
                         React.createElement("div", {key: item._id, style: Styles.fullWidth}, 
                             React.createElement(ItemInstance, {data: item, tag: this.props.collection}), 

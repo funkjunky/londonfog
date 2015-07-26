@@ -1,6 +1,8 @@
 var React = require('react/addons');
 var _ = require('underscore');
 
+var request = require('superagent');
+
 var TaskBadge = require('./task-badge');
 var ProjectBadge = require('./project-badge');
 var ContentEditable = require('./content-editable');
@@ -19,7 +21,6 @@ function blankTodo() {
 
 var Todo = React.createClass({
     url: 'http://localhost:1212/',
-    dataKey: '#root', //this means we put the data directly in the state.
     //the button states and labels displayed while in each state.
 
     mixins: [SocketMixin, SocketModelMixin, StateShortcuts],
@@ -33,6 +34,19 @@ var Todo = React.createClass({
             this.props.data.editingTitle = this.props.editingTitle;
         //TODO: this is hella ugly...
         return this.props.data;
+    },
+    getData: function() {
+        var data = {
+            title: this.state.title,
+            complete: this.state.complete,
+        };
+        if(this.state._id)
+            data._id = this.state._id;
+
+        return data;
+    },
+    setData: function(data) {
+        this.setState({title: data.title, complete: data.complete});
     },
     saveModelAndClear: function() {
         if(this.props.createOverride) {
@@ -64,7 +78,6 @@ var Todo = React.createClass({
             this.props.stateChanged(this._getData());
 
         if(this.state.editingTitle) {
-            console.log('focusing: ', this.state.title);
             console.log('focusing: ', this.refs.todoTitle.props.value);
             React.findDOMNode(this.refs.todoTitle).focus();
         }
@@ -116,10 +129,8 @@ var Todo = React.createClass({
    },
 
    setTaskAndProject: function(taskAndProject) {
-        if(taskOrProject.task)
-            this.setState('task', taskOrProject.task);
-        if(taskOrProject.project)
-            this.setState('project', taskOrProject.project);
+        //make a socket call to save the todo to the project
+        //make a socket call to delete the project
    },
 
    projectsAndTasks: function() {

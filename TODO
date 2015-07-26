@@ -127,8 +127,8 @@ TODO
 			*- display tasks and todos in reverse order.
 			*- commit and push
 
-			- make a component selection-modal, which is a position absolute with backdrop, autocomplete, and selection of items.
-				- Basics
+			*- make a component selection-modal, which is a position absolute with backdrop, autocomplete, and selection of items.
+				*- Basics
 					*- make the backdrop, input and divs for clicking just for looks for now.
 					*- add the attribute callback choiceCB={myCallback} and closeCB={changeToClosed}
 					*- onClick of the divs, call this.props.choiceCB with the key of the choice.
@@ -154,13 +154,43 @@ TODO
 	*- use bower to include socket.io, instead of using a cdn!!
 	
 	- add a text filter to be applied to everything [just checking title for now]
+		*- have the workspace filter filter everything
+			*- fire an event that a prop can listen to when filter changes, then send the filter to every list in workspace, then all those lists filter by filter in render [filter just needs to be a prop]
+			*- make sure our new filter works…
 
-	- Style workspace header & fix bugs
-		- make sure we aren’t saving things when we shouldn’t like during meaningless state changes
-		- figure out why the project title gets cleared and all it’s tasks get erased…
-		- style the create project button and the text filter nicely.
-		- style and organize projects, tasks, and todos appropriately.
-			~Nitpick on colours etc at this point
+	*- Style workspace header & fix bugs
+		*- clean up console.logs
+		*- when i click outside the task type drop down, the drop down should close.
+		*- stop things from changing when they shouldn’t
+			*- when i click on a todo, it says its attempting to save, stop that. And onBlur
+		*- deleting isn’t immediately reflected
+		*- editing todos strangely edits other todos, then saves as a new todo??
+			*~ it creates a new todo… i need to stop it from doing that.
+		*- deleting todos sometimes doesnt work…
+		*- task title doesn’t clear when creating a new task.
+		*- project tasks clear when i restart server
+		*- enter doesn’t create new task
+		*- style the create project button nicely.
+
+	- Improve scalability, so save todos and tasks in their own collection.
+		- so give tasks a collection
+		- tasks now have an array of ids for todos
+		- projects now have an array of ids for tasks and for todos
+		* a project’s last_activity_at datetime would be the newest updated_at time for it’s child todos and tasks; same for tasks with todos. Also including the project or task itsself (because maybe the title was the latest update)
+
+	- get the assigning of tasks and projects to save! currently the selection does nothing.
+
+	- the columnlist combined with todolist should be one list called todolist
+		- remove columnlist from workspace
+		- todolist should be subscribed to all todos for the user.
+		~ new todos added under projects and tasks on the right don’t show up on the left.
+	
+	- all todos need an updated_at timestamp, so I can order by it.
+		- give todos an updated_at timestamp
+		- order the left todos lift by this timestamp. Regardless of grouping with tasks or projects.
+
+	- get a second opinion on the styles from someone (and perhaps user experience a bit… but no testers =P).
+
 
  *** MAJOR CODE CLEAN UP TIME!!  [PERFECT CODE]  ***
 	
@@ -204,7 +234,7 @@ TODO
 	- todo and other things shouldn’t save when we toggle states. Ie. with TODO and editingTitle.
 	- clean up ALL todos.
 	- make sure the webpage doesn’t break horribly if the socket server goes down…
-		
+
 *** getting ready to publish!! ***
 
  	- add mobile controls. [like Google inbox? swiping, right to complete, left to downgrade (high priority->normal priority. normal -> icebox, icebox -> delete ?? keep there for a second before fading away, so a user can swipe three times on the spot to delete?)]
@@ -233,11 +263,6 @@ TODO
 		 - Make sure generic rest server is adequately secure. Consult Zak on this perhaps.
 		 - come up with more cool features
 
-	- Improve scalability, so save todos and tasks in their own collection.
-		- so give tasks a collection
-		- tasks now have an array of ids for todos
-		- projects now have an array of ids for tasks and for todos
-		* a project’s last_activity_at datetime would be the newest updated_at time for it’s child todos and tasks; same for tasks with todos. Also including the project or task itsself (because maybe the title was the latest update)
 DONE:
 ———
  - Testing Reacts with forms:

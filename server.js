@@ -11,6 +11,7 @@ var app = Express();
 app.use(Favicon(__dirname + '/favicon.ico'));
 
 app.use('/dist', Express.static(__dirname + '/dist'));
+app.use('/node_modules', Express.static(__dirname + '/node_modules'));
 
 var proxy = httpProxy.createProxyServer({ ws: true, target: 'http://localhost:1212/' });
 app.all('/api/*', function(req, res) { proxy.web(req, res); } );
